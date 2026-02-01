@@ -246,14 +246,27 @@
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
-            // Increase padding for mobile to avoid edges/address bars
-            const padding = width < 600 ? 50 : 20;
+            // Get current window dimensions explicitly to ensure accuracy on resize/scroll
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
             
-            const safeWidth = width - btnWidth - padding;
-            const safeHeight = height - btnHeight - padding;
+            // Define strict boundaries with padding to avoid edges/bars
+            const xPadding = 20;
+            const yPadding = 40; // Larger vertical padding for mobile browser bars
             
-            const randomX = Math.max(padding, Math.random() * safeWidth);
-            const randomY = Math.max(padding, Math.random() * safeHeight);
+            const maxX = winWidth - btnWidth - xPadding;
+            const maxY = winHeight - btnHeight - yPadding;
+            
+            const minX = xPadding;
+            const minY = yPadding;
+            
+            // Generate random position
+            let randomX = Math.random() * (maxX - minX) + minX;
+            let randomY = Math.random() * (maxY - minY) + minY;
+            
+            // Clamp values to strictly ensure button stays inside visible area
+            randomX = Math.max(minX, Math.min(randomX, maxX));
+            randomY = Math.max(minY, Math.min(randomY, maxY));
             
             noBtn.style.position = 'fixed';
             noBtn.style.left = randomX + 'px';
