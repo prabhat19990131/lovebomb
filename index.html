@@ -102,9 +102,9 @@
 
             <!-- No Button -->
             <!-- Position is static initially, becomes fixed on interaction -->
-            <!-- UPDATED: Changed duration-300 to duration-700 and ease-out to ease-in-out for ultra smooth movement -->
+            <!-- UPDATED: Changed duration-700 to duration-100 for fast teleport effect -->
             <button id="noBtn" 
-                class="w-full md:w-auto min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-4 px-8 md:px-12 rounded-full text-lg md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-700 ease-in-out touch-none">
+                class="w-full md:w-auto min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-4 px-8 md:px-12 rounded-full text-lg md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
                 No 😢
             </button>
         </div>
@@ -265,6 +265,16 @@
                 // Check if user is trying to tap on mobile
                 if(e && e.type === 'touchstart') e.preventDefault();
                 
+                // Capture pointer location for distance calculation
+                let pointerX = 0, pointerY = 0;
+                if (e.touches && e.touches.length > 0) {
+                    pointerX = e.touches[0].clientX;
+                    pointerY = e.touches[0].clientY;
+                } else if (e.clientX !== undefined) {
+                    pointerX = e.clientX;
+                    pointerY = e.clientY;
+                }
+
                 interactionCount++;
 
                 // TRICK LOGIC:
@@ -342,6 +352,11 @@
                 // Get Yes Button position relative to Card to detect overlap
                 const yesRect = yesBtn.getBoundingClientRect();
                 const cardRect = card.getBoundingClientRect();
+                
+                // Pointer relative to card
+                const pointerRelX = pointerX - cardRect.left;
+                const pointerRelY = pointerY - cardRect.top;
+
                 const yesRel = {
                     left: yesRect.left - cardRect.left,
                     top: yesRect.top - cardRect.top,
@@ -351,6 +366,8 @@
                 
                 // Gap to keep distance between buttons
                 const gap = 20;
+                // Minimum distance from pointer to be considered "far"
+                const minPointerDistance = 150;
 
                 // Use the card's dimensions instead of the window
                 // Calculate safe ranges within the card
@@ -365,8 +382,9 @@
                 let validPosition = false;
                 let attempts = 0;
 
-                // Attempt to find a non-overlapping position up to 50 times
-                while (!validPosition && attempts < 50) {
+                // Attempt to find a non-overlapping position up to 100 times
+                // We added a check for distance from pointer
+                while (!validPosition && attempts < 100) {
                     attempts++;
                     
                     randomX = Math.random() * safeX + 20;
@@ -383,13 +401,24 @@
                     const yesTop = yesRel.top - gap;
                     const yesBottom = yesRel.top + yesRel.height + gap;
                     
-                    // Check if they overlap
+                    // Check if they overlap with YES button
                     const isOverlapping = !(noRight < yesLeft || 
                                           noLeft > yesRight || 
                                           noBottom < yesTop || 
                                           noTop > yesBottom);
-                                          
-                    if (!isOverlapping) {
+                    
+                    // Check distance from pointer (center of button)
+                    const btnCenterX = randomX + btnWidth/2;
+                    const btnCenterY = randomY + btnHeight/2;
+                    const distFromPointer = Math.sqrt(
+                        Math.pow(btnCenterX - pointerRelX, 2) + 
+                        Math.pow(btnCenterY - pointerRelY, 2)
+                    );
+
+                    const isFarEnough = distFromPointer > minPointerDistance;
+
+                    // Valid if no overlap AND (it is far enough OR we tried too many times)
+                    if (!isOverlapping && (isFarEnough || attempts > 50)) {
                         validPosition = true;
                     }
                 }
