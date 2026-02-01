@@ -291,6 +291,8 @@
                     
                     // 2. Add Success Event
                     noBtn.addEventListener('click', triggerLoveBomb);
+                    // Ensure it's clickable (re-enable pointer events if they were disabled)
+                    noBtn.style.pointerEvents = 'auto';
 
                     // 3. Show the Reset/Play Again button on the main card
                     if(resetGameBtn) resetGameBtn.classList.remove('hidden');
@@ -330,6 +332,14 @@
                 }
 
                 // Standard Runaway Logic
+                
+                // --- MOBILE FIX: Ghost Button ---
+                // Temporarily disable clicks on the button to prevent accidental touches
+                // immediately after it moves (double-tap protection)
+                noBtn.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    noBtn.style.pointerEvents = 'auto';
+                }, 400); // 400ms "ghost" time
                 
                 // --- SMOOTHNESS FIX: Prevent Layout Shift ---
                 // If the button is not yet absolute, insert a placeholder to keep the layout stable
