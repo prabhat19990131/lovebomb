@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>For You ❤️</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
@@ -77,8 +75,6 @@
 
     <canvas id="effects-canvas"></canvas>
 
-    <!-- MAIN PROPOSAL CARD -->
-    <!-- Added 'relative' class to ensure absolute button positioning is contained within this card -->
     <div id="proposal-card" class="z-20 bg-white/90 backdrop-blur-md p-8 sm:p-10 md:p-14 rounded-[2rem] shadow-2xl w-[90%] max-w-md md:max-w-2xl text-center border-4 border-pink-200 float transition-all duration-500 relative">
         
         <div class="mb-4 text-6xl sm:text-7xl md:text-9xl animate-bounce">
@@ -91,25 +87,25 @@
         
         <p class="text-gray-500 text-lg sm:text-xl md:text-2xl mb-8 font-semibold">Please say yes! 🥺 👀</p>
         
-        <!-- Button Container: Flex-col for mobile, Row for tablet+ -->
         <div class="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-8 w-full min-h-[8rem]">
-            <!-- Yes Button -->
-            <!-- Removed onclick, will attach via JS for safety -->
             <button id="yesBtn" 
                 class="w-full md:w-auto min-w-[140px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-4 px-8 md:px-12 rounded-full text-xl md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
                 YES! 😍
             </button>
 
-            <!-- No Button -->
-            <!-- Position is static initially, becomes fixed on interaction -->
-            <!-- UPDATED: Changed duration-700 to duration-100 for fast teleport effect -->
             <button id="noBtn" 
                 class="w-full md:w-auto min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-4 px-8 md:px-12 rounded-full text-lg md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
                 No 😢
             </button>
+            
+            <div id="noBubble" class="absolute opacity-0 transition-opacity duration-200 pointer-events-none z-50">
+                <div class="relative bg-gray-800 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                    <span id="bubbleText">Too slow!</span>
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Play Again Button (Initially Hidden) - Moved outside the flex container to prevent layout shifting -->
         <div class="mt-6 flex justify-center w-full">
             <button id="resetGameBtn" onclick="location.reload()" 
                 class="hidden w-full md:w-auto min-w-[140px] bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-3 px-8 rounded-full text-lg shadow-lg transform transition hover:scale-105 active:scale-95 border-b-4 border-gray-400 z-10">
@@ -118,10 +114,8 @@
         </div>
     </div>
 
-    <!-- SUCCESS MESSAGE (Hidden initially) -->
     <div id="success-msg" class="fixed inset-0 z-30 flex flex-col items-center justify-center hidden-transition bg-white/30 backdrop-blur-sm p-4">
         
-        <!-- Added max-h and overflow-auto for small landscape screens -->
         <div class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl text-center border-8 border-pink-300 transform rotate-2 w-full max-w-md md:max-w-xl max-h-[90vh] overflow-y-auto">
             <h1 class="text-5xl sm:text-6xl md:text-8xl text-pink-600 mb-4 pound">YAY!!! 🎉</h1>
             <p class="text-xl sm:text-2xl md:text-4xl text-gray-800 font-bold mb-8">You're officially mine now! ❤️</p>
@@ -155,10 +149,13 @@
             const card = document.getElementById('proposal-card');
             const successMsg = document.getElementById('success-msg');
             const resetGameBtn = document.getElementById('resetGameBtn');
+            const noBubble = document.getElementById('noBubble');
+            const bubbleText = document.getElementById('bubbleText');
             
             let width, height;
             let particles = [];
             let interactionCount = 0;
+            let bubbleTimeout;
             
             // Resize canvas
             function resize() {
@@ -281,6 +278,9 @@
                 // After 5 attempts, there's a 20% chance it turns into a YES button
                 if (interactionCount > 5 && Math.random() < 0.2) {
                     
+                    // Hide bubble immediately if trick happens
+                    noBubble.style.opacity = '0';
+
                     // Determine Outcome Randomly
                     const rand = Math.random();
                     
@@ -314,7 +314,6 @@
                         noBtn.innerHTML = `
                             <div class="flex flex-col items-center justify-center leading-none py-1">
                                 <svg class="w-10 h-10 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <!-- Simple Line Art Helmet -->
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v5m0 0v-5m0 0a3 3 0 013 3v2a3 3 0 01-3 3m-3-3v-2a3 3 0 013-3z M7 14c-3-2-5-9-1-12 M17 14c3-2 5-9 1-12" />
                                 </svg>
                                 <span class="text-xs sm:text-sm font-bold text-center px-1">You have fallen in Loki's trick:<br>It was always a YES button!</span>
@@ -429,9 +428,31 @@
                 noBtn.style.top = randomY + 'px';
                 noBtn.style.zIndex = 100;
                 
-                // Change text occasionally for fun
-                const texts = ["Nope!", "Try Again!", "Too Slow!", "Cant Catch Me!", "Seriously?", "Just Click Yes!"];
-                noBtn.innerText = texts[Math.floor(Math.random() * texts.length)];
+                // NO TEXT CHANGE - Button stays as "No 😢"
+
+                // --- BUBBLE LOGIC ---
+                // Show cheeky message in the bubble above the button
+                const texts = ["Nope!", "Try Again!", "Too Slow!", "Cant Catch Me!", "Seriously?", "Just Click Yes!", "Nice Try!"];
+                bubbleText.innerText = texts[Math.floor(Math.random() * texts.length)];
+                
+                // Position Bubble Above Button
+                // The bubble is absolute within the card, just like the button
+                // We center it horizontally relative to the button
+                const bubbleWidth = noBubble.offsetWidth || 100; // approximation if hidden
+                const bubbleHeight = noBubble.offsetHeight || 40;
+                
+                noBubble.style.left = (randomX + btnWidth/2 - bubbleWidth/2) + 'px'; // Actually we use transform to center, so just center point
+                noBubble.style.left = (randomX + btnWidth/2) + 'px';
+                noBubble.style.top = (randomY - 50) + 'px'; // 50px above
+                noBubble.style.transform = "translateX(-50%)"; // Center horizontally
+                
+                noBubble.style.opacity = '1';
+
+                // Reset timer to hide bubble
+                clearTimeout(bubbleTimeout);
+                bubbleTimeout = setTimeout(() => {
+                    noBubble.style.opacity = '0';
+                }, 1500);
             }
 
             // --- LOVE BOMB LOGIC ---
