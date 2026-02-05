@@ -16,6 +16,9 @@
             background: linear-gradient(180deg, #ffdde1 0%, #ee9ca7 100%);
             touch-action: manipulation; /* Improves touch response */
             height: 100dvh; /* Fix for mobile browser address bars */
+            /* Support for mobile safe areas */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         h1, h2 {
@@ -78,33 +81,34 @@
     <canvas id="effects-canvas"></canvas>
 
     <!-- MAIN PROPOSAL CARD -->
-    <!-- Added 'relative' class to ensure absolute button positioning is contained within this card -->
-    <div id="proposal-card" class="z-20 bg-white/90 backdrop-blur-md p-8 sm:p-10 md:p-14 rounded-[2rem] shadow-2xl w-[90%] max-w-md md:max-w-2xl text-center border-4 border-pink-200 float transition-all duration-500 relative">
+    <!-- Adjusted padding and width for better mobile fit -->
+    <div id="proposal-card" class="z-20 bg-white/90 backdrop-blur-md p-6 sm:p-10 md:p-14 rounded-[2rem] shadow-2xl w-[95%] sm:w-[90%] max-w-md md:max-w-2xl text-center border-4 border-pink-200 float transition-all duration-500 relative">
         
-        <div class="mb-4 text-6xl sm:text-7xl md:text-9xl animate-bounce">
+        <!-- Smaller emoji size on mobile -->
+        <div class="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl animate-bounce">
             💌
         </div>
 
-        <h1 class="text-4xl sm:text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-600 mb-4 font-bold leading-tight py-2">
+        <!-- Responsive text sizing to prevent wrapping issues on small screens -->
+        <h1 class="text-3xl sm:text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-600 mb-2 sm:mb-4 font-bold leading-tight py-2">
             Will you be my Valentine?
         </h1>
         
-        <p class="text-gray-500 text-lg sm:text-xl md:text-2xl mb-8 font-semibold">Please say yes! 🥺 👀</p>
+        <p class="text-gray-500 text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 font-semibold">Please say yes! 🥺 👀</p>
         
         <!-- Button Container: Flex-col for mobile, Row for tablet+ -->
-        <div class="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-8 w-full min-h-[8rem]">
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 w-full min-h-[8rem]">
             <!-- Yes Button -->
-            <!-- Removed onclick, will attach via JS for safety -->
+            <!-- Adjusted padding and text size for mobile -->
             <button id="yesBtn" 
-                class="w-full md:w-auto min-w-[140px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-4 px-8 md:px-12 rounded-full text-xl md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
+                class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
                 YES! 😍
             </button>
 
             <!-- No Button -->
-            <!-- Position is static initially, becomes fixed on interaction -->
-            <!-- UPDATED: Changed duration-700 to duration-100 for fast teleport effect -->
+            <!-- Adjusted padding and text size for mobile -->
             <button id="noBtn" 
-                class="w-full md:w-auto min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-4 px-8 md:px-12 rounded-full text-lg md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
+                class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
                 No 😢
             </button>
             
@@ -117,14 +121,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Play Again Button (Initially Hidden) - Moved outside the flex container to prevent layout shifting -->
-        <div class="mt-6 flex justify-center w-full">
-            <button id="resetGameBtn" onclick="location.reload()" 
-                class="hidden w-full md:w-auto min-w-[140px] bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-3 px-8 rounded-full text-lg shadow-lg transform transition hover:scale-105 active:scale-95 border-b-4 border-gray-400 z-10">
-                Want a chance to say no?
-            </button>
-        </div>
     </div>
 
     <!-- SUCCESS MESSAGE (Hidden initially) -->
@@ -132,17 +128,17 @@
         
         <!-- Added max-h and overflow-auto for small landscape screens -->
         <div class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl text-center border-8 border-pink-300 transform rotate-2 w-full max-w-md md:max-w-xl max-h-[90vh] overflow-y-auto">
-            <h1 class="text-5xl sm:text-6xl md:text-8xl text-pink-600 mb-4 pound">YAY!!! 🎉</h1>
-            <p class="text-xl sm:text-2xl md:text-4xl text-gray-800 font-bold mb-8">You're officially mine now! ❤️</p>
+            <h1 class="text-4xl sm:text-6xl md:text-8xl text-pink-600 mb-4 pound">YAY!!! 🎉</h1>
+            <p class="text-lg sm:text-2xl md:text-4xl text-gray-800 font-bold mb-8">You're officially mine now! ❤️</p>
             
-            <div class="text-5xl sm:text-6xl md:text-7xl animate-pulse tracking-widest mb-6">
+            <div class="text-4xl sm:text-6xl md:text-7xl animate-pulse tracking-widest mb-6">
                 👩‍❤️‍👨 💍 💒
             </div>
             
             <p class="mt-4 text-pink-400 text-xs sm:text-sm font-bold uppercase tracking-widest">No Returns • No Refunds</p>
             
             <div class="mt-8 p-4 bg-pink-100 rounded-xl border-2 border-pink-200 animate-bounce">
-                <p class="text-lg sm:text-xl md:text-2xl text-pink-600 font-bold">Since you pressed YES,<br>Please DM me! 💌</p>
+                <p class="text-base sm:text-xl md:text-2xl text-pink-600 font-bold">Since you pressed YES,<br>Please DM me! 💌</p>
             </div>
         </div>
 
@@ -163,7 +159,6 @@
             const yesBtn = document.getElementById('yesBtn');
             const card = document.getElementById('proposal-card');
             const successMsg = document.getElementById('success-msg');
-            const resetGameBtn = document.getElementById('resetGameBtn');
             const noBubble = document.getElementById('noBubble');
             const bubbleText = document.getElementById('bubbleText');
             
@@ -171,7 +166,7 @@
             let particles = [];
             let interactionCount = 0;
             let bubbleTimeout;
-            let isRaining = false; // Fixed: Added missing initialization
+            let isRaining = false; 
             
             // Resize canvas
             function resize() {
@@ -319,9 +314,6 @@
                     noBtn.style.left = 'auto';
                     noBtn.style.top = 'auto';
                     noBtn.style.zIndex = 'auto';
-
-                    // 3. Show the Reset/Play Again button on the main card
-                    if(resetGameBtn) resetGameBtn.classList.remove('hidden');
                     
                     // 4. Base styles for the transformed button
                     noBtn.style.transition = "all 0.3s ease";
@@ -337,11 +329,13 @@
                     // NEW: Add Loki Notice AT THE TOP of the website
                     const notice = document.createElement('div');
                     // z-[100] to ensure it is above everything else (confetti, overlay, etc)
-                    notice.className = "fixed top-0 left-0 w-full bg-yellow-100/95 backdrop-blur border-b-4 border-yellow-500 text-yellow-800 py-3 px-4 z-[100] flex flex-row items-center justify-center font-bold shadow-lg transform -translate-y-full transition-transform duration-500 ease-out";
+                    // Changed flex-row to flex-col to stack the text lines nicely
+                    notice.className = "fixed top-0 left-0 w-full bg-yellow-100/95 backdrop-blur border-b-4 border-yellow-500 text-yellow-800 py-3 px-4 z-[100] flex flex-col items-center justify-center font-bold shadow-lg transform -translate-y-full transition-transform duration-500 ease-out";
                     
-                    // Updated innerHTML to remove the SVG icon as requested
+                    // Updated innerHTML to include Nepali text
                     notice.innerHTML = `
-                        <span class="text-sm sm:text-base">(it was always a yes button btw. Enchanted by Loki's magic)</span>
+                        <span class="text-sm sm:text-base mb-1 text-center">(it was always a yes button btw. Enchanted by Loki's magic)</span>
+                        <span class="text-xs sm:text-sm font-medium text-yellow-900">तपाईं अब असरको प्रभावमा हुनुहुन्छ, अब उम्कन गाह्रो छ!</span>
                     `;
                     
                     // Append to body so it stays at the top of the viewport
