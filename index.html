@@ -113,6 +113,7 @@
 
                 <!-- No Button -->
                 <!-- Adjusted padding and text size for mobile -->
+                <!-- touch-none class is crucial here -->
                 <button id="noBtn" 
                     class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
                     No 😢
@@ -174,6 +175,7 @@
             let interactionCount = 0;
             let bubbleTimeout;
             let isRaining = false; 
+            let loveBombTriggered = false; // Prevent double firing
             
             // Resize canvas
             function resize() {
@@ -280,7 +282,10 @@
             // --- BUTTON LOGIC ---
             
             function moveButton(e) {
+                if (loveBombTriggered) return;
+
                 // Check if user is trying to tap on mobile
+                // Use passive:false in listener to allow preventDefault
                 if(e && e.type === 'touchstart') e.preventDefault();
                 
                 // Capture pointer location for distance calculation
@@ -304,11 +309,19 @@
 
                     // 1. Clean up events (stop moving)
                     noBtn.removeEventListener('mouseenter', moveButton);
-                    noBtn.removeEventListener('touchstart', moveButton);
+                    noBtn.removeEventListener('touchstart', moveButton); // match options not strictly needed for removal by ref but good practice
                     noBtn.removeEventListener('click', moveButton);
                     
                     // 2. Add Success Event
-                    noBtn.addEventListener('click', triggerLoveBomb);
+                    // Define handler to support both click and touch
+                    const surrenderHandler = (evt) => {
+                        if(evt.type === 'touchstart') evt.preventDefault(); // Prevent double fire
+                        triggerLoveBomb();
+                    };
+
+                    noBtn.addEventListener('click', surrenderHandler);
+                    noBtn.addEventListener('touchstart', surrenderHandler, { passive: false });
+                    
                     // Ensure it's clickable (re-enable pointer events if they were disabled)
                     noBtn.style.pointerEvents = 'auto';
 
@@ -325,6 +338,11 @@
                     // 4. Base styles for the transformed button
                     noBtn.style.transition = "all 0.3s ease";
                     noBtn.style.transform = "scale(1.1)";
+                    
+                    // RESET SHAPE & PADDING (fix random deformations for the final state)
+                    noBtn.style.borderRadius = "9999px"; 
+                    noBtn.style.padding = "1rem 3rem"; // Reset to standard look
+                    
                     noBtn.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)";
 
                     // OUTCOME: Always Surrender (Loki Removed)
@@ -385,8 +403,39 @@
                     noBubble.style.zIndex = 100;
                 }
 
-                const btnWidth = noBtn.offsetWidth;
-                const btnHeight = noBtn.offsetHeight;
+                // --- NEW: Random Shape & Size Logic ---
+                const randomScale = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 scale
+                noBtn.style.transform = `scale(${randomScale})`;
+
+                // Random Border Radius Morphing
+                const shapeType = Math.random();
+                if (shapeType < 0.3) {
+                    // Blobby shape (Organic)
+                    const b1 = Math.floor(30 + Math.random() * 40);
+                    const b2 = Math.floor(30 + Math.random() * 40);
+                    const b3 = Math.floor(30 + Math.random() * 40);
+                    const b4 = Math.floor(30 + Math.random() * 40);
+                    noBtn.style.borderRadius = `${b1}% ${100-b1}% ${b2}% ${100-b2}% / ${b3}% ${b4}% ${100-b4}% ${100-b3}%`;
+                } else if (shapeType < 0.6) {
+                    // Circle/Oval
+                    noBtn.style.borderRadius = "50%";
+                } else if (shapeType < 0.8) {
+                    // Leaf/Teardrop
+                    noBtn.style.borderRadius = "0px 30px 0px 30px";
+                } else {
+                    // Standard Pill (Boxy)
+                    noBtn.style.borderRadius = "9999px";
+                }
+
+                // Random Padding (Change aspect ratio slightly)
+                const padY = Math.floor(15 + Math.random() * 10) + 'px'; // 15-25px
+                const padX = Math.floor(30 + Math.random() * 20) + 'px'; // 30-50px
+                noBtn.style.padding = `${padY} ${padX}`;
+                // --------------------------------------
+
+                // Recalculate Width/Height based on scale for collision accuracy
+                const btnWidth = noBtn.offsetWidth * randomScale;
+                const btnHeight = noBtn.offsetHeight * randomScale;
                 
                 // Get Card Rect for safe area calculations relative to screen
                 const cardRect = card.getBoundingClientRect();
@@ -504,6 +553,9 @@
 
             // --- LOVE BOMB LOGIC ---
             function triggerLoveBomb() {
+                if (loveBombTriggered) return;
+                loveBombTriggered = true;
+
                 // 1. Hide card logic
                 card.style.opacity = '0';
                 card.style.transform = 'scale(0.8)';
@@ -530,12 +582,18 @@
             // Attach events using JS
             if (noBtn) {
                 noBtn.addEventListener('mouseenter', moveButton);
-                noBtn.addEventListener('touchstart', moveButton);
+                // Passive false allows preventDefault() to work on touch, preventing scroll/zoom
+                noBtn.addEventListener('touchstart', moveButton, { passive: false });
                 noBtn.addEventListener('click', moveButton);
             }
 
             if (yesBtn) {
-                yesBtn.addEventListener('click', triggerLoveBomb);
+                const yesHandler = (e) => {
+                    if (e.type === 'touchstart') e.preventDefault();
+                    triggerLoveBomb();
+                };
+                yesBtn.addEventListener('click', yesHandler);
+                yesBtn.addEventListener('touchstart', yesHandler, { passive: false });
             }
         });
     </script>
