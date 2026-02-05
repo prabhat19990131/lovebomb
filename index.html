@@ -305,7 +305,7 @@
                     // Ensure it's clickable (re-enable pointer events if they were disabled)
                     noBtn.style.pointerEvents = 'auto';
 
-                    // RESET POSITION: Move back to original place
+                    // RESET POSITION: Move back to original place inside the card
                     const spacer = document.getElementById('noBtn-spacer');
                     if (spacer) {
                         spacer.remove();
@@ -360,8 +360,8 @@
                 }, 400); // 400ms "ghost" time
                 
                 // --- SMOOTHNESS FIX: Prevent Layout Shift ---
-                // If the button is not yet absolute, insert a placeholder to keep the layout stable
-                if (noBtn.style.position !== 'absolute') {
+                // Switch to FIXED positioning to allow escape from card
+                if (noBtn.style.position !== 'fixed') {
                     const spacer = noBtn.cloneNode(true);
                     spacer.id = 'noBtn-spacer';
                     spacer.style.visibility = 'hidden'; // Hide it
@@ -369,38 +369,28 @@
                     spacer.style.pointerEvents = 'none'; // No interactions
                     noBtn.parentNode.insertBefore(spacer, noBtn);
                     
-                    noBtn.style.position = 'absolute';
+                    noBtn.style.position = 'fixed';
                     noBtn.style.zIndex = 1000;
+                    
+                    // Also switch bubble to fixed so it follows correctly
+                    noBubble.style.position = 'fixed';
+                    noBubble.style.zIndex = 1000;
                 }
 
                 const btnWidth = noBtn.offsetWidth;
                 const btnHeight = noBtn.offsetHeight;
                 
-                // Get Yes Button position relative to Card to detect overlap
+                // Get Yes Button position (Global/Viewport coordinates)
                 const yesRect = yesBtn.getBoundingClientRect();
-                const cardRect = card.getBoundingClientRect();
-                
-                // Pointer relative to card
-                const pointerRelX = pointerX - cardRect.left;
-                const pointerRelY = pointerY - cardRect.top;
-
-                const yesRel = {
-                    left: yesRect.left - cardRect.left,
-                    top: yesRect.top - cardRect.top,
-                    width: yesRect.width,
-                    height: yesRect.height
-                };
                 
                 // Gap to keep distance between buttons
                 const gap = 20;
                 // Minimum distance from pointer to be considered "far"
                 const minPointerDistance = 150;
 
-                // Use the card's dimensions instead of the window
-                // Calculate safe ranges within the card
-                // Padding of 20px to keep away from edges
-                const xRange = card.clientWidth - btnWidth - 40;
-                const yRange = card.clientHeight - btnHeight - 40;
+                // Use the WINDOW dimensions now (Global movement)
+                const xRange = window.innerWidth - btnWidth - 40;
+                const yRange = window.innerHeight - btnHeight - 40;
                 
                 const safeX = Math.max(0, xRange);
                 const safeY = Math.max(0, yRange);
@@ -410,23 +400,22 @@
                 let attempts = 0;
 
                 // Attempt to find a non-overlapping position up to 100 times
-                // We added a check for distance from pointer
                 while (!validPosition && attempts < 100) {
                     attempts++;
                     
                     randomX = Math.random() * safeX + 20;
                     randomY = Math.random() * safeY + 20;
                     
-                    // Collision Detection (Axis-Aligned Bounding Box)
+                    // Collision Detection (Global Coordinates)
                     const noLeft = randomX;
                     const noRight = randomX + btnWidth;
                     const noTop = randomY;
                     const noBottom = randomY + btnHeight;
                     
-                    const yesLeft = yesRel.left - gap;
-                    const yesRight = yesRel.left + yesRel.width + gap;
-                    const yesTop = yesRel.top - gap;
-                    const yesBottom = yesRel.top + yesRel.height + gap;
+                    const yesLeft = yesRect.left - gap;
+                    const yesRight = yesRect.right + gap;
+                    const yesTop = yesRect.top - gap;
+                    const yesBottom = yesRect.bottom + gap;
                     
                     // Check if they overlap with YES button
                     const isOverlapping = !(noRight < yesLeft || 
@@ -438,8 +427,8 @@
                     const btnCenterX = randomX + btnWidth/2;
                     const btnCenterY = randomY + btnHeight/2;
                     const distFromPointer = Math.sqrt(
-                        Math.pow(btnCenterX - pointerRelX, 2) + 
-                        Math.pow(btnCenterY - pointerRelY, 2)
+                        Math.pow(btnCenterX - pointerX, 2) + 
+                        Math.pow(btnCenterY - pointerY, 2)
                     );
 
                     const isFarEnough = distFromPointer > minPointerDistance;
@@ -450,11 +439,9 @@
                     }
                 }
 
-                // Set position to absolute (relative to the card parent)
-                noBtn.style.position = 'absolute';
+                // Set position to fixed (viewport coordinates)
                 noBtn.style.left = randomX + 'px';
                 noBtn.style.top = randomY + 'px';
-                noBtn.style.zIndex = 100;
                 
                 // NO TEXT CHANGE - Button stays as "No 😢"
 
@@ -464,12 +451,9 @@
                 bubbleText.innerText = texts[Math.floor(Math.random() * texts.length)];
                 
                 // Position Bubble Above Button
-                // The bubble is absolute within the card, just like the button
-                // We center it horizontally relative to the button
+                // The bubble is fixed now, so we position it relative to the viewport
                 const bubbleWidth = noBubble.offsetWidth || 100; // approximation if hidden
-                const bubbleHeight = noBubble.offsetHeight || 40;
                 
-                noBubble.style.left = (randomX + btnWidth/2 - bubbleWidth/2) + 'px'; // Actually we use transform to center, so just center point
                 noBubble.style.left = (randomX + btnWidth/2) + 'px';
                 noBubble.style.top = (randomY - 50) + 'px'; // 50px above
                 noBubble.style.transform = "translateX(-50%)"; // Center horizontally
