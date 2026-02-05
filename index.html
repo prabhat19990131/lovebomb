@@ -81,43 +81,50 @@
     <canvas id="effects-canvas"></canvas>
 
     <!-- MAIN PROPOSAL CARD -->
-    <!-- Adjusted padding and width for better mobile fit -->
-    <div id="proposal-card" class="z-20 bg-white/90 backdrop-blur-md p-6 sm:p-10 md:p-14 rounded-[2rem] shadow-2xl w-[95%] sm:w-[90%] max-w-md md:max-w-2xl text-center border-4 border-pink-200 float transition-all duration-500 relative">
+    <!-- Wrapper with ID for JS hooks - now handles positioning and float -->
+    <div id="proposal-card" class="relative z-20 w-[95%] sm:w-[90%] max-w-md md:max-w-2xl float transition-all duration-500">
         
-        <!-- Smaller emoji size on mobile -->
-        <div class="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl animate-bounce">
-            💌
-        </div>
+        <!-- Bigger Grey Rectangle (Background) -->
+        <div id="grey-bg" class="absolute top-1/2 left-1/2 w-[125%] h-[125%] -translate-x-1/2 -translate-y-1/2 bg-gray-400 rounded-[2.5rem] rotate-[-3deg] shadow-xl z-0"></div>
 
-        <!-- Responsive text sizing to prevent wrapping issues on small screens -->
-        <h1 class="text-3xl sm:text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-600 mb-2 sm:mb-4 font-bold leading-tight py-2">
-            Will you be my Valentine?
-        </h1>
-        
-        <p class="text-gray-500 text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 font-semibold">Please say yes! 🥺 👀</p>
-        
-        <!-- Button Container: Flex-col for mobile, Row for tablet+ -->
-        <div class="flex flex-col md:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 w-full min-h-[8rem]">
-            <!-- Yes Button -->
-            <!-- Adjusted padding and text size for mobile -->
-            <button id="yesBtn" 
-                class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
-                YES! 😍
-            </button>
-
-            <!-- No Button -->
-            <!-- Adjusted padding and text size for mobile -->
-            <button id="noBtn" 
-                class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
-                No 😢
-            </button>
+        <!-- White Card (Foreground) - Contains content -->
+        <div class="relative z-10 bg-white/90 backdrop-blur-md p-6 sm:p-10 md:p-14 rounded-[2rem] shadow-2xl w-full text-center border-4 border-pink-200">
             
-            <!-- SPEECH BUBBLE (Hidden by default) -->
-            <div id="noBubble" class="absolute opacity-0 transition-opacity duration-200 pointer-events-none z-50">
-                <div class="relative bg-gray-800 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
-                    <span id="bubbleText">Too slow!</span>
-                    <!-- Triangle Arrow -->
-                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+            <!-- Smaller emoji size on mobile -->
+            <div class="mb-2 sm:mb-4 text-5xl sm:text-7xl md:text-9xl animate-bounce">
+                💌
+            </div>
+
+            <!-- Responsive text sizing to prevent wrapping issues on small screens -->
+            <h1 class="text-3xl sm:text-5xl md:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-red-600 mb-2 sm:mb-4 font-bold leading-tight py-2">
+                Will you be my Valentine?
+            </h1>
+            
+            <p class="text-gray-500 text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 font-semibold">Please say yes! 🥺 👀</p>
+            
+            <!-- Button Container: Flex-col for mobile, Row for tablet+ -->
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 sm:gap-6 md:gap-8 w-full min-h-[8rem]">
+                <!-- Yes Button -->
+                <!-- Adjusted padding and text size for mobile -->
+                <button id="yesBtn" 
+                    class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
+                    YES! 😍
+                </button>
+
+                <!-- No Button -->
+                <!-- Adjusted padding and text size for mobile -->
+                <button id="noBtn" 
+                    class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
+                    No 😢
+                </button>
+                
+                <!-- SPEECH BUBBLE (Hidden by default) -->
+                <div id="noBubble" class="absolute opacity-0 transition-opacity duration-200 pointer-events-none z-50">
+                    <div class="relative bg-gray-800 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                        <span id="bubbleText">Too slow!</span>
+                        <!-- Triangle Arrow -->
+                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -360,8 +367,9 @@
                 }, 400); // 400ms "ghost" time
                 
                 // --- SMOOTHNESS FIX: Prevent Layout Shift ---
-                // Switch to FIXED positioning to allow escape from card
-                if (noBtn.style.position !== 'fixed') {
+                // Switch to ABSOLUTE positioning (relative to card)
+                // We use absolute because the card is the reference frame for the grey bg
+                if (noBtn.style.position !== 'absolute') {
                     const spacer = noBtn.cloneNode(true);
                     spacer.id = 'noBtn-spacer';
                     spacer.style.visibility = 'hidden'; // Hide it
@@ -369,32 +377,60 @@
                     spacer.style.pointerEvents = 'none'; // No interactions
                     noBtn.parentNode.insertBefore(spacer, noBtn);
                     
-                    noBtn.style.position = 'fixed';
-                    noBtn.style.zIndex = 1000;
+                    noBtn.style.position = 'absolute';
+                    noBtn.style.zIndex = 100; // Above everything
                     
-                    // Also switch bubble to fixed so it follows correctly
-                    noBubble.style.position = 'fixed';
-                    noBubble.style.zIndex = 1000;
+                    // Reset bubble to absolute
+                    noBubble.style.position = 'absolute';
+                    noBubble.style.zIndex = 100;
                 }
 
                 const btnWidth = noBtn.offsetWidth;
                 const btnHeight = noBtn.offsetHeight;
                 
-                // Get Yes Button position (Global/Viewport coordinates)
-                const yesRect = yesBtn.getBoundingClientRect();
+                // Get Card Rect for safe area calculations relative to screen
+                const cardRect = card.getBoundingClientRect();
                 
-                // Gap to keep distance between buttons
-                const gap = 20;
-                // Minimum distance from pointer to be considered "far"
-                const minPointerDistance = 150;
+                // 1. Define Bounds relative to the CARD (0,0 is top-left of card)
+                // Grey Rectangle is 125% size, centered.
+                // It overhangs by 12.5% on each side.
+                const overhangX = card.clientWidth * 0.125;
+                const overhangY = card.clientHeight * 0.125;
+                
+                // These are the ideal bounds for the grey box
+                let minX = -overhangX + 10; // Padding
+                let maxX = card.clientWidth + overhangX - btnWidth - 10;
+                let minY = -overhangY + 10;
+                let maxY = card.clientHeight + overhangY - btnHeight - 10;
 
-                // Use the WINDOW dimensions now (Global movement)
-                const xRange = window.innerWidth - btnWidth - 40;
-                const yRange = window.innerHeight - btnHeight - 40;
+                // 2. SAFETY CHECK: Viewport Constraint
+                // Convert viewport boundaries to card-relative coordinates
+                // Viewport Left (0) in card coords = -cardRect.left
+                const viewportRelLeft = -cardRect.left;
+                // Viewport Right (window.innerWidth) in card coords = window.innerWidth - cardRect.left
+                const viewportRelRight = window.innerWidth - cardRect.left;
+                const viewportRelTop = -cardRect.top;
+                const viewportRelBottom = window.innerHeight - cardRect.top;
+
+                // Clamp bounds to ensure button never goes off screen
+                minX = Math.max(minX, viewportRelLeft + 10);
+                maxX = Math.min(maxX, viewportRelRight - btnWidth - 10);
+                minY = Math.max(minY, viewportRelTop + 10);
+                maxY = Math.min(maxY, viewportRelBottom - btnHeight - 10);
+
+                // Collision Logic (Relative to Card)
+                // Since 'yesBtn' is inside the card, we need its relative position
+                const yesRect = yesBtn.getBoundingClientRect();
+                const yesRelLeft = yesRect.left - cardRect.left;
+                const yesRelTop = yesRect.top - cardRect.top;
+
+                const gap = 20;
+                const minPointerDistance = 150;
                 
-                const safeX = Math.max(0, xRange);
-                const safeY = Math.max(0, yRange);
-                
+                // Pointer Relative to Card
+                const pointerRelX = pointerX - cardRect.left;
+                const pointerRelY = pointerY - cardRect.top;
+
                 let randomX, randomY;
                 let validPosition = false;
                 let attempts = 0;
@@ -403,19 +439,19 @@
                 while (!validPosition && attempts < 100) {
                     attempts++;
                     
-                    randomX = Math.random() * safeX + 20;
-                    randomY = Math.random() * safeY + 20;
+                    randomX = minX + Math.random() * (maxX - minX);
+                    randomY = minY + Math.random() * (maxY - minY);
                     
-                    // Collision Detection (Global Coordinates)
+                    // Collision Detection (Card Relative Coordinates)
                     const noLeft = randomX;
                     const noRight = randomX + btnWidth;
                     const noTop = randomY;
                     const noBottom = randomY + btnHeight;
                     
-                    const yesLeft = yesRect.left - gap;
-                    const yesRight = yesRect.right + gap;
-                    const yesTop = yesRect.top - gap;
-                    const yesBottom = yesRect.bottom + gap;
+                    const yesLeft = yesRelLeft - gap;
+                    const yesRight = yesRelLeft + yesRect.width + gap;
+                    const yesTop = yesRelTop - gap;
+                    const yesBottom = yesRelTop + yesRect.height + gap;
                     
                     // Check if they overlap with YES button
                     const isOverlapping = !(noRight < yesLeft || 
@@ -427,8 +463,8 @@
                     const btnCenterX = randomX + btnWidth/2;
                     const btnCenterY = randomY + btnHeight/2;
                     const distFromPointer = Math.sqrt(
-                        Math.pow(btnCenterX - pointerX, 2) + 
-                        Math.pow(btnCenterY - pointerY, 2)
+                        Math.pow(btnCenterX - pointerRelX, 2) + 
+                        Math.pow(btnCenterY - pointerRelY, 2)
                     );
 
                     const isFarEnough = distFromPointer > minPointerDistance;
@@ -439,7 +475,7 @@
                     }
                 }
 
-                // Set position to fixed (viewport coordinates)
+                // Set position to absolute (card relative coordinates)
                 noBtn.style.left = randomX + 'px';
                 noBtn.style.top = randomY + 'px';
                 
@@ -450,8 +486,7 @@
                 const texts = ["Nope!", "Try Again!", "Too Slow!", "Cant Catch Me!", "Seriously?", "Just Click Yes!", "Nice Try!"];
                 bubbleText.innerText = texts[Math.floor(Math.random() * texts.length)];
                 
-                // Position Bubble Above Button
-                // The bubble is fixed now, so we position it relative to the viewport
+                // Position Bubble Above Button relative to button position
                 const bubbleWidth = noBubble.offsetWidth || 100; // approximation if hidden
                 
                 noBubble.style.left = (randomX + btnWidth/2) + 'px';
