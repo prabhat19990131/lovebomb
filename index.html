@@ -294,8 +294,8 @@
                 interactionCount++;
 
                 // TRICK LOGIC:
-                // After 5 attempts, there's a 20% chance it turns into a YES button
-                if (interactionCount > 5 && Math.random() < 0.2) {
+                // After 12 attempts, there's a 20% chance it turns into a YES button
+                if (interactionCount > 12 && Math.random() < 0.2) {
                     
                     // Hide bubble immediately if trick happens
                     noBubble.style.opacity = '0';
