@@ -110,7 +110,7 @@
                 <!-- Yes Button -->
                 <!-- Adjusted padding and text size for mobile -->
                 <button id="yesBtn" 
-                    class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
+                    class="w-full md:w-auto min-w-[100px] sm:min-w-[120px] bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black py-2 px-4 sm:py-3 sm:px-8 md:py-4 md:px-12 rounded-full text-base sm:text-lg md:text-2xl shadow-xl transform transition hover:scale-105 active:scale-95 border-b-4 border-pink-700 z-10">
                     YES! 😍
                 </button>
 
@@ -118,7 +118,7 @@
                 <!-- Added whitespace-nowrap to prevent text breaking when morphing -->
                 <!-- touch-none class is crucial here to prevent scrolling while chasing -->
                 <button id="noBtn" 
-                    class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none whitespace-nowrap">
+                    class="w-full md:w-auto min-w-[100px] sm:min-w-[120px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 sm:py-3 sm:px-8 md:py-4 md:px-12 rounded-full text-base sm:text-lg md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none whitespace-nowrap">
                     No 😢
                 </button>
                 
@@ -441,11 +441,11 @@
 
                 // Random Padding (Change aspect ratio slightly)
                 // Reduced padding on mobile to prevent text overflow/crowding
-                const minPadY = isMobile ? 12 : 15; // Increased min slightly
-                const varPadY = isMobile ? 10 : 10;
+                const minPadY = isMobile ? 8 : 15; // Decreased min padding for mobile
+                const varPadY = isMobile ? 8 : 10;
                 
-                const minPadX = isMobile ? 24 : 30; // Increased min slightly
-                const varPadX = isMobile ? 15 : 20;
+                const minPadX = isMobile ? 16 : 30; // Decreased min padding for mobile
+                const varPadX = isMobile ? 12 : 20;
 
                 const padY = Math.floor(minPadY + Math.random() * varPadY) + 'px';
                 const padX = Math.floor(minPadX + Math.random() * varPadX) + 'px';
