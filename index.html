@@ -16,9 +16,12 @@
             background: linear-gradient(180deg, #ffdde1 0%, #ee9ca7 100%);
             touch-action: manipulation; /* Improves touch response */
             height: 100dvh; /* Fix for mobile browser address bars */
-            /* Support for mobile safe areas */
+            
+            /* Support for mobile safe areas (Notch/Home bar) */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
         
         h1, h2 {
@@ -112,10 +115,10 @@
                 </button>
 
                 <!-- No Button -->
-                <!-- Adjusted padding and text size for mobile -->
-                <!-- touch-none class is crucial here -->
+                <!-- Added whitespace-nowrap to prevent text breaking when morphing -->
+                <!-- touch-none class is crucial here to prevent scrolling while chasing -->
                 <button id="noBtn" 
-                    class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none">
+                    class="w-full md:w-auto min-w-[120px] sm:min-w-[140px] bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 px-6 sm:py-4 sm:px-12 rounded-full text-lg sm:text-xl md:text-xl shadow-lg border-b-4 border-gray-400 transition-all duration-100 ease-out touch-none whitespace-nowrap">
                     No 😢
                 </button>
                 
@@ -354,9 +357,12 @@
                     // NEW: Add Loki Notice AT THE TOP of the website
                     const notice = document.createElement('div');
                     // z-[100] to ensure it is above everything else (confetti, overlay, etc)
-                    // Changed flex-row to flex-col to stack the text lines nicely
+                    // Added safe-area padding top for notch support
                     notice.className = "fixed top-0 left-0 w-full bg-yellow-100/95 backdrop-blur border-b-4 border-yellow-500 text-yellow-800 py-3 px-4 z-[100] flex flex-col items-center justify-center font-bold shadow-lg transform -translate-y-full transition-transform duration-500 ease-out";
                     
+                    // Use style to safely apply env() padding
+                    notice.style.paddingTop = "max(0.75rem, env(safe-area-inset-top))";
+
                     // Updated innerHTML to include Nepali text
                     notice.innerHTML = `
                         <span class="text-sm sm:text-base mb-1 text-center">(it was always a yes button btw. Enchanted by Loki's magic)</span>
@@ -404,7 +410,13 @@
                 }
 
                 // --- NEW: Random Shape & Size Logic ---
-                const randomScale = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 scale
+                // Responsive scaling: smaller buttons on mobile to fit the screen better
+                const isMobile = window.innerWidth < 640;
+                
+                // Scale range: 0.7-1.0 on mobile, 0.8-1.2 on desktop
+                const baseScale = isMobile ? 0.7 : 0.8;
+                const varScale = isMobile ? 0.3 : 0.4;
+                const randomScale = baseScale + Math.random() * varScale;
                 noBtn.style.transform = `scale(${randomScale})`;
 
                 // Random Border Radius Morphing
@@ -428,8 +440,15 @@
                 }
 
                 // Random Padding (Change aspect ratio slightly)
-                const padY = Math.floor(15 + Math.random() * 10) + 'px'; // 15-25px
-                const padX = Math.floor(30 + Math.random() * 20) + 'px'; // 30-50px
+                // Reduced padding on mobile to prevent text overflow/crowding
+                const minPadY = isMobile ? 12 : 15; // Increased min slightly
+                const varPadY = isMobile ? 10 : 10;
+                
+                const minPadX = isMobile ? 24 : 30; // Increased min slightly
+                const varPadX = isMobile ? 15 : 20;
+
+                const padY = Math.floor(minPadY + Math.random() * varPadY) + 'px';
+                const padX = Math.floor(minPadX + Math.random() * varPadX) + 'px';
                 noBtn.style.padding = `${padY} ${padX}`;
                 // --------------------------------------
 
