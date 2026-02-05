@@ -171,6 +171,7 @@
             let particles = [];
             let interactionCount = 0;
             let bubbleTimeout;
+            let isRaining = false; // Fixed: Added missing initialization
             
             // Resize canvas
             function resize() {
@@ -270,6 +271,9 @@
                 
                 requestAnimationFrame(animate);
             }
+            
+            // Fixed: Start the animation loop!
+            animate();
 
             // --- BUTTON LOGIC ---
             
@@ -305,6 +309,16 @@
                     noBtn.addEventListener('click', triggerLoveBomb);
                     // Ensure it's clickable (re-enable pointer events if they were disabled)
                     noBtn.style.pointerEvents = 'auto';
+
+                    // RESET POSITION: Move back to original place
+                    const spacer = document.getElementById('noBtn-spacer');
+                    if (spacer) {
+                        spacer.remove();
+                    }
+                    noBtn.style.position = 'static';
+                    noBtn.style.left = 'auto';
+                    noBtn.style.top = 'auto';
+                    noBtn.style.zIndex = 'auto';
 
                     // 3. Show the Reset/Play Again button on the main card
                     if(resetGameBtn) resetGameBtn.classList.remove('hidden');
@@ -422,9 +436,9 @@
                     
                     // Check if they overlap with YES button
                     const isOverlapping = !(noRight < yesLeft || 
-                                          noLeft > yesRight || 
-                                          noBottom < yesTop || 
-                                          noTop > yesBottom);
+                                            noLeft > yesRight || 
+                                            noBottom < yesTop || 
+                                            noTop > yesBottom);
                     
                     // Check distance from pointer (center of button)
                     const btnCenterX = randomX + btnWidth/2;
@@ -514,5 +528,3 @@
     </script>
 </body>
 </html>
-
-
