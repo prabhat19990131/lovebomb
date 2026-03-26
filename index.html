@@ -309,10 +309,75 @@
         /* Revealed badge on card */
         .card-wrap.revealed .face-back { opacity: .45; }
 
-        @media(max-width:600px){
-            .card-wrap{width:130px;height:220px}
-            .grid{gap:.8rem}
+        /* Selected state highlight */
+        .card-wrap.selected .face-back {
+            border-color: #ffd700;
+            box-shadow: 0 0 35px rgba(255,215,0,0.6), inset 0 0 36px rgba(100,0,200,.4);
+            filter: brightness(1.2);
         }
+        .card-wrap.selected {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .meaning-panel.show{display:block; max-height: 80vh; overflow-y: auto;}
+        .card-entry {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,120,0,0.15);
+        }
+        .card-entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .card-entry h3 { margin-bottom: 0.5rem; }
+
+
+        /* Responsive Breakpoints */
+
+        /* Tablet (Large) */
+        @media(max-width: 1024px) {
+            .container { padding-top: 1.5rem; }
+            h1 { letter-spacing: 3px; }
+            .deck-stats { gap: 2rem; }
+        }
+
+        /* Tablet (Small) / Landscape Phone */
+        @media(max-width: 768px) {
+            .card-wrap { width: 140px; height: 238px; }
+            .grid { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+            .btn { padding: .65rem 1.4rem; font-size: .8rem; }
+            .meaning-panel { padding: 1.2rem 1.4rem; }
+            .panel-header { font-size: .65rem; }
+            .panel-body { font-size: .88rem; line-height: 1.6; }
+        }
+
+        /* Phone */
+        @media(max-width: 480px) {
+            .eye { font-size: 2.2rem; }
+            h1 { font-size: 1.5rem; letter-spacing: 2px; }
+            .subtitle { font-size: 0.6rem; letter-spacing: 3px; }
+            .deck-stats { gap: 1.2rem; margin: 1.2rem 0; }
+            .stat-num { font-size: 1.5rem; }
+            .stat-label { font-size: 0.5rem; letter-spacing: 1.5px; }
+
+            .card-wrap { width: 110px; height: 185px; }
+            .grid { gap: 0.7rem; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+
+            .controls { gap: 0.6rem; }
+            .btn { padding: 0.7rem 1.1rem; font-size: 0.75rem; width: 100%; }
+
+            .f-arcana { font-size: 0.4rem; }
+            .f-symbol { font-size: 1.8rem; }
+            .f-marvel-name { font-size: 0.6rem; }
+            .f-preview { display: none; } /* Hide preview text on small mobile cards to save space */
+            .f-tap { font-size: 0.4rem; }
+
+            .meaning-panel { margin-top: 1.8rem; }
+        }
+
+        /* Very Small Phone */
+        @media(max-width: 360px) {
+            .card-wrap { width: 95px; height: 160px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); }
+        }
+
     </style>
 </head>
 <body>
@@ -344,16 +409,16 @@
     </div>
 
     <div class="controls">
+        <button class="btn" id="revealBtn" onclick="revealSelected()" style="background: rgba(255,215,0,0.15); border-color: #ffd700; color: #ffd700; display: none;">✦ Reveal Magic ✦</button>
+        <button class="btn" onclick="shuffleDeck()">✦ Shuffle Deck ✦</button>
         <button class="btn btn-reset" onclick="resetAll()">✦ Reset All Cards ✦</button>
     </div>
-    <p class="hint">Choose any card to reveal its mystical meaning</p>
+    <p class="hint" id="mainHint">Select the cards that call to you, then reveal their secrets</p>
 
     <div class="grid" id="grid"></div>
 
     <div class="meaning-panel" id="meaningPanel">
-        <div class="panel-header" id="panelHeader"></div>
-        <p class="panel-body" id="panelBody"></p>
-        <div class="panel-keyword" id="panelKeyword"></div>
+        <div id="meaningContent"></div>
     </div>
 </div>
 
@@ -493,39 +558,79 @@ const DECK = [
     }
 ];
 
-// State: which cards are flipped
+// State
 const flipped = new Array(22).fill(false);
+const selected = new Array(22).fill(false);
+
 
 function updateStats() {
     const rev = flipped.filter(Boolean).length;
     document.getElementById('revealed-count').textContent = rev;
     document.getElementById('hidden-count').textContent = 22 - rev;
+
+    // Show reveal button if cards are selected and not all already revealed
+    const selCount = selected.filter((s, i) => s && !flipped[i]).length;
+    document.getElementById('revealBtn').style.display = selCount > 0 ? 'inline-block' : 'none';
+    document.getElementById('mainHint').textContent = selCount > 0
+        ? `You have selected ${selCount} card${selCount > 1 ? 's' : ''}`
+        : "Select the cards that call to you, then reveal their secrets";
 }
 
-function flipCard(i) {
-    flipped[i] = !flipped[i];
-    const cardEl = document.getElementById('card-' + i);
+function toggleSelect(i) {
+    if (flipped[i]) return; // Cannot select already revealed cards
+
+    selected[i] = !selected[i];
     const wrapEl = document.getElementById('wrap-' + i);
 
-    if (flipped[i]) {
-        cardEl.classList.add('flipped');
-        wrapEl.classList.add('revealed');
-        showMeaning(DECK[i]);
+    if (selected[i]) {
+        wrapEl.classList.add('selected');
     } else {
-        cardEl.classList.remove('flipped');
-        wrapEl.classList.remove('revealed');
-        hideMeaning();
+        wrapEl.classList.remove('selected');
     }
     updateStats();
 }
 
-function showMeaning(card) {
+function revealSelected() {
+    const revealedIndices = [];
+    selected.forEach((s, i) => {
+        if (s && !flipped[i]) {
+            flipped[i] = true;
+            revealedIndices.push(i);
+            const cardEl = document.getElementById('card-' + i);
+            const wrapEl = document.getElementById('wrap-' + i);
+            cardEl.classList.add('flipped');
+            wrapEl.classList.add('revealed');
+            wrapEl.classList.remove('selected');
+            selected[i] = false; // Reset selection once revealed
+        }
+    });
+
+    if (revealedIndices.length > 0) {
+        showMeanings();
+    }
+    updateStats();
+}
+
+function showMeanings() {
     const panel = document.getElementById('meaningPanel');
-    document.getElementById('panelHeader').innerHTML =
-        `<span style="color:${card.color}">${card.symbol} ${card.marvel} — ${card.title}</span>`;
-    document.getElementById('panelBody').textContent = card.meaning;
-    document.getElementById('panelKeyword').innerHTML =
-        `<span style="color:${card.color}">✦ ${card.keyword} ✦</span>`;
+    const content = document.getElementById('meaningContent');
+
+    // Get all cards that are currently flipped
+    const revealedCards = DECK.filter((_, i) => flipped[i]);
+
+    if (revealedCards.length === 0) {
+        panel.classList.remove('show');
+        return;
+    }
+
+    content.innerHTML = revealedCards.map(card => `
+        <div class="card-entry">
+            <div class="panel-header" style="color:${card.color}">${card.symbol} ${card.marvel} — ${card.title}</div>
+            <p class="panel-body">${card.meaning}</p>
+            <div class="panel-keyword" style="color:${card.color}">✦ ${card.keyword} ✦</div>
+        </div>
+    `).join('');
+
     panel.classList.add('show');
     panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
 }
@@ -536,16 +641,44 @@ function hideMeaning() {
 
 function resetAll() {
     flipped.fill(false);
+    selected.fill(false);
     hideMeaning();
     updateStats();
     renderGrid();
 }
 
+function shuffleDeck() {
+    // Standard practice: reset cards before shuffling
+    flipped.fill(false);
+    selected.fill(false);
+    hideMeaning();
+    updateStats();
+
+    // Fisher-Yates Shuffle
+    for (let i = DECK.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [DECK[i], DECK[j]] = [DECK[j], DECK[i]];
+    }
+
+    // Visual feedback: brief grid animation
+    const grid = document.getElementById('grid');
+    grid.style.opacity = '0';
+    grid.style.transform = 'scale(0.95)';
+    grid.style.transition = 'all 0.4s ease';
+
+    setTimeout(() => {
+        renderGrid();
+        grid.style.opacity = '1';
+        grid.style.transform = 'scale(1)';
+    }, 400);
+}
+
 function renderGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = DECK.map((card, i) => `
-        <div class="card-wrap" id="wrap-${i}" onclick="flipCard(${i})">
-            <div class="card" id="card-${i}">
+        <div class="card-wrap ${flipped[i] ? 'revealed' : ''} ${selected[i] ? 'selected' : ''}"
+             id="wrap-${i}" onclick="toggleSelect(${i})">
+            <div class="card ${flipped[i] ? 'flipped' : ''}" id="card-${i}">
                 <div class="face face-back">
                     <div class="back-art">
                         <span class="back-rune">✦</span>
@@ -561,7 +694,7 @@ function renderGrid() {
                     <div class="f-line" style="background:linear-gradient(to right,transparent,${card.color}70,transparent)"></div>
                     <div class="f-keyword">${card.keyword}</div>
                     <div class="f-preview">${card.meaning.substring(0, 100)}…</div>
-                    <div class="f-tap">tap again to hide</div>
+                    <div class="f-tap">revealed</div>
                 </div>
             </div>
         </div>
