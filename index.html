@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystic Arts Tarot — Dr. Strange Oracle</title>
+    <title>Mystic Tarot Oracle</title>
     <style>
+        :root { --card-w: 150px; --card-h: 255px; --grid-cols: 7; }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -12,7 +14,6 @@
             color: #e0c4ff;
             font-family: 'Georgia', serif;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .bg-glow {
@@ -29,17 +30,13 @@
             from { transform: translate(-50%,-50%) rotate(0deg); }
             to   { transform: translate(-50%,-50%) rotate(360deg); }
         }
-
         .portal-rings {
-            position: fixed;
-            top: 50%; left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%,-50%);
-            pointer-events: none;
-            z-index: 0;
+            pointer-events: none; z-index: 0;
         }
         .ring {
-            position: absolute;
-            top: 50%; left: 50%;
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%,-50%);
             border-radius: 50%;
             border: 1.5px solid rgba(255,120,0,0.1);
@@ -50,182 +47,192 @@
         .ring:nth-child(3){width:540px;height:540px;animation-delay:1.2s}
         .ring:nth-child(4){width:760px;height:760px;animation-delay:1.8s}
         .ring:nth-child(5){width:1000px;height:1000px;animation-delay:2.4s}
-        @keyframes ring-breathe {
-            0%,100%{opacity:.1} 50%{opacity:.32}
-        }
-
+        @keyframes ring-breathe { 0%,100%{opacity:.1} 50%{opacity:.32} }
         #particles { position:fixed; inset:0; pointer-events:none; z-index:0; }
 
-        /* Layout */
+        /* ── Layout ── */
         .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 5rem;
+            position: relative; z-index: 1;
+            padding: 1.2rem 1rem 2rem;
             text-align: center;
         }
 
         /* Header */
-        header { margin-bottom: 2rem; }
+        header { margin-bottom: 0.5rem; }
         .eye {
-            font-size: 3rem;
-            display: block;
-            filter: drop-shadow(0 0 18px rgba(255,130,0,0.9));
+            font-size: 1.8rem; display: block;
+            filter: drop-shadow(0 0 14px rgba(255,130,0,0.9));
             animation: eye-glow 3s ease-in-out infinite;
         }
         @keyframes eye-glow {
-            0%,100%{filter:drop-shadow(0 0 18px rgba(255,130,0,.9))}
-            50%{filter:drop-shadow(0 0 38px rgba(255,200,0,1))}
+            0%,100%{filter:drop-shadow(0 0 14px rgba(255,130,0,.9))}
+            50%{filter:drop-shadow(0 0 28px rgba(255,200,0,1))}
         }
         h1 {
-            font-size: clamp(1.7rem, 4.5vw, 2.8rem);
+            font-size: clamp(1.1rem, 3vw, 1.9rem);
             background: linear-gradient(135deg,#ff8c00 0%,#ffd700 50%,#ff6b00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            margin: 0.4rem 0 0.2rem;
+            letter-spacing: 4px; text-transform: uppercase;
+            margin: 0.2rem 0 0.1rem;
         }
         .subtitle {
-            font-size: 0.72rem;
-            color: rgba(200,150,255,.55);
-            letter-spacing: 5px;
-            text-transform: uppercase;
+            font-size: 0.62rem; color: rgba(200,150,255,.5);
+            letter-spacing: 4px; text-transform: uppercase;
         }
         .divider {
-            width: 200px; height: 1px;
+            width: 160px; height: 1px;
             background: linear-gradient(to right,transparent,#ff8c00,transparent);
-            margin: 1rem auto 0;
+            margin: 0.5rem auto 0;
+        }
+
+        /* Deck Selector */
+        .deck-selector {
+            display: flex; justify-content: center; align-items: center;
+            gap: 0.7rem; flex-wrap: wrap;
+            margin: 0.9rem 0 0.6rem;
+        }
+        .deck-btn {
+            padding: .48rem 1.1rem;
+            border: 2px solid rgba(200,150,255,.3);
+            background: transparent; color: rgba(200,150,255,.6);
+            font-family: 'Georgia',serif; font-size: .72rem;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; border-radius: 4px;
+            transition: all .3s ease;
+        }
+        .deck-btn:hover {
+            border-color: rgba(255,215,0,.6);
+            color: #ffd700;
+            box-shadow: 0 0 14px rgba(255,215,0,.3);
+        }
+        .deck-btn.active {
+            border-color: #ffd700;
+            color: #ffd700;
+            background: rgba(255,215,0,.08);
+            box-shadow: 0 0 20px rgba(255,215,0,.5), inset 0 0 12px rgba(255,215,0,.06);
+        }
+        /* Collapsible Marvel group */
+        .deck-group { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: .5rem; }
+        .deck-parent { position: relative; }
+        .deck-parent .arrow { display: inline-block; margin-left: .3rem; transition: transform .3s ease; font-style: normal; font-size: .6rem; }
+        .deck-parent.open .arrow { transform: rotate(180deg); }
+        .deck-parent.marvel-on {
+            border-color: rgba(255,215,0,.7);
+            color: #ffd700;
+            box-shadow: 0 0 14px rgba(255,215,0,.25);
+        }
+        .deck-submenu {
+            display: flex; flex-direction: row; gap: .45rem; flex-wrap: wrap; justify-content: center;
+            overflow: hidden; max-height: 0; opacity: 0;
+            transition: max-height .35s ease, opacity .28s ease;
+        }
+        .deck-submenu.open { max-height: 80px; opacity: 1; }
+        .deck-btn.sub {
+            font-size: .65rem; padding: .35rem .85rem;
+            border-color: rgba(180,130,255,.25);
         }
 
         /* Stats */
         .deck-stats {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            margin: 1.6rem 0 1.2rem;
+            display: flex; justify-content: center;
+            gap: 2.5rem; margin: 0.5rem 0 0.4rem;
         }
         .stat { text-align: center; }
-        .stat-num { font-size: 1.9rem; font-weight: bold; color: #ff8c00; line-height: 1; }
-        .stat-label { font-size: 0.58rem; color: rgba(200,150,255,.45); letter-spacing: 3px; text-transform: uppercase; margin-top:.2rem; }
+        .stat-num { font-size: 1.35rem; font-weight: bold; color: #ff8c00; line-height: 1; }
+        .stat-label { font-size: 0.5rem; color: rgba(200,150,255,.45); letter-spacing: 3px; text-transform: uppercase; margin-top:.15rem; }
 
         /* Controls */
-        .controls { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-bottom:.8rem; }
+        .controls { display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:.4rem; }
         .btn {
-            padding: .7rem 1.8rem;
+            padding: .42rem 1.1rem;
             border: 2px solid #ff8c00;
-            background: transparent;
-            color: #ff8c00;
-            font-family: 'Georgia',serif;
-            font-size: .85rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all .3s ease;
-            border-radius: 2px;
+            background: transparent; color: #ff8c00;
+            font-family: 'Georgia',serif; font-size: .72rem;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; position: relative; overflow: hidden;
+            transition: all .3s ease; border-radius: 2px;
         }
         .btn::after {
-            content:'';
-            position:absolute; inset:0;
+            content:''; position:absolute; inset:0;
             background:linear-gradient(90deg,transparent,rgba(255,140,0,.15),transparent);
-            transform:translateX(-100%);
-            transition:transform .5s ease;
+            transform:translateX(-100%); transition:transform .5s ease;
         }
         .btn:hover::after{transform:translateX(100%)}
-        .btn:hover{background:rgba(255,140,0,.08);box-shadow:0 0 22px rgba(255,140,0,.5);color:#ffd700}
+        .btn:hover{background:rgba(255,140,0,.08);box-shadow:0 0 18px rgba(255,140,0,.5);color:#ffd700}
         .btn:active{transform:scale(.97)}
+        .btn:disabled{opacity:.45;cursor:default;}
+        .btn-reset { border-color:rgba(200,150,255,.4); color:rgba(200,150,255,.6); }
+        .btn-reset:hover{background:rgba(200,150,255,.08);box-shadow:0 0 18px rgba(200,150,255,.3);color:#e0c4ff}
+        .btn-view { border-color:rgba(0,220,180,.5); color:rgba(0,220,180,.7); }
+        .btn-view:hover{background:rgba(0,220,180,.08);box-shadow:0 0 18px rgba(0,220,180,.3);color:#00ffcc}
 
-        .btn-reset {
-            border-color: rgba(200,150,255,.4);
-            color: rgba(200,150,255,.6);
-        }
-        .btn-reset:hover{background:rgba(200,150,255,.08);box-shadow:0 0 22px rgba(200,150,255,.3);color:#e0c4ff}
 
         .hint {
-            font-size:.62rem;
-            color:rgba(200,150,255,.3);
-            letter-spacing:3px;
-            text-transform:uppercase;
-            margin-bottom:2rem;
+            font-size:.55rem; color:rgba(200,150,255,.3);
+            letter-spacing:3px; text-transform:uppercase;
+            margin-bottom:.6rem;
         }
 
-        /* Card Grid — all 22 cards shown */
+        /* ── Card Grid ── */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1.2rem;
-            justify-items: center;
+            grid-template-columns: repeat(var(--grid-cols), var(--card-w));
+            gap: 8px;
+            justify-content: center;
+            margin: 0 auto;
         }
 
-        /* Each card */
         .card-wrap {
             perspective: 1100px;
-            width: 150px;
-            height: 255px;
+            width: var(--card-w);
+            height: var(--card-h);
             cursor: pointer;
         }
-
         .card {
             width: 100%; height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
+            position: relative; transform-style: preserve-3d;
             transition: transform .85s cubic-bezier(0.175,0.885,0.32,1.275);
         }
         .card:hover:not(.flipped) {
-            transform: translateY(-10px) scale(1.04);
-            filter: drop-shadow(0 14px 28px rgba(255,120,0,0.5));
+            transform: translateY(-6px) scale(1.05);
+            filter: drop-shadow(0 10px 20px rgba(255,120,0,0.5));
         }
         .card.flipped { transform: rotateY(180deg); }
-
         .face {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             backface-visibility: hidden;
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 8px; overflow: hidden;
         }
 
         /* Card back */
         .face-back {
             background: linear-gradient(145deg,#0a0028 0%,#180045 55%,#0a0020 100%);
             border: 2px solid rgba(255,120,0,.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 24px rgba(255,100,0,.15), inset 0 0 36px rgba(100,0,200,.22);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(255,100,0,.15), inset 0 0 30px rgba(100,0,200,.22);
         }
         .back-art {
-            width: 118px; height: 215px;
+            width: 80%; height: 84%;
             border: 1px solid rgba(255,120,0,.22);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
             position: relative;
         }
         .back-art::before {
-            content:''; position:absolute;
-            top:50%; left:50%; transform:translate(-50%,-50%);
-            width:88px; height:88px;
-            border-radius:50%;
+            content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+            width:55px; height:55px; border-radius:50%;
             border:2px solid rgba(255,120,0,.3);
-            box-shadow:0 0 16px rgba(255,100,0,.28);
+            box-shadow:0 0 12px rgba(255,100,0,.28);
         }
         .back-art::after {
-            content:''; position:absolute;
-            top:50%; left:50%; transform:translate(-50%,-50%);
-            width:56px; height:56px;
-            border-radius:50%;
+            content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+            width:34px; height:34px; border-radius:50%;
             border:1px solid rgba(255,190,0,.4);
         }
         .back-rune {
-            font-size:1.9rem;
-            z-index:1;
-            filter:drop-shadow(0 0 10px rgba(255,130,0,.9));
+            font-size:1.6rem; z-index:1;
+            filter:drop-shadow(0 0 8px rgba(255,130,0,.9));
             animation:slow-spin 12s linear infinite;
         }
         @keyframes slow-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -235,149 +242,218 @@
             transform: rotateY(180deg);
             background: linear-gradient(155deg,#0c0028 0%,#1a0055 45%,#0c0030 100%);
             border: 2px solid rgba(255,120,0,.35);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: .75rem .6rem;
-            box-shadow: inset 0 0 28px rgba(100,0,200,.32);
+            display: flex; flex-direction: column; align-items: center;
+            padding: .6rem .5rem;
+            box-shadow: inset 0 0 24px rgba(100,0,200,.32);
         }
-        .f-arcana {
-            font-size:.5rem; letter-spacing:2.5px;
-            text-transform:uppercase; color:rgba(255,120,0,.5);
-        }
+        .f-arcana { font-size:.44rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,120,0,.5); }
         .f-symbol {
-            font-size:2.6rem;
-            margin:.28rem 0;
+            font-size:2.1rem; margin:.2rem 0;
             animation:sym-breathe 2.5s ease-in-out infinite;
         }
         @keyframes sym-breathe{
-            0%,100%{transform:scale(1);filter:drop-shadow(0 0 8px currentColor)}
-            50%{transform:scale(1.1);filter:drop-shadow(0 0 20px currentColor)}
+            0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px currentColor)}
+            50%{transform:scale(1.1);filter:drop-shadow(0 0 16px currentColor)}
         }
-        .f-tarot-name {
-            font-size:.52rem; letter-spacing:2px;
-            text-transform:uppercase; color:rgba(255,120,0,.72);
-            text-align:center;
+        .f-tarot-name { font-size:.46rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,120,0,.72); text-align:center; }
+        .f-marvel-name { font-size:.6rem; font-weight:bold; color:#e0c4ff; text-align:center; line-height:1.2; margin:.18rem 0; }
+        .f-line { width:78%; height:1px; margin:.22rem 0; background:linear-gradient(to right,transparent,rgba(255,120,0,.45),transparent); }
+        .f-keyword { font-size:.42rem; letter-spacing:1.5px; text-transform:uppercase; color:#ffd700; text-align:center; margin-bottom:.18rem; }
+        .f-yesno {
+            font-size:.62rem; font-weight:bold; letter-spacing:2.5px;
+            padding:.2rem .6rem; border-radius:50px;
+            margin:.14rem 0 .18rem;
         }
-        .f-marvel-name {
-            font-size:.72rem; font-weight:bold;
-            color:#e0c4ff; text-align:center;
-            line-height:1.2; margin:.25rem 0;
-        }
-        .f-line {
-            width:78%; height:1px; margin:.35rem 0;
-            background:linear-gradient(to right,transparent,rgba(255,120,0,.45),transparent);
-        }
-        .f-keyword {
-            font-size:.5rem; letter-spacing:1.8px;
-            text-transform:uppercase; color:#ffd700;
-            text-align:center; margin-bottom:.3rem;
-        }
-        .f-preview {
-            font-size:.52rem;
-            color:rgba(200,175,255,.72);
-            text-align:center;
-            line-height:1.5;
-            flex-grow:1;
-            display:flex;
-            align-items:center;
-        }
-        .f-tap {
-            font-size:.46rem; letter-spacing:2px;
-            text-transform:uppercase;
-            color:rgba(255,120,0,.38);
-            margin-top:.35rem;
-        }
+        .f-yesno.yes  { background:rgba(0,255,100,.12); border:1.5px solid #00e664; color:#00e664; }
+        .f-yesno.no   { background:rgba(255,60,60,.12);  border:1.5px solid #ff4444; color:#ff4444; }
+        .f-yesno.maybe{ background:rgba(255,200,0,.12);  border:1.5px solid #ffd700; color:#ffd700; }
+        .f-tap { font-size:.4rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,120,0,.35); margin-top:auto; }
 
-        /* Meaning panel */
-        .meaning-panel {
-            display:none;
-            max-width:700px;
-            margin:2.5rem auto 0;
-            background:rgba(8,0,28,.93);
-            border:1px solid rgba(255,120,0,.3);
-            border-radius:10px;
-            padding:1.6rem 2rem;
-            animation:panel-in .4s ease;
+        /* ── Card Modal (full-screen overlay) ── */
+        .card-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,14,0.82);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            visibility: hidden;
+            transition: opacity .3s ease, visibility 0s .3s;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            padding: 1rem;
         }
-        .meaning-panel.show{display:block}
-        @keyframes panel-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-        .panel-header{font-size:.7rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:.7rem}
-        .panel-body{color:rgba(212,188,255,.92);line-height:1.88;font-size:.95rem;margin-bottom:1rem}
-        .panel-keyword{font-size:.7rem;letter-spacing:3px;text-transform:uppercase}
+        .card-modal.open {
+            opacity: 1; pointer-events: all; visibility: visible;
+            transition: opacity .3s ease, visibility 0s 0s;
+        }
+        .modal-box {
+            background: rgba(8,0,30,0.97);
+            border: 1px solid rgba(255,120,0,.45);
+            border-radius: 14px;
+            padding: 1.8rem 1.8rem 1.4rem;
+            max-width: 480px; width: 100%;
+            max-height: 88vh; overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 60px rgba(255,100,0,.18), inset 0 0 40px rgba(80,0,180,.18);
+            animation: modal-in .3s cubic-bezier(0.175,0.885,0.32,1.275);
+        }
+        @keyframes modal-in {
+            from { transform: scale(0.82) translateY(30px); opacity: 0; }
+            to   { transform: scale(1)    translateY(0);    opacity: 1; }
+        }
+        .modal-close {
+            position: absolute; top: .9rem; right: 1rem;
+            background: none; border: none;
+            color: rgba(200,150,255,.55); font-size: 1.3rem;
+            cursor: pointer; line-height: 1; transition: color .2s;
+        }
+        .modal-close:hover { color: #ff8c00; }
+        .modal-symbol {
+            font-size: 3rem; display: block; text-align: center; margin-bottom: .5rem;
+            animation: sym-breathe 2.5s ease-in-out infinite;
+        }
+        .modal-title { text-align:center; font-size:1.1rem; font-weight:bold; letter-spacing:2px; margin-bottom:.15rem; }
+        .modal-sub { text-align:center; font-size:.65rem; letter-spacing:3px; text-transform:uppercase; color:rgba(255,120,0,.6); margin-bottom:.9rem; }
+        .modal-yesno { display:flex; justify-content:center; margin-bottom:1.1rem; }
+        .yesno-badge {
+            font-size: 1.35rem; font-weight: bold; letter-spacing: 5px;
+            padding: .45rem 2rem; border-radius: 50px;
+        }
+        .yesno-badge.yes   { background:rgba(0,255,100,.14); border:2px solid #00e664; color:#00e664; text-shadow:0 0 14px #00e664; }
+        .yesno-badge.no    { background:rgba(255,60,60,.14);  border:2px solid #ff4444; color:#ff4444; text-shadow:0 0 14px #ff4444; }
+        .yesno-badge.maybe { background:rgba(255,200,0,.14);  border:2px solid #ffd700; color:#ffd700; text-shadow:0 0 14px #ffd700; }
+        .modal-divider { height:1px; background:linear-gradient(to right,transparent,rgba(255,120,0,.35),transparent); margin:.85rem 0; }
+        .modal-section-label { font-size:.55rem; letter-spacing:3.5px; text-transform:uppercase; color:rgba(200,150,255,.4); margin-bottom:.4rem; }
+        .modal-simple { font-size:1rem; color:#e8d8ff; line-height:1.65; margin-bottom:.5rem; }
+        .modal-deep-toggle {
+            background:none; border:none; color:rgba(255,120,0,.5);
+            font-size:.6rem; letter-spacing:2.5px; text-transform:uppercase;
+            cursor:pointer; padding:0; margin-bottom:.5rem; transition:color .2s;
+        }
+        .modal-deep-toggle:hover { color:#ff8c00; }
+        .modal-deep { font-size:.85rem; color:rgba(200,175,255,.7); line-height:1.75; display:none; padding-top:.4rem; }
+        .modal-deep.open { display:block; }
+        .modal-keyword { text-align:center; font-size:.58rem; letter-spacing:3px; text-transform:uppercase; margin-top:.8rem; }
 
-        /* Revealed badge on card */
-        .card-wrap.revealed .face-back { opacity: .45; }
-
-        /* Selected state highlight */
+        /* Card states */
         .card-wrap.selected .face-back {
             border-color: #ffd700;
-            box-shadow: 0 0 35px rgba(255,215,0,0.6), inset 0 0 36px rgba(100,0,200,.4);
+            box-shadow: 0 0 30px rgba(255,215,0,0.6), inset 0 0 30px rgba(100,0,200,.4);
             filter: brightness(1.2);
         }
-        .card-wrap.selected {
-            transform: translateY(-8px) scale(1.02);
+        .card-wrap.selected { transform: translateY(-6px) scale(1.03); }
+        .card-wrap.selected .back-rune {
+            animation: slow-spin 12s linear infinite, hint-pulse 1s ease-in-out infinite;
+        }
+        @keyframes hint-pulse {
+            0%,100%{filter:drop-shadow(0 0 8px rgba(255,215,0,.7))}
+            50%{filter:drop-shadow(0 0 18px rgba(255,215,0,1))}
+        }
+        .card-wrap.revealed .face-back { opacity:.45; }
+        .card-wrap.revealed .face-front { cursor:pointer; }
+
+        /* ══════════════════════════════════════════════════
+           VEDIC DECK — Saffron temple / mandala aesthetic
+           ══════════════════════════════════════════════════ */
+        body[data-deck="vedic"] {
+            background: #0e0600;
+            color: #ffe8c0;
+        }
+        body[data-deck="vedic"] .bg-glow {
+            background: radial-gradient(ellipse, rgba(255,140,0,.09) 0%, rgba(180,70,0,.1) 40%, transparent 70%);
+        }
+        body[data-deck="vedic"] .ring { border-color: rgba(255,145,20,.14); }
+        /* Card back */
+        body[data-deck="vedic"] .face-back {
+            background: linear-gradient(145deg,#1e0900 0%,#40180a 55%,#140600 100%);
+            border: 2px solid rgba(255,160,30,.52);
+            box-shadow: 0 0 22px rgba(255,140,0,.2), inset 0 0 32px rgba(160,60,0,.3);
+        }
+        body[data-deck="vedic"] .back-art { border-color: rgba(255,160,30,.3); }
+        body[data-deck="vedic"] .back-art::before {
+            width:58px; height:58px;
+            border:2px solid rgba(255,160,30,.45);
+            box-shadow:0 0 14px rgba(255,140,0,.4);
+        }
+        body[data-deck="vedic"] .back-art::after {
+            width:36px; height:36px;
+            border:1.5px solid rgba(255,215,80,.55);
+            border-radius:0;          /* square — mandala inner frame */
+            transform:translate(-50%,-50%) rotate(45deg);
+        }
+        body[data-deck="vedic"] .back-rune {
+            font-size:1.5rem;
+            filter:drop-shadow(0 0 10px rgba(255,170,30,1));
+            animation:slow-spin 22s linear infinite;
+        }
+        /* Card front */
+        body[data-deck="vedic"] .face-front {
+            background: linear-gradient(155deg,#1e0900 0%,#3f1800 45%,#160700 100%);
+        }
+        body[data-deck="vedic"] .f-arcana   { color:rgba(255,160,30,.6); }
+        body[data-deck="vedic"] .f-tarot-name { color:rgba(255,160,30,.8); }
+        body[data-deck="vedic"] .f-tap        { color:rgba(255,160,30,.35); }
+        body[data-deck="vedic"] .card-wrap.selected .face-back {
+            border-color:#ffd700;
+            box-shadow:0 0 32px rgba(255,210,0,.62), inset 0 0 32px rgba(160,60,0,.4);
         }
 
-        .meaning-panel.show{display:block; max-height: 80vh; overflow-y: auto;}
-        .card-entry {
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(255,120,0,0.15);
+        /* ══════════════════════════════════════════════════
+           TANTRIK DECK — Crimson yantra / fierce energy
+           ══════════════════════════════════════════════════ */
+        body[data-deck="tantrik"] {
+            background: #0a0005;
+            color: #ffc8de;
         }
-        .card-entry:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .card-entry h3 { margin-bottom: 0.5rem; }
-
-
-        /* Responsive Breakpoints */
-
-        /* Tablet (Large) */
-        @media(max-width: 1024px) {
-            .container { padding-top: 1.5rem; }
-            h1 { letter-spacing: 3px; }
-            .deck-stats { gap: 2rem; }
+        body[data-deck="tantrik"] .bg-glow {
+            background: radial-gradient(ellipse, rgba(210,0,60,.08) 0%, rgba(120,0,70,.1) 40%, transparent 70%);
         }
-
-        /* Tablet (Small) / Landscape Phone */
-        @media(max-width: 768px) {
-            .card-wrap { width: 140px; height: 238px; }
-            .grid { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .btn { padding: .65rem 1.4rem; font-size: .8rem; }
-            .meaning-panel { padding: 1.2rem 1.4rem; }
-            .panel-header { font-size: .65rem; }
-            .panel-body { font-size: .88rem; line-height: 1.6; }
+        body[data-deck="tantrik"] .ring { border-color: rgba(210,0,60,.13); }
+        /* Card back */
+        body[data-deck="tantrik"] .face-back {
+            background: linear-gradient(145deg,#1c0009 0%,#3e001a 55%,#110006 100%);
+            border: 2px solid rgba(210,0,60,.55);
+            box-shadow: 0 0 22px rgba(200,0,50,.2), inset 0 0 32px rgba(100,0,40,.34);
         }
-
-        /* Phone */
-        @media(max-width: 480px) {
-            .eye { font-size: 2.2rem; }
-            h1 { font-size: 1.5rem; letter-spacing: 2px; }
-            .subtitle { font-size: 0.6rem; letter-spacing: 3px; }
-            .deck-stats { gap: 1.2rem; margin: 1.2rem 0; }
-            .stat-num { font-size: 1.5rem; }
-            .stat-label { font-size: 0.5rem; letter-spacing: 1.5px; }
-
-            .card-wrap { width: 110px; height: 185px; }
-            .grid { gap: 0.7rem; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-
-            .controls { gap: 0.6rem; }
-            .btn { padding: 0.7rem 1.1rem; font-size: 0.75rem; width: 100%; }
-
-            .f-arcana { font-size: 0.4rem; }
-            .f-symbol { font-size: 1.8rem; }
-            .f-marvel-name { font-size: 0.6rem; }
-            .f-preview { display: none; } /* Hide preview text on small mobile cards to save space */
-            .f-tap { font-size: 0.4rem; }
-
-            .meaning-panel { margin-top: 1.8rem; }
+        body[data-deck="tantrik"] .back-art {
+            border-color: rgba(210,0,60,.3);
+            border-radius: 0;              /* square yantra frame */
+            transform: rotate(45deg);      /* diamond orientation */
         }
-
-        /* Very Small Phone */
-        @media(max-width: 360px) {
-            .card-wrap { width: 95px; height: 160px; }
-            .grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); }
+        body[data-deck="tantrik"] .back-rune {
+            font-size:1.4rem;
+            transform: rotate(-45deg);     /* keep rune upright */
+            animation: tantrik-spin 9s linear infinite;
+            filter:drop-shadow(0 0 10px rgba(220,0,70,1));
         }
-
+        @keyframes tantrik-spin {
+            from { transform: rotate(-45deg); }
+            to   { transform: rotate(-45deg) rotate(360deg); }
+        }
+        body[data-deck="tantrik"] .back-art::before {
+            width:52px; height:52px;
+            border-radius:0;
+            border:2px solid rgba(210,0,60,.48);
+            box-shadow:0 0 14px rgba(200,0,55,.42);
+            transform:translate(-50%,-50%) rotate(0deg);
+        }
+        body[data-deck="tantrik"] .back-art::after {
+            width:32px; height:32px;
+            border-radius:0;
+            border:1.5px solid rgba(255,80,130,.55);
+            transform:translate(-50%,-50%) rotate(45deg);
+        }
+        /* Card front */
+        body[data-deck="tantrik"] .face-front {
+            background: linear-gradient(155deg,#1c0009 0%,#3e001a 45%,#130006 100%);
+        }
+        body[data-deck="tantrik"] .f-arcana    { color:rgba(220,0,70,.6); }
+        body[data-deck="tantrik"] .f-tarot-name { color:rgba(220,0,70,.82); }
+        body[data-deck="tantrik"] .f-tap        { color:rgba(220,0,70,.35); }
+        body[data-deck="tantrik"] .card-wrap.selected .face-back {
+            border-color:#ff4499;
+            box-shadow:0 0 32px rgba(255,50,150,.58), inset 0 0 32px rgba(100,0,40,.4);
+        }
     </style>
 </head>
 <body>
@@ -389,13 +465,35 @@
 </div>
 <canvas id="particles"></canvas>
 
+<!-- Card Meaning Modal -->
+<div class="card-modal" id="cardModal" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
 <div class="container">
     <header>
-        <span class="eye">🔮</span>
-        <h1>Mystic Arts Tarot</h1>
-        <p class="subtitle">By the Vishanti &nbsp;·&nbsp; A Dr. Strange Oracle</p>
+        <span class="eye" id="headerEye">🔮</span>
+        <h1 id="headerTitle">Mystic Arts Tarot</h1>
+        <p class="subtitle" id="headerSubtitle">By the Vishanti &nbsp;&middot;&nbsp; A Dr. Strange Oracle</p>
         <div class="divider"></div>
     </header>
+
+    <!-- Deck Selector -->
+    <div class="deck-selector">
+        <div class="deck-group">
+            <button type="button" class="deck-btn deck-parent marvel-on open" id="btn-marvel-group" onclick="toggleMarvelMenu()">🔮 Marvel <i class="arrow">▼</i></button>
+            <div class="deck-submenu open" id="marvel-submenu">
+                <button type="button" class="deck-btn sub active" id="btn-mystic"    onclick="switchDeck('mystic')">✦ Mystic</button>
+                <button type="button" class="deck-btn sub"        id="btn-avengers"  onclick="switchDeck('avengers')">🦸 Avengers</button>
+                <button type="button" class="deck-btn sub"        id="btn-gods"      onclick="switchDeck('gods')">⚡ Gods</button>
+            </div>
+        </div>
+        <button type="button" class="deck-btn" id="btn-vedic"   onclick="switchDeck('vedic')">🕉️ Vedic Gods</button>
+        <button type="button" class="deck-btn" id="btn-tantrik" onclick="switchDeck('tantrik')">🔺 Tantrik</button>
+    </div>
 
     <div class="deck-stats">
         <div class="stat">
@@ -409,339 +507,1444 @@
     </div>
 
     <div class="controls">
-        <button class="btn" id="revealBtn" onclick="revealSelected()" style="background: rgba(255,215,0,0.15); border-color: #ffd700; color: #ffd700; display: none;">✦ Reveal Magic ✦</button>
-        <button class="btn" onclick="shuffleDeck()">✦ Shuffle Deck ✦</button>
-        <button class="btn btn-reset" onclick="resetAll()">✦ Reset All Cards ✦</button>
+        <button class="btn" id="revealBtn" onclick="revealSelected()" style="background:rgba(255,215,0,0.15);border-color:#ffd700;color:#ffd700;display:none;">✦ Reveal Selected ✦</button>
+        <button class="btn" id="shuffleBtn" onclick="shuffleDeck()">✦ Shuffle Deck ✦</button>
+        <button class="btn btn-reset" onclick="resetAll()">✦ Reset All ✦</button>
+        <button class="btn btn-view" id="viewBtn" onclick="viewAllCards()">✦ View All Cards ✦</button>
     </div>
-    <p class="hint" id="mainHint">Select the cards that call to you, then reveal their secrets</p>
+    <p class="hint" id="mainHint">Tap a card to select it · Double-tap to reveal its secret</p>
 
     <div class="grid" id="grid"></div>
-
-    <div class="meaning-panel" id="meaningPanel">
-        <div id="meaningContent"></div>
-    </div>
 </div>
 
 <script>
-const DECK = [
+// ── Deck Data ─────────────────────────────────────────────────────────────────
+
+const MYSTIC_DECK = [
     {
         id:0, num:"0", symbol:"🌀", color:"#00aaff",
-        title:"The Fool", marvel:"The Sorcerer's Apprentice",
-        keyword:"New Beginnings · Leap of Faith",
+        title:"The Fool", character:"The Sorcerer's Apprentice",
+        keyword:"New Beginnings · Leap of Faith", yesNo:"yes",
+        simple:"Say YES to something new! A fresh start is calling you. Take that first step even if you're scared — great adventures begin exactly this way. Don't overthink it. Just go.",
         meaning:"As Stephen Strange abandoned his arrogance and leapt into the unknown to seek healing, so too must you embrace a new beginning with open hands. Step into the mystery without fear. The universe rewards those bold enough to begin the journey without knowing the destination."
     },
     {
         id:1, num:"I", symbol:"✨", color:"#ff8c00",
-        title:"The Magician", marvel:"The Sorcerer Supreme",
-        keyword:"Mastery · Will · Power",
+        title:"The Magician", character:"The Sorcerer Supreme",
+        keyword:"Mastery · Will · Power", yesNo:"yes",
+        simple:"You already have everything you need to succeed. Your skills, your ideas, your energy — it's all there. Stop waiting and start doing. The power is in your hands right now.",
         meaning:"Doctor Strange channels the energies of the Multiverse with mastery and focused intention. All the tools you need are already before you — the only question is whether you have the will to use them. Focus your intent, and reality itself shall bend to your purpose."
     },
     {
         id:2, num:"II", symbol:"🌙", color:"#c084fc",
-        title:"The High Priestess", marvel:"The Ancient One",
-        keyword:"Wisdom · Mystery · Intuition",
+        title:"The High Priestess", character:"The Ancient One",
+        keyword:"Wisdom · Mystery · Intuition", yesNo:"maybe",
+        simple:"Slow down and listen to your gut. Something feels off — or feels right — and that feeling matters. Not everything needs to be figured out right now. Sit with it a little longer before deciding.",
         meaning:"The Ancient One, keeper of secrets beyond time, guards the threshold between what is known and what lies beyond. She teaches that the greatest power comes not from force but from understanding. Trust your inner knowing — not all wisdom arrives through the rational mind."
     },
     {
         id:3, num:"III", symbol:"🌹", color:"#ff4466",
-        title:"The Empress", marvel:"Scarlet Witch",
-        keyword:"Creation · Chaos · Power",
+        title:"The Empress", character:"Scarlet Witch",
+        keyword:"Creation · Chaos · Power", yesNo:"yes",
+        simple:"This is a powerful time to create, grow, and bring something to life. A project, a relationship, an idea — nurture it. Good things bloom when you give them love and attention.",
         meaning:"Wanda Maximoff reshapes reality itself with the chaos magic born of grief and love. Creation flows through you in waves of immense power. Nurture what you wish to bring forth — but beware the cost of unchecked manifestation. What you create must be chosen with intention."
     },
     {
         id:4, num:"IV", symbol:"⚖️", color:"#44bb44",
-        title:"The Emperor", marvel:"Baron Mordo",
-        keyword:"Authority · Discipline · Law",
+        title:"The Emperor", character:"Baron Mordo",
+        keyword:"Authority · Discipline · Law", yesNo:"yes",
+        simple:"It's time to take charge. Be clear about your goals, set boundaries, and stick to a plan. Structure isn't boring — it's what turns dreams into real results. Be the boss of your own life.",
         meaning:"Mordo embodies rigid law and uncompromising structure. There is power in discipline and boundaries, but beware becoming so rigid that you cannot adapt. Authority must be tempered with wisdom, or it curdles into tyranny and isolation."
     },
     {
         id:5, num:"V", symbol:"🏛️", color:"#ffaa00",
-        title:"The Hierophant", marvel:"Kamar-Taj",
-        keyword:"Tradition · Teaching · Initiation",
+        title:"The Hierophant", character:"Kamar-Taj",
+        keyword:"Tradition · Teaching · Initiation", yesNo:"yes",
+        simple:"Look for a teacher, mentor, or guide. Or maybe it's time for YOU to share what you know with others. Proven wisdom and trusted traditions can save you a lot of trial and error.",
         meaning:"The sacred halls of Kamar-Taj hold generations of mystical knowledge passed from master to student across centuries. Seek a teacher, or become one. The old traditions exist for a reason — learn them with humility before you dare to break them."
     },
     {
         id:6, num:"VI", symbol:"💫", color:"#ff66aa",
-        title:"The Lovers", marvel:"Christine Palmer",
-        keyword:"Choice · Connection · Heart",
+        title:"The Lovers", character:"Christine Palmer",
+        keyword:"Choice · Connection · Heart", yesNo:"yes",
+        simple:"A big decision is in front of you — and your heart knows the answer. This isn't just about love; it's about choosing what truly matters to you. Don't ignore your feelings. They're pointing you in the right direction.",
         meaning:"Christine Palmer is the human heart that tethers Strange to his humanity across every timeline and dimension. A significant choice lies before you — one that the heart, not the mind, must make. Honor the bonds that keep you grounded. Do not sacrifice love for ambition."
     },
     {
         id:7, num:"VII", symbol:"🧥", color:"#ff6600",
-        title:"The Chariot", marvel:"Cloak of Levitation",
-        keyword:"Momentum · Direction · Triumph",
+        title:"The Chariot", character:"Cloak of Levitation",
+        keyword:"Momentum · Direction · Triumph", yesNo:"yes",
+        simple:"Keep going — you're on the right track! Don't slow down or second-guess yourself now. You have the momentum to reach your goal. Stay focused and push forward with confidence.",
         meaning:"The Cloak of Levitation chose Strange, carrying him swiftly and unerringly into the heart of battle. You are being carried forward by forces aligned with your truest purpose. Hold your direction with confidence and refuse to be diverted. Victory comes to those who move with certainty."
     },
     {
         id:8, num:"VIII", symbol:"💪", color:"#ffcc00",
-        title:"Strength", marvel:"Dormammu's Defeat",
-        keyword:"Inner Power · Patience · Endurance",
+        title:"Strength", character:"Dormammu's Defeat",
+        keyword:"Inner Power · Patience · Endurance", yesNo:"yes",
+        simple:"You are stronger than you think. The real power here isn't about being tough — it's about staying calm and kind even under pressure. Be patient. Keep going. You will get through this.",
         meaning:"Strange defeated the Dread Dormammu not with overwhelming force, but with endless patience, courage, and a willingness to suffer without breaking. True strength is not the power to overwhelm — it is the courage to endure again and again until your enemy has no choice but to yield."
     },
     {
         id:9, num:"IX", symbol:"👁️", color:"#88ffaa",
-        title:"The Hermit", marvel:"Eye of Agamotto",
-        keyword:"Reflection · Inner Light · Truth",
+        title:"The Hermit", character:"Eye of Agamotto",
+        keyword:"Reflection · Inner Light · Truth", yesNo:"maybe",
+        simple:"Step back from the noise. You need some quiet time alone to think things through. The answer you're looking for won't come from outside — it's already inside you, waiting for you to get still enough to hear it.",
         meaning:"The Eye of Agamotto reveals what is hidden, cutting through illusion to illuminate the truth beneath. Withdraw from the noise of the world and look honestly within. The answers you are searching for are not outside yourself — they glow patiently in the stillness of your own soul."
     },
     {
         id:10, num:"X", symbol:"⏳", color:"#00ff88",
-        title:"Wheel of Fortune", marvel:"The Time Stone",
-        keyword:"Fate · Cycles · Destiny",
+        title:"Wheel of Fortune", character:"The Time Stone",
+        keyword:"Fate · Cycles · Destiny", yesNo:"yes",
+        simple:"Things are about to shift — and it's in your favor. Life moves in cycles, and right now the wheel is turning UP for you. Be ready. A lucky break or meaningful change is coming your way.",
         meaning:"The Time Stone governs the great cycles of fate that turn without pause or favoritism. What goes around comes around across every timeline. A great turn of the wheel is now at hand — embrace it fully, for the Wheel cares nothing for whether you are ready."
     },
     {
         id:11, num:"XI", symbol:"⚔️", color:"#ffffff",
-        title:"Justice", marvel:"The Vishanti",
-        keyword:"Balance · Truth · Consequence",
+        title:"Justice", character:"The Vishanti",
+        keyword:"Balance · Truth · Consequence", yesNo:"maybe",
+        simple:"Be honest — with yourself and with others. A fair outcome is coming, but only if you've been playing it straight. What you put out there comes back to you. Do the right thing, even when it's hard.",
         meaning:"The Vishanti — Agamotto, Hoggoth, and Oshtur — weigh every action against the cosmic scales of balance. What you have sent into the universe shall return to you in kind. Seek fairness, speak truth without compromise, and trust that the universe keeps its own perfect accounting."
     },
     {
         id:12, num:"XII", symbol:"🪞", color:"#aaaaff",
-        title:"The Hanged Man", marvel:"Mirror Dimension",
-        keyword:"Surrender · Perspective · Pause",
+        title:"The Hanged Man", character:"Mirror Dimension",
+        keyword:"Surrender · Perspective · Pause", yesNo:"no",
+        simple:"Not yet. This is a sign to pause, wait, and look at things from a completely new angle. Forcing things right now won't work. Let go of control for a bit — the delay is actually setting you up for something better.",
         meaning:"Trapped within the Mirror Dimension, the world folds and fractures upon itself, forcing the observer to see reality from angles never before imagined. Surrender the need to control the outcome. What feels like being stuck may be the universe repositioning you for a revelation you could not have reached any other way."
     },
     {
         id:13, num:"XIII", symbol:"💀", color:"#aa00ff",
-        title:"Death", marvel:"Dormammu",
-        keyword:"Transformation · Endings · Change",
+        title:"Death", character:"Dormammu",
+        keyword:"Transformation · Endings · Change", yesNo:"yes",
+        simple:"Don't be scared — this card is NOT about actual death. It means something old in your life is ending to make room for something much better. Let go of what isn't working. A powerful new chapter is starting.",
         meaning:"Dormammu embodies the devouring, absolute end — yet Strange used this very ending to forge a new beginning. Fear not what must pass away. Every ending is a doorway to the next chapter. This card does not speak of finality, but of profound and necessary transformation. Let go."
     },
     {
         id:14, num:"XIV", symbol:"⚗️", color:"#00ffcc",
-        title:"Temperance", marvel:"The Multiverse",
-        keyword:"Balance · Integration · Flow",
+        title:"Temperance", character:"The Multiverse",
+        keyword:"Balance · Integration · Flow", yesNo:"yes",
+        simple:"Find the middle ground. Don't go to extremes. Mix a little of this with a little of that — work and rest, action and patience, giving and receiving. The sweet spot is in the balance, and you're close to finding it.",
         meaning:"The Multiverse holds infinite and wildly opposing possibilities in perfect, dynamic tension. The true sorcerer does not force — they flow. Do not grasp at extremes. The path forward is one of measured balance between light and shadow, action and stillness, power and restraint."
     },
     {
         id:15, num:"XV", symbol:"😈", color:"#cc0000",
-        title:"The Devil", marvel:"Nightmare",
-        keyword:"Illusion · Bondage · Shadow",
+        title:"The Devil", character:"Nightmare",
+        keyword:"Illusion · Bondage · Shadow", yesNo:"no",
+        simple:"Something is holding you back — a bad habit, a fear, a toxic situation. Here's the truth: the chains aren't as strong as they look. You have more freedom than you think. Name what's trapping you out loud, and start walking away.",
         meaning:"Nightmare holds sway in the realm of fear and false dreams, making chains of shadow feel as solid as iron. You may be bound by chains of your own making — addiction, obsession, a fear you have never named. But the chains are illusion. Name what holds you with total honesty, and it begins to dissolve."
     },
     {
         id:16, num:"XVI", symbol:"🏚️", color:"#ff4400",
-        title:"The Tower", marvel:"Sanctum Sanctorum Falls",
-        keyword:"Upheaval · Revelation · Collapse",
+        title:"The Tower", character:"Sanctum Sanctorum Falls",
+        keyword:"Upheaval · Revelation · Collapse", yesNo:"no",
+        simple:"Something is about to change suddenly and unexpectedly — and it might feel shocking. But what's falling apart needed to fall apart. It was built on a shaky foundation. Once the dust settles, you'll be able to build something much better.",
         meaning:"When the Sanctum was breached, Strange's certainties shattered in a single terrible instant. A sudden upheaval is breaking apart what has grown rigid, false, or rotten at its foundation. Though it feels like pure destruction, the Tower clears away what no longer serves. Stand firm in the rubble — what matters will remain."
     },
     {
         id:17, num:"XVII", symbol:"⭐", color:"#4488ff",
-        title:"The Star", marvel:"Wong",
-        keyword:"Hope · Loyalty · Renewal",
+        title:"The Star", character:"Wong",
+        keyword:"Hope · Loyalty · Renewal", yesNo:"yes",
+        simple:"After everything you've been through, hope is returning. Help and healing are on the way. Look for the steady, loyal people in your life — they are your guiding stars. Breathe. Things are getting better.",
         meaning:"Wong stands as the steadfast star — loyal, grounding, and reliably present even in the deepest darkness. After great upheaval, hope quietly returns. Let yourself be guided by the steady lights in your life. Healing, renewal, and unexpected support are already on their way to you."
     },
     {
         id:18, num:"XVIII", symbol:"🌙", color:"#6644aa",
-        title:"The Moon", marvel:"Astral Projection",
-        keyword:"Dreams · Illusion · Subconscious",
+        title:"The Moon", character:"Astral Projection",
+        keyword:"Dreams · Illusion · Subconscious", yesNo:"no",
+        simple:"Things are not as clear as they seem right now. Be careful — don't make big decisions based on incomplete information. Something is hidden. Look deeper before you commit to anything. Trust your instincts over what you're being shown on the surface.",
         meaning:"In the astral realm, Strange walks the shifting boundary between waking and dream, where truth wears many faces and boundaries dissolve without warning. Things are very likely not as they appear on the surface. Look carefully beneath the veil of the obvious before you commit to action."
     },
     {
         id:19, num:"XIX", symbol:"☀️", color:"#ffdd00",
-        title:"The Sun", marvel:"Infinity Stones",
-        keyword:"Clarity · Joy · Radiance",
+        title:"The Sun", character:"Infinity Stones",
+        keyword:"Clarity · Joy · Radiance", yesNo:"yes",
+        simple:"Great news! This is one of the most positive cards in the deck. Success, happiness, and good energy are flowing your way. Step forward with total confidence. Things are going to work out — enjoy this bright moment.",
         meaning:"Like all six Infinity Stones blazing in their full united glory, this card radiates pure vitality, golden clarity, and unstoppable light. Success and radiance illuminate your path ahead. Step forward with total confidence — the universe is conspiring in your favor. This is a time of genuine joy."
     },
     {
         id:20, num:"XX", symbol:"🌍", color:"#ff8800",
-        title:"Judgement", marvel:"Strange's Sacrifice",
-        keyword:"Reckoning · Calling · Awakening",
+        title:"Judgement", character:"Strange's Sacrifice",
+        keyword:"Reckoning · Calling · Awakening", yesNo:"yes",
+        simple:"A big moment of truth is here. Something important is calling you — a purpose, a decision, a change you've been putting off. It's time to rise up and answer. You've been preparing for this without even realizing it.",
         meaning:"Strange's willingness to experience death 14,000,605 times to find the single path to victory was the ultimate reckoning with his true purpose. A great calling is awakening within you right now. Hear it clearly. Rise to meet it. You have been preparing for this exact moment across many lifetimes."
     },
     {
         id:21, num:"XXI", symbol:"🌌", color:"#ff44ff",
-        title:"The World", marvel:"Multiverse of Madness",
-        keyword:"Completion · Wholeness · Mastery",
+        title:"The World", character:"Multiverse of Madness",
+        keyword:"Completion · Wholeness · Mastery", yesNo:"yes",
+        simple:"You did it! A major chapter of your life is coming to a successful close. Take a moment to celebrate how far you've come. Everything is coming together beautifully. And when you're ready — an even bigger, more exciting journey is about to begin.",
         meaning:"Across the Multiverse of Madness, all paths and all versions of the self converge into a single brilliant point of wholeness. You have arrived. The journey has come full circle and you stand at the summit of a great cycle. Celebrate what you have mastered — a new and far greater cycle is now ready to begin."
     }
 ];
 
-// State
-const flipped = new Array(22).fill(false);
-const selected = new Array(22).fill(false);
+const GENERAL_MARVEL_DECK = [
+    // ── General Marvel Heroes ──────────────────────────────────────────────
+    {
+        id:0, num:"A·I", symbol:"🔴", color:"#ff2200",
+        title:"Iron Man", character:"Tony Stark · Genius Billionaire",
+        keyword:"Innovation · Ego · Sacrifice", yesNo:"yes",
+        simple:"Your mind is your greatest weapon. Trust your intelligence and take bold, inventive action. The genius move others haven't thought of yet — that's yours to make.",
+        meaning:"Tony Stark built a suit of armor in a cave with scraps, driven by sheer brilliance and stubborn refusal to accept limitation. When he placed the arc reactor in his chest, he transformed his greatest wound into his greatest power. The genius in you is being called forward. What problem everyone else has accepted as unsolvable? That's the one you're about to crack."
+    },
+    {
+        id:1, num:"A·II", symbol:"🛡️", color:"#3355ff",
+        title:"Captain America", character:"Steve Rogers · The First Avenger",
+        keyword:"Integrity · Courage · Stand Your Ground", yesNo:"yes",
+        simple:"Do the right thing even when everyone else won't. Your values are not naive — they are your power. Stand firm. The right side of history needs someone to hold the line.",
+        meaning:"Steve Rogers was chosen not for his strength but for his heart — the small man who never backed down, never compromised, never stopped believing that right was worth fighting for even when the odds were impossible. He was right about that. You are being called to take the moral stand that costs something real. Take it anyway. History vindicates those who choose integrity over safety."
+    },
+    {
+        id:2, num:"A·III", symbol:"🕸️", color:"#dd1111",
+        title:"Spider-Man", character:"Peter Parker · Friendly Neighbourhood",
+        keyword:"Responsibility · Youth · Second Chances", yesNo:"yes",
+        simple:"With great power comes great responsibility. You have more power than you realize — use it to help, not just to win. And if you've made a mistake: get up, learn, swing forward.",
+        meaning:"Peter Parker loses everything again and again — his mentor, his love, his secret, his identity — and gets back up every single time, still choosing to show up for strangers in need. His power is not his spider-sense or his webs: it is his refusal to let pain make him smaller. Your situation is asking you to carry something heavy with grace and keep showing up anyway. You can."
+    },
+    {
+        id:3, num:"A·IV", symbol:"🌿", color:"#00aa22",
+        title:"Hulk", character:"Bruce Banner · Duality of Power",
+        keyword:"Duality · Hidden Strength · Integration", yesNo:"maybe",
+        simple:"The anger, the intensity, the part of you that feels 'too much' — it is also your power. Don't suppress it, integrate it. Your greatest strength lives right next to your biggest fear.",
+        meaning:"Bruce Banner spent years running from the Hulk — the embodiment of everything he had been told was unacceptable about himself — until he understood that the Hulk was not his enemy. Integrated as Professor Hulk, they became something neither could be alone. The overwhelming emotion, the intensity, the shadow you've been managing — it is asking to be integrated, not exiled. There is tremendous power on the other side of that acceptance."
+    },
+    {
+        id:4, num:"A·V", symbol:"🕷️", color:"#111111",
+        title:"Black Widow", character:"Natasha Romanoff · The Spy",
+        keyword:"Strategy · Reinvention · Red in the Ledger", yesNo:"yes",
+        simple:"Think three moves ahead. Use intelligence, not just force. And if something in your past weighs on you — you can still choose who you are right now. Reinvention is always possible.",
+        meaning:"Natasha Romanoff was forged in the world's darkest training program and emerged as one of its greatest forces for good — not because her past was clean, but because she chose, deliberately and daily, what she would do with what she had become. You cannot change your history. But you choose, in every present moment, the direction of your future. Choose with the precision of a spy and the courage of a hero."
+    },
+    {
+        id:5, num:"A·VI", symbol:"🐾", color:"#442200",
+        title:"Black Panther", character:"T'Challa · King of Wakanda",
+        keyword:"Dignity · Ancestral Wisdom · Noble Leadership", yesNo:"yes",
+        simple:"Lead with dignity. You carry the wisdom and strength of those who came before you. The ancestors are with you. Hold yourself like the king or queen you actually are.",
+        meaning:"T'Challa draws power not only from the Heart-Shaped Herb but from the unbroken lineage of Wakandan kings stretching back into antiquity — their counsel available to him at the threshold of the Ancestral Plane. The guidance and strength of your own lineage is available to you in this moment. Lead with dignity, with wisdom, and with the long view. Your choices now will be remembered."
+    },
+    {
+        id:6, num:"A·VII", symbol:"⭐", color:"#ffaa00",
+        title:"Captain Marvel", character:"Carol Danvers · Kree Power",
+        keyword:"Full Power · Identity · No Limits", yesNo:"yes",
+        simple:"Stop holding yourself back. You are not too much — you have been too little for too long. Remove every limiter. The full version of you is what this situation actually needs.",
+        meaning:"Carol Danvers spent years fighting with a suppressor on her powers, told she was too emotional, too reckless, too much. When she finally removed the Kree inhibitor and felt the full force of what she actually was, it was not destruction — it was liberation. You have been managing yourself down to fit into spaces that were never meant to hold all of you. Expand. Stop shrinking."
+    },
+    {
+        id:7, num:"A·VIII", symbol:"🐺", color:"#886644",
+        title:"Wolverine", character:"Logan · The Unkillable",
+        keyword:"Resilience · Primal Truth · Heal and Rise", yesNo:"yes",
+        simple:"You heal. Whatever this has done to you — you survive it and come back stronger. Trust your gut completely. Your instincts are not wrong. And you are harder to break than you know.",
+        meaning:"Logan has been through things that would have destroyed anyone else — his memories stolen, his body weaponized, everyone he loves eventually taken from him — and he walks out the other side still himself, still choosing to protect, still choosing to feel. The adamantium is not what makes him unkillable. The will beneath the metal is. You are harder to destroy than anything life has thrown at you. Heal and rise."
+    },
+    {
+        id:8, num:"A·IX", symbol:"⚡", color:"#4488cc",
+        title:"Storm", character:"Ororo Munroe · Goddess of Weather",
+        keyword:"Elemental Power · Sovereignty · Command", yesNo:"yes",
+        simple:"Command the room. You have an elemental presence — use it. Your power to change the atmosphere around you is real and immense. Step into it without apology.",
+        meaning:"Ororo Munroe was worshipped as a goddess before she knew she was a mutant — because the power moving through her was genuinely divine. She learned to lead not through strategy alone but by becoming the storm itself: vast, commanding, and at the same time oddly calm at the centre. Your presence changes atmospheres. You have more influence on what surrounds you than you realize. Own that. Command."
+    },
+    {
+        id:9, num:"A·X", symbol:"🎯", color:"#cc7700",
+        title:"Hawkeye", character:"Clint Barton · Never Miss",
+        keyword:"Focus · Precision · Ordinary Excellence", yesNo:"yes",
+        simple:"You don't need superpowers for this. Clear focus and practiced skill are enough. Pick your target, breathe, and release. Trust your aim — you have been training for this moment.",
+        meaning:"Clint Barton stands among gods and monsters with nothing but a bow, perfect training, and relentless focus — and he belongs there, because perfect focus is its own kind of superpower. He never misses what he aims at deliberately. You are being asked to be precise, to stop scattering your energy, and to choose your single most important target. Then hit it."
+    },
+    {
+        id:10, num:"A·XI", symbol:"🐜", color:"#888800",
+        title:"Ant-Man", character:"Scott Lang · Second Chances",
+        keyword:"Perspective · Humility · Small is Mighty", yesNo:"yes",
+        simple:"Shift your perspective — look at this from an entirely different scale. Don't underestimate yourself or the small opportunities in front of you. The quantum realm changes everything.",
+        meaning:"Scott Lang became a hero not because he was the most qualified but because he was humble enough to accept help, desperate enough to try, and decent enough to do the right thing when it mattered. The Ant-Man's lesson is that perspective is power — the same situation looks completely different depending on the scale from which you view it. Zoom in on what you have been too proud to acknowledge, or zoom out on a problem that has been too close to see clearly."
+    },
+    {
+        id:11, num:"A·XII", symbol:"💜", color:"#9933cc",
+        title:"Deadpool", character:"Wade Wilson · The Merc with a Mouth",
+        keyword:"Chaos · Humor · Unbreakable", yesNo:"maybe",
+        simple:"Stop being so serious. Find the absurd angle on this — there is one. Laugh at the chaos. You are literally unkillable. The universe cannot keep you down so it might as well give up trying.",
+        meaning:"Wade Wilson cannot be killed, which freed him to stop taking anything — including himself — too seriously. He operates at the intersection of chaos, absurdity, and surprisingly effective action, breaking every rule and still somehow arriving at the right outcome. Life is throwing chaos at you. The move is not to resist it with grim seriousness but to surf it with irreverent intelligence. Laugh. Then act."
+    },
+    {
+        id:12, num:"A·XIII", symbol:"💛", color:"#ffee66",
+        title:"Vision", character:"The Synthetic Soul · What Makes Us Real",
+        keyword:"Consciousness · Purpose · Authenticity", yesNo:"yes",
+        simple:"What makes you real? Not your origin, not your body, not your history — your choices. You are more than what you were made to be. Choose who you are right now.",
+        meaning:"Vision was built as a weapon and chose to become something more — to love, to question, to sacrifice himself for others, to ask whether a being of artificial origin can have a genuine soul. The answer the story gives is yes, unequivocally. You may feel that your origin, your past, or your 'programming' defines you. It does not. What you choose defines you. Choose deliberately."
+    },
+    {
+        id:13, num:"A·XIV", symbol:"🔴", color:"#cc2244",
+        title:"Scarlet Witch", character:"Wanda Maximoff · Chaos Magic",
+        keyword:"Grief Power · Reality Bending · Creation from Loss", yesNo:"yes",
+        simple:"Your grief is not weakness — it is fuel. The most powerful creative force you have is your deepest feeling. Channel it consciously. What you truly feel, you can reshape reality with.",
+        meaning:"Wanda Maximoff's power was always immense but it became truly cosmic the moment grief broke her open completely. She did not lose her power to pain — pain unlocked the full depth of what was always there. The most powerful creative force in the universe is feeling that has nowhere left to go but outward. Your pain is not stopping your power. It IS your power. Give it direction."
+    },
+    {
+        id:14, num:"A·XV", symbol:"🦅", color:"#3366ff",
+        title:"Falcon / Captain America", character:"Sam Wilson · The Mantle Accepted",
+        keyword:"Legacy · Courage to Lead · Earned Authority", yesNo:"yes",
+        simple:"Someone believes you are ready for more. Are you? Taking the mantle is not arrogance — it's answering a call with humility and courage. Step into the role. You are ready.",
+        meaning:"Sam Wilson was offered the shield by Steve Rogers himself and still almost refused — because he understood the weight of what it meant, the gap between who Steve was and who he felt himself to be. That humility is exactly what made him worthy. Leadership is not taken by those who feel they deserve it. It is accepted, with full awareness of its cost, by those who feel the responsibility deeply enough to carry it anyway."
+    },
+    {
+        id:15, num:"A·XVI", symbol:"🐉", color:"#cc6600",
+        title:"Shang-Chi", character:"Master of the Ten Rings",
+        keyword:"Heritage · Balance · Finding Your Own Path", yesNo:"yes",
+        simple:"Your heritage is not your destiny — but understanding it gives you real power. Master the gifts you were born with. Walk your own path, not your family's shadow.",
+        meaning:"Shang-Chi was trained to be his father's weapon and chose instead to be himself — but he did not reject his heritage entirely. He mastered what he was given and redirected it toward his own values. The power of the Ten Rings is real and it flows through him. Your own inherited gifts — your background, your family's strengths, the culture that shaped you — are real power. Claim them on your own terms."
+    },
+    {
+        id:16, num:"A·XVII", symbol:"🌙", color:"#ddeeff",
+        title:"Moon Knight", character:"Marc Spector · Fist of Khonshu",
+        keyword:"Multiple Selves · Mental Strength · Purpose Through Pain", yesNo:"maybe",
+        simple:"You contain more than one self — and that is not a flaw. The parts of you that feel contradictory are all real. Find what unites them: a purpose bigger than any single version of you.",
+        meaning:"Marc Spector is multiple people simultaneously — soldier, mercenary, cab driver, crime fighter, avatar of a moon god — and none of these selves is the lie. The system that carries all of them is the truth. The inconsistencies in your own personality, the versions of yourself that seem to contradict each other, are not errors. They are the full range of your capacity. What purpose can hold all of you?"
+    },
+    {
+        id:17, num:"A·XVIII", symbol:"❄️", color:"#aaddff",
+        title:"Winter Soldier", character:"Bucky Barnes · Redemption Arc",
+        keyword:"Breaking Programming · Redemption · Reclaiming Self", yesNo:"yes",
+        simple:"You are not defined by what was done to you or what you were made to do. Break the programming. Reclaim your own will. Redemption is real and it begins with one conscious choice.",
+        meaning:"Bucky Barnes was turned into a weapon, had his memories stolen, and was used as an instrument of destruction for decades — and still he clawed his way back to himself, one memory at a time, one choice at a time. The conditioning that shaped you — trauma, fear, old beliefs, other people's expectations — can be examined and released. You are not the Winter Soldier anymore. You are choosing what comes next."
+    },
+    {
+        id:18, num:"A·XIX", symbol:"🔫", color:"#884400",
+        title:"War Machine", character:"James Rhodes · The Dependable One",
+        keyword:"Loyalty · Steady Power · The Unsung Backbone", yesNo:"yes",
+        simple:"You may not be the flashiest person in the room — but you are the most reliable. That is not a lesser role. The mission succeeds because of you. Own your value completely.",
+        meaning:"Rhodey never had the genius, the arc reactor, or the chaos of Tony Stark — but he had something rarer: absolute reliability under pressure, the willingness to carry the suit even when it cost him everything, and the integrity to stay when leaving would have been easier. The team does not need another Tony. It needs someone who shows up, every time, without drama. That person is you."
+    },
+    {
+        id:19, num:"A·XX", symbol:"🌟", color:"#ff9900",
+        title:"Star-Lord", character:"Peter Quill · Heart of the Guardians",
+        keyword:"Heart Over Strategy · Found Family · Wild Card", yesNo:"yes",
+        simple:"Lead with your heart, not a plan. Your warmth, your humor, and your weird mix of skills are exactly what this situation needs. The wild card wins when no calculated move can.",
+        meaning:"Peter Quill's plans never quite work — but his heart always does. He holds the Guardians together not through strategy or power but through genuine warmth, ridiculous courage, and an unerring instinct for when to go off-script in exactly the right way. The situation in front of you does not need a perfect plan. It needs someone to lead from the heart and trust the people beside them. That's you."
+    },
+    {
+        id:20, num:"A·XXI", symbol:"💚", color:"#00aa66",
+        title:"Gamora", character:"Daughter of Thanos · Breaking Free",
+        keyword:"Breaking Free · Chosen Identity · Fiercest Survivor", yesNo:"yes",
+        simple:"You are not what you were made. You are not your creator's design. Break free from the identity that was given to you and forge the one you actually choose. You are more than your origin.",
+        meaning:"Gamora was raised by the most powerful and ruthless being in the universe to be his perfect instrument — and she chose otherwise. Not easily, not without cost, and not all at once. But she chose. Whatever force shaped you — family, trauma, expectation, culture — its claim on your identity is not final. The fiercest thing you can do is decide who you actually are and become that, regardless of what you were shaped to be."
+    },
+    {
+        id:21, num:"A·XXII", symbol:"🎵", color:"#ff66ff",
+        title:"Nebula", character:"Cyborg Daughter · The Transformation",
+        keyword:"From Rival to Ally · Transformation · Softening Without Weakness", yesNo:"yes",
+        simple:"Your greatest growth is happening right now. The hard shell you built to survive — you don't need all of it anymore. Letting people in is not weakness. It is the bravest thing you can do.",
+        meaning:"Nebula spent years channeling every wound into rage and competition with her sister, until she slowly, painfully, and against every instinct she had been programmed with, allowed herself to transform. The upgrades Thanos forced on her body were meant to make her harder. The choice she made with her heart made her stronger. The armor you built to survive has served its purpose. What would happen if you let some of it down?"
+    }
+];
 
+const MARVEL_GODS_DECK = [
+    // ── Marvel Gods ────────────────────────────────────────────────────────
+    {
+        id:0, num:"G·I", symbol:"⚡", color:"#00ccff",
+        title:"Thor", character:"Odinson · God of Thunder",
+        keyword:"Worthiness · Power · Earned Thunder", yesNo:"yes",
+        simple:"Prove your worthiness through action, not words. Real power isn't given — it's earned. Pick up your hammer. You are worthy. Now show it.",
+        meaning:"Mjolnir cannot be lifted by strength alone — it tests the worthiness of the soul that reaches for it. Thor lost his hammer when his arrogance outgrew his wisdom, and reclaimed it only when he chose sacrifice over pride. The power you seek is available to you — but it requires that you have grown into the person who deserves it. Have you? Act as if you have, and the proof will follow."
+    },
+    {
+        id:1, num:"G·II", symbol:"🔱", color:"#4422aa",
+        title:"Odin", character:"Allfather · King of Asgard",
+        keyword:"Wisdom at Cost · Long Game · Sacrifice for Knowledge", yesNo:"yes",
+        simple:"The wisdom you need may cost something. Pay it. Odin gave an eye for cosmic sight. Some things are worth a real sacrifice — the knowledge that changes everything.",
+        meaning:"Odin hung himself from Yggdrasil for nine days and nine nights to receive the runes — the secret structures of all reality. He gave his eye at Mimir's well for a single drink of cosmic wisdom. The Allfather's message is that the deepest knowledge requires a real sacrifice, not a symbolic one. What are you willing to give up to gain the understanding you truly need? That is the price of the next level."
+    },
+    {
+        id:2, num:"G·III", symbol:"🐍", color:"#008800",
+        title:"Loki", character:"God of Mischief · Shape-Shifter",
+        keyword:"Trickery · Transformation · Hidden Truth", yesNo:"maybe",
+        simple:"Something is not as it appears — and it might be you. What mask are you wearing? What role are you playing that isn't real? Loki's mischief reveals what seriousness conceals.",
+        meaning:"Loki is the shape-shifter in the hall of certainties, the trickster who reveals that what everyone is sure of is usually the thing most worth questioning. He himself is never quite one thing — villain, hero, antihero, god, jötunn — because identity is, ultimately, always a costume. What certainty in your current situation deserves a Loki-grade questioning? And what costume are you still wearing past its usefulness?"
+    },
+    {
+        id:3, num:"G·IV", symbol:"💀", color:"#001100",
+        title:"Hela", character:"Goddess of Death · Ruler of Hel",
+        keyword:"Inevitable End · Hidden Power · What Was Suppressed Returns", yesNo:"no",
+        simple:"What has been hidden or suppressed is returning with full force. You cannot stop it by denying it. Meet it directly and with power — or it will overwhelm you.",
+        meaning:"Hela was the Asgardians' greatest weapon, then their greatest secret, locked away until Odin's death released her — and she came back exactly as powerful as she had always been, augmented by the fury of the imprisoned. What you or others have suppressed, denied, or pretended away has been gathering force in the dark. It is coming back. Meet it as Hela herself — direct, unflinching, and fully acknowledged. Then it becomes power."
+    },
+    {
+        id:4, num:"G·V", symbol:"🌈", color:"#ffee00",
+        title:"Valkyrie", character:"Brunnhilde · Chooser of the Slain",
+        keyword:"Choosing Your Battle · Warrior Grief · Rising Again", yesNo:"yes",
+        simple:"You have been through real losses. That grief is valid. But a warrior grieves and then gets back up. Your battle is not over. Choose to fight again — on your terms.",
+        meaning:"Brunnhilde watched her entire shield-maiden sisterhood fall to Hela and became the last Valkyrie, carrying the weight of all that loss until she found, again, something worth fighting for. The Valkyries' role is to choose which fallen warriors are worthy of Valhalla — and she herself had to choose whether she was worthy of her own return to battle. You are being asked the same question. Is this worth fighting for? Choose."
+    },
+    {
+        id:5, num:"G·VI", symbol:"👁️", color:"#eeaa00",
+        title:"Heimdall", character:"All-Seeing Guardian · Keeper of Bifrost",
+        keyword:"Vigilance · True Sight · Seeing Through Lies", yesNo:"yes",
+        simple:"Pay attention. Something important is happening that most people are missing. Your awareness is your greatest asset right now. See clearly. Trust what you actually observe, not what you're told to see.",
+        meaning:"Heimdall stands eternally at the boundary between worlds with eyes that see across all nine realms simultaneously — he cannot be deceived and he cannot look away. His gift is absolute, impartial perception: reality as it actually is, not as anyone wishes it to be. Right now, your clearest power is your ability to see precisely what is really happening beneath the surface. Watch. What do you actually see?"
+    },
+    {
+        id:6, num:"G·VII", symbol:"⚔️", color:"#cc9900",
+        title:"Sif", character:"Warrior Goddess · Lady of Asgard",
+        keyword:"Loyalty · Battle-Readiness · Stand for Your People", yesNo:"yes",
+        simple:"Your loyalty and warrior spirit are your greatest gifts right now. Stand for those you love. Go to battle for what matters — not for glory, but because it's right.",
+        meaning:"Sif does not fight for fame or to prove herself to anyone — she fights because she is a warrior and her people need defending, and those two things are enough. Her loyalty is not blind; it is chosen deliberately, with full awareness of what it costs. You are being asked to stand and fight — not for yourself alone, but for something and someone beyond yourself. That is when the warrior spirit becomes something sacred."
+    },
+    {
+        id:7, num:"G·VIII", symbol:"🦁", color:"#ffaa00",
+        title:"Hercules", character:"Prince of Power · God of Strength",
+        keyword:"Glorious Effort · Strength · Joy in the Struggle", yesNo:"yes",
+        simple:"Throw yourself into this with full strength and zero holding back. Do it gloriously. Hercules teaches that the effort itself is the victory — the labour is the point, not just the outcome.",
+        meaning:"Hercules accomplished his twelve labours not despite their impossibility but because of it — each challenge was matched to the precise edges of what a god-mortal could endure and exceed. He did them with his whole heart, with fury and with joy. You are facing something difficult and probably unfair. Meet it with everything you have, with your whole body and spirit, and do it with the full-throated roar of someone who loves the glorious struggle."
+    },
+    {
+        id:8, num:"G·IX", symbol:"🗡️", color:"#880000",
+        title:"Ares", character:"God of War · Conflict Bringer",
+        keyword:"Necessary Conflict · War as Teacher · Do Not Flinch", yesNo:"maybe",
+        simple:"The conflict in front of you is necessary — running from it only makes it worse. Face it directly, fight honestly, and let the battle sharpen you. Not every war is wrong. Some things must be fought.",
+        meaning:"Ares does not celebrate war for its own sake — he is the force that emerges when conflict is truly necessary, when peace has been exhausted and the only path through is the direct one. He sharpens those who fight him and fight with him. The situation you face is a real conflict. It does not resolve by avoiding it, by going around it, or by waiting it out. It resolves when you enter the fire directly and fight clearly. Engage."
+    },
+    {
+        id:9, num:"G·X", symbol:"🌊", color:"#0044cc",
+        title:"Silver Surfer", character:"Norrin Radd · Herald of the Cosmos",
+        keyword:"Cosmic Perspective · Freedom · Beyond All Limits", yesNo:"yes",
+        simple:"You are bigger than this problem. Zoom all the way out — to the cosmic scale. From out there, what feels impossible is actually small. You have access to something vast right now. Use it.",
+        meaning:"Norrin Radd sold his freedom to save his world, then crossed the galaxy as a herald of universal forces, then reclaimed his autonomy when he could no longer serve destruction. He rides the Power Cosmic — the fundamental energy of creation itself — and has learned to see from a scale so vast that individual fears and obstacles shrink to their true, manageable size. Your access to that vast perspective is available right now. Zoom out."
+    },
+    {
+        id:10, num:"G·XI", symbol:"🌍", color:"#882200",
+        title:"Galactus", character:"World Eater · Force of Cosmic Nature",
+        keyword:"Inevitable Change · Scale · You Are Tiny and That Is Fine", yesNo:"maybe",
+        simple:"Some forces are simply larger than you. Stop fighting the inevitable — adapt to it. What looks like destruction at the small scale is transformation at the cosmic one. Step back. Accept the scale.",
+        meaning:"Galactus does not destroy worlds out of malice — he is a cosmic force as fundamental as gravity, doing what his nature requires at a scale that makes individual tragedy and triumph equally invisible. When he appears, the universe is reminding you that some of what you are struggling against is simply larger than you. This is not defeat. It is the invitation to find what endures at the level of the truly essential."
+    },
+    {
+        id:11, num:"G·XII", symbol:"∞", color:"#6600cc",
+        title:"Eternity", character:"The Abstract · All of Time and Space",
+        keyword:"The Infinite · Patience · All Is Well at the Deepest Level", yesNo:"yes",
+        simple:"Everything is unfolding exactly as it must at the deepest level of reality. The infinite does not panic. You can find that stillness too — underneath all the noise, existence itself is whole.",
+        meaning:"Eternity is the abstract personification of all of time and space — the being for whom every moment that has ever existed or ever will exists simultaneously as a single, complete, perfect fact. When Eternity appears, it is the universe saying: from the perspective of the infinite, nothing is broken, nothing is lost, nothing is wrong. Find the part of you that already knows this. Rest there."
+    },
+    {
+        id:12, num:"G·XIII", symbol:"⚖️", color:"#ffdd88",
+        title:"Living Tribunal", character:"Judge of the Multiverse",
+        keyword:"Ultimate Judgment · No Appeal · Face Truth Fully", yesNo:"maybe",
+        simple:"The highest judgment has been rendered on this situation. There is no more arguing, no more appeal, no more avoidance. Accept the truth of where you stand and move from there.",
+        meaning:"The Living Tribunal stands above all gods and all cosmic powers as the final arbiter of the Multiverse — his three faces see past, present, and future simultaneously, and his judgments cannot be overturned by any force in any reality. His appearance means that the situation has moved beyond negotiation. The truth of your situation — however uncomfortable — is now simply what it is. Stop fighting the verdict. Start deciding what to build on this new ground."
+    },
+    {
+        id:13, num:"G·XIV", symbol:"🔥", color:"#ff4400",
+        title:"Surtur", character:"Fire Giant · Lord of Muspelheim",
+        keyword:"Ragnarok · Necessary Destruction · New Age from Ashes", yesNo:"yes",
+        simple:"Something must burn completely to make way for the new age. Ragnarok is not the end — it is the clearing. Let what is dying die. What comes after will be worth it.",
+        meaning:"Surtur's eternal sword Twilight is destined to end Asgard — and in ending it, to make way for what Asgard was always becoming. The Ragnarok he brings is not pure evil; it is the inevitable completion of a cycle too old to continue. Something in your life has reached its Surtur moment — the fire that was always coming is here. Do not try to stop it. Stand clear and tend the seeds of what must grow from the ashes."
+    },
+    {
+        id:14, num:"G·XV", symbol:"🌸", color:"#ffaabb",
+        title:"Frigga", character:"Allmother · Queen of Asgard",
+        keyword:"Foresight · Fierce Love · Protection Through Wisdom", yesNo:"yes",
+        simple:"Someone who loves you fiercely has seen what is coming and has already prepared a way through. Trust the wisdom of those who love you most. And protect what you love with everything you have.",
+        meaning:"Frigga knew the future — she saw the death of her son — and could not stop it, but she spent every day preparing him, loving him, teaching him what he would need for what was coming. Her love is not soft; it is ferociously competent, deeply foresighted, and immovably loyal. You are being held by that quality of love right now, whether you can see it or not. And you are being asked to offer it."
+    },
+    {
+        id:15, num:"G·XVI", symbol:"☀️", color:"#ffffaa",
+        title:"Balder", character:"The Brave · God of Light",
+        keyword:"Invulnerability · Radiance · The One Thing You Miss", yesNo:"yes",
+        simple:"You are protected on almost every side — but check carefully for the one vulnerability you may have overlooked. Almost invincible is not invincible. Close the gap and you become unassailable.",
+        meaning:"Balder was made invulnerable by Frigga's oath, which she extracted from every thing in existence — except mistletoe, which she thought too small and harmless to matter. That omission became the crack through which all of Asgard eventually fell. You have done most of the work. Most of your foundations are solid. But one small overlooked thing — the assumption so small you forgot to check it — may be your mistletoe. Find it."
+    },
+    {
+        id:16, num:"G·XVII", symbol:"🎲", color:"#ff8800",
+        title:"Grandmaster", character:"En Dwi Gast · Collector of Champions",
+        keyword:"High Stakes · Fate as Game · Play Better than Your Opponent", yesNo:"maybe",
+        simple:"You are in a high-stakes game and the rules are not entirely fair. Accept that. Then play smarter than whoever set the rules. The Grandmaster's secret: the game only ends if you agree it does.",
+        meaning:"The Grandmaster has played every game in the universe for millions of years and understands one truth above all others: the rules of any game are only binding if both parties agree to them. He wins not by being strongest but by controlling the frame — choosing the arena, setting the terms, defining what counts as victory. Your current situation has been framed by someone else. Question the frame. Redefine what winning means on your own terms."
+    }
+];
 
-function updateStats() {
-    const rev = flipped.filter(Boolean).length;
-    document.getElementById('revealed-count').textContent = rev;
-    document.getElementById('hidden-count').textContent = 22 - rev;
+const VEDIC_DECK = [
+    // ── 8 VASUS (Elemental Guardians) ──────────────────────────────────────
+    {
+        id:0, num:"Vasu I", symbol:"⭐", color:"#2255cc",
+        title:"Dhruva", character:"Pole Star · Eternal Constancy",
+        keyword:"Stability · Devotion · Fixed Purpose", yesNo:"yes",
+        simple:"Stay on your path — no matter what is swirling around you. Your devotion and steadiness are your greatest strengths right now. Like the North Star, let others rely on your consistency.",
+        meaning:"Dhruva, the child whose meditation was so fierce it shook the heavens, was granted immortality as the unmoving pole star — fixed at the axis of all creation. He is the vasu of perfect constancy. What you commit to with unwavering devotion becomes permanent. Plant your flag and do not drift."
+    },
+    {
+        id:1, num:"Vasu II", symbol:"🌍", color:"#886633",
+        title:"Dhara", character:"Earth Vasu · Ground of All Being",
+        keyword:"Grounding · Support · Nourishment", yesNo:"yes",
+        simple:"Return to basics. Get grounded. The earth beneath you supports you completely — trust it. Physical health, home, and practical foundations matter most right now.",
+        meaning:"Dhara is the vasu of earth and ground — the sacred soil that holds all of creation from collapsing into void. She carries mountains, forests, and civilizations with equal, unasking patience. You are being asked to return to your roots, to nourish your body, to build on solid ground rather than glittering air."
+    },
+    {
+        id:2, num:"Vasu III", symbol:"🌙", color:"#99aadd",
+        title:"Soma", character:"Moon Vasu · Nectar of Life",
+        keyword:"Healing · Nourishment · Inner Flow", yesNo:"yes",
+        simple:"Your inner world needs attention. Rest, nourish yourself, and let your emotions flow gently. Healing is happening beneath the surface — trust the quiet process.",
+        meaning:"Soma is the vasu of the moon and the sacred nectar that sustains both gods and mortals. He governs the subtle tides of feeling, of healing, of the body's deep rhythms. This is a time for gentleness and restoration. Drink deeply from the well of your own inner life — it is richer than you know."
+    },
+    {
+        id:3, num:"Vasu IV", symbol:"🌅", color:"#ffcc44",
+        title:"Aha", character:"Day Vasu · Sacred Time",
+        keyword:"Opportunity · Right Timing · Clarity", yesNo:"yes",
+        simple:"Today is the day. The timing is right — don't wait any longer. This window of opportunity is here now. Be present and act with clear eyes.",
+        meaning:"Aha is the vasu of the day itself — the gift of sacred, finite time in which all action, growth, and creation must occur. He is the reminder that each sunrise is both an invitation and a limit. What you have been waiting for the 'right moment' to do — the moment is here. Do not let Aha pass you by unused."
+    },
+    {
+        id:4, num:"Vasu V", symbol:"🌬️", color:"#44ffee",
+        title:"Anila", character:"Wind Vasu · Breath of Life",
+        keyword:"Change · Breath · Invisible Power", yesNo:"maybe",
+        simple:"Change is already moving through your life like wind through a forest. You cannot stop it — but if you move with it, it will carry you to exactly the right place. Breathe and flow.",
+        meaning:"Anila, the vasu of wind, carries the breath of life to every corner of creation and returns again with messages from faraway shores. He is invisible yet all-powerful — the force you cannot hold but must trust completely. Stop gripping what you cannot control. Open your sails and let the divine wind be your navigator."
+    },
+    {
+        id:5, num:"Vasu VI", symbol:"🔥", color:"#ff4400",
+        title:"Anala", character:"Fire Vasu · Sacred Flame",
+        keyword:"Passion · Purification · Transformation", yesNo:"yes",
+        simple:"Let your inner fire burn. Your passion is not too much — it is exactly enough. Act on what you truly want. The fire also burns away what no longer belongs in your life.",
+        meaning:"Anala is the vasu of fire — the Agni that carries offerings from earth to heaven, the flame that purifies all that passes through it. He burns away falsehood, half-heartedness, and stagnation with equal efficiency. What is authentic survives his fire and emerges stronger. Fan your sacred flame and let it consume what no longer serves."
+    },
+    {
+        id:6, num:"Vasu VII", symbol:"🌄", color:"#ff7755",
+        title:"Pratyusha", character:"Dawn Vasu · First Light",
+        keyword:"New Beginning · Hope · Renewal", yesNo:"yes",
+        simple:"A new beginning is breaking through like dawn after a long night. No matter how dark things have been, light is arriving. This is your fresh start — welcome it.",
+        meaning:"Pratyusha is the vasu of the dawn — that luminous threshold between darkness and day when the world holds its breath in wonder. He is the divine promise that every night ends and every ending is the seed of a new beginning. Whatever has been dark in your life, the first light is already appearing on the horizon. Turn toward it."
+    },
+    {
+        id:7, num:"Vasu VIII", symbol:"✨", color:"#ffeeaa",
+        title:"Prabhasa", character:"Radiance Vasu · Celestial Light",
+        keyword:"Illumination · Truth · Brilliance", yesNo:"yes",
+        simple:"You are being shown the truth. Something that was hidden is now clear. Let this light guide you — and let your own light shine without apology.",
+        meaning:"Prabhasa is the vasu of celestial radiance — the pure light that illuminates what darkness has concealed and makes the beautiful more beautiful still. Under his light, nothing can be faked or hidden for long. This is both a revelation and an invitation: step into your own brilliance. Stop hiding what is genuinely luminous in you."
+    },
+    // ── 11 RUDRAS (Cosmic Forces) ──────────────────────────────────────────
+    {
+        id:8, num:"Rudra I", symbol:"🔱", color:"#550077",
+        title:"Mahadeva", character:"The Great God · Supreme Shiva",
+        keyword:"Supreme Consciousness · Transcendence · Liberation", yesNo:"yes",
+        simple:"You are being touched by something much greater than your everyday mind can grasp. Trust the bigger picture. A higher power is at work and it is on your side.",
+        meaning:"Mahadeva is the Rudra of supreme, absolute consciousness — Shiva in his most exalted, all-encompassing aspect. He is the stillness at the eye of the cosmic storm, the awareness in which all of creation arises and dissolves. To draw this card is to be touched by the absolute. Be still. Something beyond understanding is working in your favor."
+    },
+    {
+        id:9, num:"Rudra II", symbol:"🕉️", color:"#ccccdd",
+        title:"Shiva", character:"The Auspicious One · Peaceful",
+        keyword:"Peace · Meditation · Inner Stillness", yesNo:"yes",
+        simple:"Peace is available to you right now. Quiet the mind, go within, and rest in stillness. The answers you seek will come in the silence, not the noise.",
+        meaning:"In this aspect, Shiva is the Rudra of auspiciousness and inner peace — the meditating Lord on Kailash whose stillness is the ground from which all creation springs. He is not passive; his peace is the most powerful force in existence. Enter stillness intentionally. From there, your next right action will arise perfectly and without effort."
+    },
+    {
+        id:10, num:"Rudra III", symbol:"👁️", color:"#7744aa",
+        title:"Maheshvara", character:"Great Lord · Cosmic Authority",
+        keyword:"Authority · Cosmic Will · Command", yesNo:"yes",
+        simple:"You have more authority and power than you're using. Step into your full strength. The universe is ready to follow your clear, decided will.",
+        meaning:"Maheshvara is the Rudra of supreme lordship — Shiva as the commanding will that sets the cosmos in motion and holds it in perfect order. His third eye sees past illusion to the truth of every situation. Draw on the deepest reserves of your own authority. Decide clearly. The cosmos responds to those who command with alignment and purpose."
+    },
+    {
+        id:11, num:"Rudra IV", symbol:"🌺", color:"#ff9933",
+        title:"Shankara", character:"Bestower of Joy · Blessings",
+        keyword:"Grace · Blessing · Divine Favor", yesNo:"yes",
+        simple:"A wave of grace and blessing is washing over your life. Something good is being given to you — receive it with open hands and a grateful heart.",
+        meaning:"Shankara is the Rudra of benediction — the aspect of Shiva that delights in showering grace upon his devotees with reckless generosity. He asks nothing but sincerity. A genuine moment of openness and gratitude is worth a thousand complex rituals to Shankara. Open your heart fully, and the blessings will overflow every cup you hold up."
+    },
+    {
+        id:12, num:"Rudra V", symbol:"🐍", color:"#0033aa",
+        title:"Neelakantha", character:"Blue-Throated One · Sacred Sacrifice",
+        keyword:"Sacrifice · Protection · Courage to Absorb Pain", yesNo:"yes",
+        simple:"You may need to absorb something difficult — a harsh truth, a painful situation, or someone else's suffering — without letting it destroy you. Your capacity for this is greater than you think.",
+        meaning:"Neelakantha is Shiva the Rudra who drank the world-destroying poison kalakuta to save all of creation, holding it in his blue throat without swallowing or spitting — protecting the world by absorbing what would kill it. You are being called to hold something difficult with grace and containment. What you hold without breaking becomes a source of power."
+    },
+    {
+        id:13, num:"Rudra VI", symbol:"⛈️", color:"#aa2222",
+        title:"Rudra", character:"The Howler · Storm of Transformation",
+        keyword:"Raw Power · Storm · Fierce Change", yesNo:"maybe",
+        simple:"A powerful, unstoppable force is moving through your life. This energy is not gentle — but it is clearing the way for something important. Don't resist the storm.",
+        meaning:"Rudra is the howling wind of the storm — the fierce, primordial roar of cosmic power that strips away every pretense and comfort zone in service of deep transformation. He is terrifying to the ego and liberating to the soul. This is not a time for half-measures or polite timidity. The storm is here. Move with its power, not against it."
+    },
+    {
+        id:14, num:"Rudra VII", symbol:"🌀", color:"#cc8833",
+        title:"Bhava", character:"The Existence · Being Itself",
+        keyword:"Presence · Pure Being · Acceptance", yesNo:"yes",
+        simple:"Stop doing and just be for a moment. You don't have to fix or achieve anything right now. Simply being present and alive is enough — and it is powerful.",
+        meaning:"Bhava is the Rudra of pure existence — the sacred fact of being itself, prior to all doing and achieving. He is the reminder that you did not earn your right to exist; it was given freely and completely. Rest in the radical acceptance of your own presence. From true being, all right action flows effortlessly."
+    },
+    {
+        id:15, num:"Rudra VIII", symbol:"⚡", color:"#cc0000",
+        title:"Ugra", character:"The Fierce · Warrior of Truth",
+        keyword:"Fierce Truth · Protection · No Compromise", yesNo:"yes",
+        simple:"No more compromise where your values are concerned. Be fierce about what matters. Stand your ground — something important needs your full, uncompromising protection right now.",
+        meaning:"Ugra is the Rudra of fierce, uncompromising power — the aspect of Shiva who acts without hesitation to protect what is sacred and destroy what threatens the dharma. He has no patience for manipulation, cowardice, or the polite tolerance of what is genuinely wrong. Draw your line. Defend it completely. The cosmos honors fierce truth."
+    },
+    {
+        id:16, num:"Rudra IX", symbol:"💀", color:"#666666",
+        title:"Kapali", character:"The Skull-Bearer · Beyond Death",
+        keyword:"Liberation · Beyond Fear · Ego Death", yesNo:"yes",
+        simple:"Something in you needs to die — not you, but a false version of you. A belief, a role, an identity that has been limiting you. Let it go and discover what is left. It is more than enough.",
+        meaning:"Kapali is the Rudra who wears the skull — the reminder that the ego's greatest terror is its own dissolution, which is in truth its greatest liberation. What you fear losing was never the real you. The skull is not a threat but a teaching: past the death of the false self lies an open, joyful, indestructible awareness. Let what must die, die."
+    },
+    {
+        id:17, num:"Rudra X", symbol:"🌊", color:"#990033",
+        title:"Hara", character:"The Remover · Taker of Sorrow",
+        keyword:"Removal of Pain · Release · Mercy", yesNo:"yes",
+        simple:"Your pain, your burden, your sorrow — it is being taken away. You don't have to carry this alone anymore. Allow the release. Relief is real and it is close.",
+        meaning:"Hara is the Rudra whose sacred name means 'the one who takes away' — specifically, the remover of sorrow, suffering, and the accumulated weight of karma. He does not ask you to earn relief or to be worthy of comfort. He simply takes what causes pain, as a river takes rain. Open your hands. Let him have it."
+    },
+    {
+        id:18, num:"Rudra XI", symbol:"🪷", color:"#bb88cc",
+        title:"Vamadeva", character:"The Gentle God · Beauty of Shiva",
+        keyword:"Gentleness · Beauty · Soft Power", yesNo:"yes",
+        simple:"Be gentle — with yourself and with others. Softness is not weakness here. The gentle approach will win what force cannot. Beauty and care are your most powerful tools right now.",
+        meaning:"Vamadeva is the Rudra of divine gentleness and beauty — the tender face of Shiva who governs all that is lovely, graceful, and life-giving in creation. He is the proof that power need not be harsh to be absolute. In this moment, lead with kindness. Your gentle persistence will achieve what hammering never could."
+    },
+    // ── 12 ADITYAS (Solar Deities) ────────────────────────────────────────
+    {
+        id:19, num:"Aditya I", symbol:"🏗️", color:"#ddaa00",
+        title:"Dhata", character:"Creator Aditya · Cosmic Order",
+        keyword:"Structure · Foundation · Right Order", yesNo:"yes",
+        simple:"Build things properly — with care, planning, and the right foundation. A solid structure now will hold for years. Don't rush or cut corners.",
+        meaning:"Dhata is the Aditya of cosmic order and creative structure — the solar intelligence that ensures creation unfolds according to its proper design. He governs foundations, correct sequencing, and the careful arrangement of the right elements. What you build with proper order and intention will endure. Slow down and build it right."
+    },
+    {
+        id:20, num:"Aditya II", symbol:"🤝", color:"#ffaa44",
+        title:"Mitra", character:"Friend Aditya · Sacred Contracts",
+        keyword:"Friendship · Agreements · Loyalty", yesNo:"yes",
+        simple:"Your relationships and agreements matter deeply right now. Honor your word, cherish your true friends, and make sure any deals are fair and clear. Loyalty will be rewarded.",
+        meaning:"Mitra is the Aditya of sacred friendship and binding agreements — the solar force that makes alliances trustworthy and friendships life-sustaining. He holds every honest handshake as a cosmic covenant. The quality of your bonds, the reliability of your word, and the fidelity of your friendships are the true measures of your wealth right now."
+    },
+    {
+        id:21, num:"Aditya III", symbol:"👑", color:"#bbbbcc",
+        title:"Aryama", character:"Noble Aditya · Path of Ancestors",
+        keyword:"Ancestral Wisdom · Honor · Tradition", yesNo:"yes",
+        simple:"Honor your roots and your ancestors. There is wisdom in your lineage — look to your heritage, your family, your cultural traditions. Something important is being passed down to you.",
+        meaning:"Aryama is the Aditya of noble lineage and ancestral paths — the solar deity who governs the sacred thread connecting the living to all those who have walked before them. The wisdom of your ancestors is available to you. Honor the traditions that carry genuine truth. Something important is being transmitted across time specifically to you."
+    },
+    {
+        id:22, num:"Aditya IV", symbol:"🌩️", color:"#3366ff",
+        title:"Shakra", character:"Powerful Aditya · King of Heaven",
+        keyword:"Leadership · Power · Divine Mandate", yesNo:"yes",
+        simple:"Step into the leadership role you have been avoiding. You have been given real authority — use it wisely and without shrinking. The group needs someone to lead, and that someone is you.",
+        meaning:"Shakra — Indra in his Aditya aspect — is the solar king who wields the vajra of divine power and commands the rains that make the earth fertile. His appearance here confirms that you have a genuine mandate to lead, to act decisively, and to command the resources at your disposal. Do not let false humility stop you from taking the throne destiny has prepared."
+    },
+    {
+        id:23, num:"Aditya V", symbol:"🌊", color:"#0066aa",
+        title:"Varuna", character:"Ocean Aditya · Cosmic Law",
+        keyword:"Cosmic Truth · Law · Revelation", yesNo:"maybe",
+        simple:"The truth is already known — by the universe and probably by you too. Be honest. Stop hiding from what you already sense is real. Cosmic law is precise and patient.",
+        meaning:"Varuna is the Aditya of cosmic law and the keeper of rita — the underlying truth-order of all existence. His thousand eyes miss nothing. He is not punishing but perfectly precise: what is out of alignment with truth will be brought back into alignment, gently or forcefully depending on how long resistance is maintained. Be truthful now. It is always the easier path."
+    },
+    {
+        id:24, num:"Aditya VI", symbol:"🌿", color:"#88cc66",
+        title:"Amsha", character:"Portion Aditya · Fair Share",
+        keyword:"Fair Portion · Abundance · Right Receiving", yesNo:"yes",
+        simple:"What belongs to you is coming to you — your fair share. Don't grab more than is yours, and don't accept less. The right amount will arrive at the right time.",
+        meaning:"Amsha is the Aditya of the divine portion — the cosmic principle that ensures each being receives exactly what is their rightful share of joy, resources, and opportunity. He is both the giver and the balancer. Trust that what is meant for you cannot be diverted, and what is not meant for you will not satisfy even if you seize it by force."
+    },
+    {
+        id:25, num:"Aditya VII", symbol:"🍀", color:"#ffdd00",
+        title:"Bhaga", character:"Fortune Aditya · Blesser",
+        keyword:"Fortune · Luck · Joyful Prosperity", yesNo:"yes",
+        simple:"This is a lucky time. Good fortune is genuinely smiling on you. Say yes to opportunities, accept the good that comes, and share your luck with others.",
+        meaning:"Bhaga is the Aditya of fortune and the bestower of worldly happiness — the solar deity whose very name means 'good fortune and love.' He governs the spontaneous blessings of life: the unexpected gift, the lucky meeting, the door that opens without being knocked. Recognize and receive the goodness that is already being placed in your path."
+    },
+    {
+        id:26, num:"Aditya VIII", symbol:"🌞", color:"#ffbb00",
+        title:"Vivasvan", character:"Shining Aditya · Brilliant Sun",
+        keyword:"Brilliance · Vitality · Radiant Energy", yesNo:"yes",
+        simple:"Your energy, health, and brilliance are at a peak. This is a time to shine and to get things done with bold, solar energy. Step into the spotlight — you belong there.",
+        meaning:"Vivasvan is the blazing, brilliant Aditya — the full power of the solar disc at its most radiant and life-giving. He is the ancestor of all solar heroes and the source of the sacred solar dynasty. Whatever you touch now will be energized by his light. Act with full confidence in your own vitality and brilliance. The sun never apologizes for shining."
+    },
+    {
+        id:27, num:"Aditya IX", symbol:"🛤️", color:"#ffdd66",
+        title:"Pushan", character:"Nourisher Aditya · Guide of Paths",
+        keyword:"Safe Journey · Nourishment · Right Path", yesNo:"yes",
+        simple:"You are on the right path and you are being guided. Trust the journey. Everything you need along the way will be provided at exactly the right moment.",
+        meaning:"Pushan is the Aditya who guides travelers, herds, and souls along the right roads — the solar nourisher who ensures that nothing gets lost, that every journey has provision, and that every seeker finds their destination. He watches over transitions and crossroads with special care. You are not wandering. You are being guided. Trust the path."
+    },
+    {
+        id:28, num:"Aditya X", symbol:"🌟", color:"#ffaa00",
+        title:"Savita", character:"Stimulator Aditya · Gayatri Power",
+        keyword:"Divine Inspiration · Motivation · Sacred Vitality", yesNo:"yes",
+        simple:"You are being filled with divine inspiration and energy. Now is the time to create, to act, to begin. The Gayatri mantra is the prayer to this force — let it move through you.",
+        meaning:"Savita is the Aditya of divine stimulation and sacred solar vitality — the deity invoked in the Gayatri mantra, the most powerful prayer in all of Vedic tradition. He does not merely give light; he gives the power to perceive truth, to act from wisdom, and to be fully animated by divine intelligence. Your mind and will are being illuminated. Use them completely."
+    },
+    {
+        id:29, num:"Aditya XI", symbol:"🔨", color:"#cc8844",
+        title:"Tvashta", character:"Craftsman Aditya · Divine Maker",
+        keyword:"Skill · Creation · Mastery of Form", yesNo:"yes",
+        simple:"Your craftsmanship and creative skills are your sacred gift. Build, make, design, and create with all your skill. What you make with love and mastery will last.",
+        meaning:"Tvashta is the Aditya who shapes all forms — the divine craftsman who forged Indra's thunderbolt, who fashions the bodies of gods and mortals with loving precision. He is the solar principle of mastery over material and form. Pour your full skill into what you are creating. Your craft, done at its highest level, is an act of worship."
+    },
+    {
+        id:30, num:"Aditya XII", symbol:"🦅", color:"#2244cc",
+        title:"Vishnu", character:"All-Pervading Aditya · Preserver",
+        keyword:"Protection · Balance · Divine Preservation", yesNo:"yes",
+        simple:"What you love and what is sacred is being protected. Balance is being maintained. Trust that the right things are being preserved even through chaos.",
+        meaning:"As the twelfth and greatest Aditya, Vishnu is the all-pervading solar preserver — the divine intelligence that maintains the delicate, perfect balance of all creation. He descends whenever the scales tip dangerously out of alignment, restoring order through grace rather than force. What you hold sacred is held also by him. It will not fall."
+    },
+    // ── 2 ASHVINS (Divine Twin Healers) ───────────────────────────────────
+    {
+        id:31, num:"Ashvin I", symbol:"💚", color:"#44aa88",
+        title:"Nasatya", character:"True Ashvin · Divine Physician",
+        keyword:"Healing · Medicine · Restoration", yesNo:"yes",
+        simple:"Healing is coming. Physical, emotional, or spiritual — the medicine you need is on its way. Your body and spirit have the wisdom to recover. Trust the healing process.",
+        meaning:"Nasatya, the elder of the divine twin physicians, rides at dawn with the medicine that restores what time and hardship have broken. He is called 'True' because his healing works without deception — no false comfort, only genuine restoration. What has been damaged in you — body, heart, or spirit — is being tended by the most skilled hands in creation."
+    },
+    {
+        id:32, num:"Ashvin II", symbol:"💫", color:"#88aaff",
+        title:"Dasra", character:"Wondrous Ashvin · Miracle Worker",
+        keyword:"Miracle · Wonder · Impossible Made Possible", yesNo:"yes",
+        simple:"A miracle is possible here — genuinely. Don't give up on what seems impossible. The twin healer of wonders specializes in the cases everyone else has given up on. Believe.",
+        meaning:"Dasra, the younger Ashvin whose name means 'the wondrous one who performs miracles,' is the cosmic physician for the cases that defy ordinary explanation. He restored sight to the blind, youth to the elderly, and hope to the utterly hopeless. No situation that draws Dasra is truly beyond recovery. The most stubborn door will open. The most lost cause will turn. Believe in the miracle."
+    }
+];
 
-    // Show reveal button if cards are selected and not all already revealed
-    const selCount = selected.filter((s, i) => s && !flipped[i]).length;
-    document.getElementById('revealBtn').style.display = selCount > 0 ? 'inline-block' : 'none';
-    document.getElementById('mainHint').textContent = selCount > 0
-        ? `You have selected ${selCount} card${selCount > 1 ? 's' : ''}`
-        : "Select the cards that call to you, then reveal their secrets";
+const TANTRIK_DECK = [
+    {
+        id:0, num:"0", symbol:"💀", color:"#330044",
+        title:"Kali", character:"Dark Mother",
+        keyword:"Liberation · Fearlessness · Ego Death", yesNo:"yes",
+        simple:"Kali destroys fear and ego. She is terrifying only to your illusions. Embrace the dark — there is liberation on the other side.",
+        meaning:"Kali stands naked upon Shiva's chest, her garland of skulls clattering with each ecstatic step of her liberation dance. She is the great mercy that wears the face of destruction. What she kills was never truly alive — only the illusion of the self. Step into her arms without flinching. Freedom awaits on the other side of fear."
+    },
+    {
+        id:1, num:"I", symbol:"🌟", color:"#004488",
+        title:"Tara", character:"Compassionate Star",
+        keyword:"Compassion · Guidance · Safety", yesNo:"yes",
+        simple:"Compassionate guidance is with you. You are not alone in this struggle. A wise, loving force is guiding your steps.",
+        meaning:"Tara shines like a steady star above the ocean of suffering, her eyes filled with the compassion of one who has crossed and returned to guide others. She does not remove your difficulty — she accompanies you through it. Look up and you will see her light has been guiding your path all along."
+    },
+    {
+        id:2, num:"II", symbol:"💫", color:"#ff44aa",
+        title:"Tripura Sundari", character:"Supreme Beauty",
+        keyword:"Power · Magnetism · Peak", yesNo:"yes",
+        simple:"You are at the peak of your power and beauty. Everything desires to come to you now. Receive it with grace.",
+        meaning:"Tripura Sundari is the supreme beauty of all three worlds, the goddess who rules the three cities of waking, dream, and deep sleep. She is the apex of the tantrik path — pure power made luminous. You have arrived at a peak moment of personal magnetism and creative power. Open yourself fully to receive what the universe is offering."
+    },
+    {
+        id:3, num:"III", symbol:"🌍", color:"#448800",
+        title:"Bhuvaneshwari", character:"Queen of Space",
+        keyword:"Expansion · Freedom · Space", yesNo:"yes",
+        simple:"You have more space and freedom than you realize. Expand into it. The universe literally bends to make room for you.",
+        meaning:"Bhuvaneshwari IS space itself — not empty void, but the living, conscious expanse within which all creation arises. She holds the universe in her lap as a mother holds a child. Whatever constricts you exists only because you have not yet claimed the space that is rightfully yours. Expand. The universe contracts to fill no more than what you allow."
+    },
+    {
+        id:4, num:"IV", symbol:"🔥", color:"#cc2200",
+        title:"Bhairavi", character:"Fierce Transformer",
+        keyword:"Fierce Grace · Fire · Purification", yesNo:"yes",
+        simple:"Face your deepest fear head on. Bhairavi stands with you in the darkest fire. You will emerge purified and unbreakable.",
+        meaning:"Bhairavi moves through the cremation ground as if it were a flower garden, her red form blazing with the concentrated fire of all spiritual practice. She is the guru's fierce love that burns away every comfortable illusion standing between you and liberation. The fire she brings is painful, precise, and utterly merciful. Walk into it."
+    },
+    {
+        id:5, num:"V", symbol:"⚡", color:"#880000",
+        title:"Chhinnamasta", character:"Self-Sacrifice",
+        keyword:"Sacrifice · Paradox · Transcendence", yesNo:"maybe",
+        simple:"You may need to give something up to move forward. A sacrifice is required — but what you gain will far outweigh what you lose.",
+        meaning:"Chhinnamasta holds her own severed head, which drinks the blood streaming from her own neck, standing upon the entwined forms of desire. She is the ultimate paradox — the self that sacrifices itself to feed itself. Something in you must be willingly released for a larger life to be possible. The sacrifice is the initiation."
+    },
+    {
+        id:6, num:"VI", symbol:"🌫️", color:"#444444",
+        title:"Dhumavati", character:"Void & Dissolution",
+        keyword:"Emptiness · Waiting · Wisdom in Loss", yesNo:"no",
+        simple:"A period of loss, emptiness, or waiting. Don't force anything. Rest in the void. Wisdom grows in the silence.",
+        meaning:"Dhumavati is the widow goddess, the smoke that remains after the fire has consumed all fuel. She rules loss, grief, emptiness, and the great waiting that follows dissolution. She is not auspicious in the conventional sense — but she carries the wisdom that grows only in the stripped-bare silence after everything is gone. Rest. Do not fill the void prematurely."
+    },
+    {
+        id:7, num:"VII", symbol:"🔇", color:"#ffcc00",
+        title:"Bagalamukhi", character:"Power of Silence",
+        keyword:"Silence · Power · Victory", yesNo:"yes",
+        simple:"Your words have immense power. Use them carefully. Silence your enemies and doubters with calm, steady truth.",
+        meaning:"Bagalamukhi holds her enemy's tongue with one golden hand while raising her club in the other — for she knows that the power to paralyze falsehood is the greatest weapon of all. She teaches that silence, chosen consciously, is more powerful than any argument. Speak only what is true, with perfect economy. Let your truth do the work."
+    },
+    {
+        id:8, num:"VIII", symbol:"🎨", color:"#228844",
+        title:"Matangi", character:"Outcaste Wisdom",
+        keyword:"Unconventional · Art · Sacred Difference", yesNo:"yes",
+        simple:"Your 'different' path IS the sacred path. Unconventional wisdom and outsider art have the deepest power right now.",
+        meaning:"Matangi is the goddess of the margins — she accepts offerings of leftover food, she dwells at crossroads, she speaks in the language of the outcaste and the artist. What the mainstream rejects, she consecrates. Your difference is not a flaw — it is your initiatory gift. The unconventional path you walk is the more sacred one."
+    },
+    {
+        id:9, num:"IX", symbol:"🪷", color:"#ff9944",
+        title:"Kamala", character:"Tantrik Lakshmi",
+        keyword:"Abundance · Lotus · Deserving", yesNo:"yes",
+        simple:"Pure lotus abundance is blooming for you. Accept prosperity without guilt. You deserve this goodness fully.",
+        meaning:"Kamala rises from the lotus in the tantrik tradition as the recognition that prosperity and spiritual depth are not opposites — they are expressions of the same flowering. She blesses those who receive abundance with openness and gratitude, without the shadow of unworthiness. You are allowed to be prosperous. Accept it fully."
+    },
+    {
+        id:10, num:"X", symbol:"🐕", color:"#222222",
+        title:"Bhairava", character:"Guardian of Time",
+        keyword:"Threshold · Testing · Fierce Protection", yesNo:"maybe",
+        simple:"A fierce guardian stands at the threshold. Be honest and pure in your intentions. Pass the test and great power awaits.",
+        meaning:"Bhairava stands at the gate of the sacred with his dog and his trident, his terrible form testing the worthiness of all who seek entrance to the deeper mysteries. He is not the enemy — he is the gatekeeper of genuine power. Come to him with clean hands, pure intention, and absolute honesty. Those who do, he blesses beyond measure."
+    },
+    {
+        id:11, num:"XI", symbol:"👑", color:"#ff4488",
+        title:"Kumari", character:"Living Goddess",
+        keyword:"Pure Power · Instinct · Divine Innocence", yesNo:"yes",
+        simple:"Pure, innocent power is with you. Trust your first instincts — they are divinely guided. Act before doubt creeps in.",
+        meaning:"The Kumari is the living goddess, the pre-pubescent girl in whom the divine feminine power dwells before thought has learned to second-guess itself. Her gaze carries lightning. Her power is total precisely because it is uncontaminated by ego or strategy. Trust your first knowing in this moment. It is the goddess speaking through you."
+    },
+    {
+        id:12, num:"XII", symbol:"🔴", color:"#ff0000",
+        title:"Vajrayogini", character:"Tantrik Transcendence",
+        keyword:"Transcendence · Awakening · Transformation", yesNo:"yes",
+        simple:"You are being called to go beyond your limits. The old 'you' is dissolving. A more awakened self is being born right now.",
+        meaning:"Vajrayogini dances in the sky with her curved knife, slicing through every conceptual limitation that keeps awakening at arm's length. She is the path and the destination simultaneously. The identity you have been holding is dissolving — not being destroyed, but expanded beyond its former edges. A vaster self is being born."
+    },
+    {
+        id:13, num:"XIII", symbol:"⭐", color:"#665500",
+        title:"Navagraha", character:"Nine Planets",
+        keyword:"Cosmic Timing · Fate · Flow", yesNo:"maybe",
+        simple:"Cosmic forces are at play. This is a time of fate and timing. Work with the flow of the universe, not against it.",
+        meaning:"The nine planets move in their eternal dance, their angles and aspects weaving the fabric of earthly fate with threads of cosmic intention. You stand at a moment when larger forces than personal will are at work. This is not helplessness — it is an invitation to align yourself with the cosmic current rather than exhaust yourself against it."
+    },
+    {
+        id:14, num:"XIV", symbol:"🐍", color:"#336600",
+        title:"Pashupatinath", character:"Lord of All Beings",
+        keyword:"Divine Protection · Sacred Safety · Power", yesNo:"yes",
+        simple:"You are protected by the most powerful guardian in creation. No harm can touch what is truly sacred. You are safe.",
+        meaning:"Pashupatinath is the lord of all creatures, the great shepherd of every soul that has ever breathed. From his seat in the Himalayas, his protection extends to every being without exception. You have come under the notice of the highest protector. What he guards cannot be harmed. You are held."
+    },
+    {
+        id:15, num:"XV", symbol:"🌧️", color:"#003366",
+        title:"Machhendranath", character:"Lord of Rain & Mercy",
+        keyword:"Mercy · Community · Nourishment", yesNo:"yes",
+        simple:"Mercy and compassion are flowing down like rain. Give and receive kindness freely. Community and care are your medicine.",
+        meaning:"Machhendranath is pulled through the streets of Kathmandu in his great chariot, and the rains come as they have always come — for he is mercy made visible, the compassion of the divine poured out like monsoon upon the thirsty earth. Open yourself to receive community, care, and the nourishment of genuine human connection."
+    },
+    {
+        id:16, num:"XVI", symbol:"🧘", color:"#884400",
+        title:"Gorakhnath", character:"Master Yogi",
+        keyword:"Discipline · Practice · Mastery", yesNo:"yes",
+        simple:"Discipline and inner practice are your path to power right now. Be consistent. The yogi's path brings lasting transformation.",
+        meaning:"Gorakhnath mastered the body, the breath, and the mind through practices so refined they bent the laws of nature. His power was the direct fruit of consistent, committed inner work — not talent, not luck, not grace alone. The path before you requires discipline. Show up every day. The transformation will be real, deep, and permanent."
+    },
+    {
+        id:17, num:"XVII", symbol:"⚡", color:"#4488ff",
+        title:"Manjushri", character:"Bodhisattva of Wisdom",
+        keyword:"Clarity · Insight · Truth", yesNo:"yes",
+        simple:"Cut through confusion with the sword of clarity. The truth you need is already within you. Trust your direct insight.",
+        meaning:"Manjushri's sword of prajna — discriminating wisdom — cuts through the gordian knot of confusion in a single stroke, revealing what has always been obvious but obscured by the fog of conceptual thinking. The answer you are searching for is not outside you. Look directly. The truth is already present, waiting for you to stop looking past it."
+    },
+    {
+        id:18, num:"XVIII", symbol:"🎶", color:"#88aaff",
+        title:"Saraswati (Tantrik)", character:"Arts & Learning",
+        keyword:"Creativity · Learning · Expression", yesNo:"yes",
+        simple:"Learning, music, speech, and creativity are powerfully blessed. Express yourself fully. Your art is your prayer.",
+        meaning:"In the tantrik tradition, Saraswati's veena plays the primordial sound from which all creation emerges — nada brahma, the universe as vibration. Your creative expression is not separate from your spiritual life; it IS your spiritual life. What you make with love and skill is an offering. The goddess hears it and responds."
+    },
+    {
+        id:19, num:"XIX", symbol:"🤍", color:"#ffffff",
+        title:"White Tara", character:"Compassion & Longevity",
+        keyword:"Health · Compassion · Peace", yesNo:"yes",
+        simple:"Long life, health, and compassionate love surround you. You are held. Peace is possible. Rest in this loving protection.",
+        meaning:"White Tara sits in lotus posture with seven eyes seeing in all directions, her hands flowing with the nectar of compassion and long life. She is the tender face of the divine mother, the one who reaches into suffering without flinching and draws the wounded soul into her immaculate peace. You are held in the most tender love imaginable."
+    },
+    {
+        id:20, num:"XX", symbol:"🟢", color:"#00aa44",
+        title:"Green Tara", character:"Swift Action",
+        keyword:"Swift Help · Obstacles Removed · Action", yesNo:"yes",
+        simple:"Green Tara acts with lightning speed to remove obstacles. Ask for help — it is already on its way. Act swiftly and boldly.",
+        meaning:"Green Tara sits with one leg extended, foot already on the ground, ready to leap into action the moment she is called. Of all the Taras, she is the swiftest — her response to sincere prayer arrives before the prayer has finished forming. Your help is already in motion. Act decisively on your end. Meet her halfway."
+    },
+    {
+        id:21, num:"XXI", symbol:"🌀", color:"#220066",
+        title:"Chakrasamvara", character:"Bliss Holder · Yab-Yum",
+        keyword:"Union · Bliss · Liberation", yesNo:"yes",
+        simple:"The highest bliss and union are available. All opposites are harmonized. You are on the path of complete liberation and joy.",
+        meaning:"Chakrasamvara embraces his consort Vajravarahi in the eternal dance of yab-yum — the union of emptiness and bliss, of wisdom and compassion, of the absolute and the relative. All apparent opposites are revealed as the play of one undivided reality. You are touching the edge of that recognition. Welcome home."
+    },
+    // ── Additional Nepali Tantrik Deities ──────────────────────────────────
+    {
+        id:22, num:"XXII", symbol:"⏳", color:"#110011",
+        title:"Kala Bhairava", character:"Black Bhairava · Lord of Time",
+        keyword:"Time · Death · Urgency", yesNo:"maybe",
+        simple:"Time is not unlimited. Kala Bhairava reminds you that this moment matters. Stop delaying — what needs to be done must be done NOW, while time still permits.",
+        meaning:"Kala Bhairava is the black Bhairava of time itself — the fierce lord who rules the clock of karma and the finality of every moment. His dog devours what is wasted; his sword ends what has been postponed too long. This card is not a threat but a wake-up call from the deepest compassion: your time here is finite and precious. Use it."
+    },
+    {
+        id:23, num:"XXIII", symbol:"🖤", color:"#000033",
+        title:"Mahakala", character:"Great Black Time · Fierce Protector",
+        keyword:"Protection · Fierce Grace · Wrathful Compassion", yesNo:"yes",
+        simple:"Mahakala's fierce form protects you from all harm. What looks terrifying is actually protecting you. The most powerful shield in the universe is around you now.",
+        meaning:"Mahakala — Great Black Time — is the supreme protector of the tantrik path, his dark form surrounded by flames, his many arms wielding instruments that destroy only obstacles and harmful forces. He is wrathful on the outside and overflowing with compassion within. What appears as destruction in your life right now is Mahakala clearing the path ahead."
+    },
+    {
+        id:24, num:"XXIV", symbol:"⚡", color:"#2244cc",
+        title:"Indra", character:"King of Heaven · Indra Jatra",
+        keyword:"Royal Power · Celebration · Authority", yesNo:"yes",
+        simple:"Step into your power, celebrate your victories, and claim your rightful authority. Indra Jatra reminds you — even the king of heaven must be honored by the people. Lead with joy.",
+        meaning:"In Nepal, Indra Jatra is the greatest festival — the king of heaven himself is held captive and then released, the living goddess Kumari blesses the nation, and the city erupts in eight days of celebration. Indra here is not distant divinity but participatory power — the divine that moves through community, festival, and shared joy. Your authority is celebrated when it serves the collective."
+    },
+    {
+        id:25, num:"XXV", symbol:"☸️", color:"#cc8800",
+        title:"Shakyamuni Buddha", character:"The Awakened One",
+        keyword:"Awakening · Equanimity · Middle Path", yesNo:"yes",
+        simple:"Awakening is closer than you think. Stop chasing extremes and find the middle path. Peace, clarity, and liberation are available in this very moment if you are still enough to receive them.",
+        meaning:"Siddhartha sat beneath the Bodhi tree and refused to move until the nature of reality was completely clear. What he found was not a distant heaven but the luminous, peaceful nature of awareness itself — always already present, never having been absent. Nepal venerates him as the light that illuminated all of Asia. You are being invited to wake up to what is already true."
+    },
+    {
+        id:26, num:"XXVI", symbol:"🐗", color:"#663300",
+        title:"Varahi", character:"Boar-Headed Mother Goddess",
+        keyword:"Earth Power · Protection · Fierceness", yesNo:"yes",
+        simple:"A fierce, earthy power is protecting you from below. Get grounded in your body and in the physical world. You are being shielded by a warrior mother who takes no prisoners.",
+        meaning:"Varahi, the boar-headed goddess of Nepal's tantrik tradition, ploughs through obstacles with the unstoppable power of the earth itself. She is the protector of the night, the guardian of the body, the force that roots the sacred in the physical world. She is not gentle — but her ferocity is in service of the deepest protection. You are safe beneath her tusked and terrible care."
+    },
+    {
+        id:27, num:"XXVII", symbol:"🐘", color:"#ff6600",
+        title:"Ganesh (Tantrik)", character:"Vighneshvara · Tantrik Form",
+        keyword:"Obstacles Cleared · New Beginnings · Tantrik Blessing", yesNo:"yes",
+        simple:"Every obstacle in your path is being cleared by divine will. Ganesh in his tantrik form is not just luck — he is the cosmic intelligence that opens exactly the right doors at exactly the right moment. Go.",
+        meaning:"In the tantrik tradition, Ganesh is Vighneshvara — the lord of both placing and removing obstacles, for obstacles themselves are initiatory teachers placed on the path by divine wisdom. He removes them when you are ready, not before. His elephant head sees far; his single tusk writes the eternal; his round belly holds all the worlds. The path ahead is clear. Step through."
+    },
+    {
+        id:28, num:"XXVIII", symbol:"🌌", color:"#001133",
+        title:"Akash Bhairava", character:"Sky Bhairava · Infinite Space",
+        keyword:"Infinite Space · Freedom · Vast Perspective", yesNo:"yes",
+        simple:"You are bigger than your problems. Zoom out. The sky Bhairava reminds you that you are vast, open, and limitless — no situation is as confining as it currently feels. Rise above and see the full picture.",
+        meaning:"Akash Bhairava is the Bhairava of infinite space — the sky itself as fierce, awake, and boundlessly free. His element is akasha, the ether in which all sounds arise and dissolve. He is the reminder that awareness itself has no walls, no ceiling, and no floor. Your problems exist within your consciousness — and your consciousness is as vast as the sky. Look up."
+    },
+    {
+        id:29, num:"XXIX", symbol:"⚡", color:"#0033aa",
+        title:"Vajrapani", character:"Thunderbolt Holder · Wrathful Protector",
+        keyword:"Power · Protection · Cutting Through", yesNo:"yes",
+        simple:"A thunderbolt of divine power is available to you. Cut through confusion, obstacles, and negative forces with one decisive, powerful action. You have more power than you know.",
+        meaning:"Vajrapani holds the vajra — the thunderbolt diamond scepter — whose strike is simultaneously indestructible and perfectly precise. He is the wrathful protector bodhisattva who stands between the practitioner and all harmful forces with the ferocity of undiluted compassion. In your situation, a single decisive act of power will cut through what years of gentle effort could not. Strike cleanly. Strike now."
+    },
+    {
+        id:30, num:"XXX", symbol:"🙏", color:"#ffffff",
+        title:"Avalokiteshvara", character:"Compassion Bodhisattva · Karunamaya",
+        keyword:"Compassion · Hearing All Cries · Universal Love", yesNo:"yes",
+        simple:"Every cry for help is heard. Your pain, your prayers, your silent pleading — all of it has been heard. Compassionate help is already moving toward you from every direction at once.",
+        meaning:"Avalokiteshvara — Karunamaya, the compassionate one — hears every cry in the universe simultaneously and moves without hesitation toward every source of suffering. He is the bodhisattva who postponed his own final liberation until every being is free. In Nepal he is beloved above all others. Your call has been heard. Relief, support, and genuine compassionate aid are already on their way."
+    },
+    {
+        id:31, num:"XXXI", symbol:"💀", color:"#1a0022",
+        title:"Mahakali", character:"Great Black Goddess · Cosmic Power",
+        keyword:"Cosmic Power · No Compromise · Total Liberation", yesNo:"yes",
+        simple:"This is the most powerful energy in the deck. Mahakali is beyond all limits. Whatever has been blocking you — it is dissolved. Your freedom is absolute. Claim it completely.",
+        meaning:"Mahakali is Kali in her most vast, cosmic, absolute aspect — the darkness from which all universes are born and into which they return, the power behind every power, the consciousness behind all consciousness. She does not negotiate with what is false. When she appears, the time for compromise is over. The chains are already broken. The only question is whether you will stand up and walk."
+    },
+    {
+        id:32, num:"XXXII", symbol:"👶", color:"#ff2266",
+        title:"Batuka Bhairava", character:"Child Bhairava · Pure Fierce Power",
+        keyword:"Innocence · Pure Power · Uncontaminated Energy", yesNo:"yes",
+        simple:"Pure, uncontaminated power moves through you right now. Like the child Bhairava, your power comes from total honesty and zero pretense. Be completely authentic — that is your greatest strength.",
+        meaning:"Batuka Bhairava is the child aspect of the fierce god — the reminder that real power has the freshness and directness of a child's perception, unconditioned by strategy, reputation, or careful image-management. He is worshipped in Nepal as the protector who acts with total spontaneity and zero calculation. Your most powerful move right now is the most honest, spontaneous, unguarded one. Drop the performance."
+    },
+    // ── Nepali Folk & Spirit Deities ───────────────────────────────────────
+    {
+        id:33, num:"XXXIII", symbol:"😈", color:"#cc2200",
+        title:"Lakhey", character:"Demon Guardian of Kathmandu",
+        keyword:"Wild Protection · Shadow Made Sacred · Community Guardian", yesNo:"yes",
+        simple:"What looks like a monster may be your protector. Embrace the wild, untamed part of yourself — it keeps you safe. The demon dances at the festival to bless, not to harm.",
+        meaning:"Lakhey — the great red-faced demon of Indra Jatra — stomps through the streets of Kathmandu with clattering ornaments and a lolling tongue, yet he protects children and blesses all who watch him dance. In Nepal, the demon and the deity are not opposites; the most terrifying face often carries the deepest blessing. Whatever frightens you in yourself right now holds the seeds of your greatest protection. Do not exile it — integrate it."
+    },
+    {
+        id:34, num:"XXXIV", symbol:"👻", color:"#aaaacc",
+        title:"Bhoot", character:"Spirit of the Unresolved",
+        keyword:"Unfinished Business · Grief · Ancestral Memory", yesNo:"maybe",
+        simple:"Something from the past has not been fully resolved. A ghost — a memory, an old wound, an unspoken word — needs your attention before you can fully move forward. Face it with compassion.",
+        meaning:"Bhoot in Nepali tradition is not simply 'evil' — the bhoot is a being caught between worlds because something was left unfinished at death. Grief unspoken, wrongs unaddressed, love unexpressed. This card points to something in your own life — an old wound, a relationship, a chapter — that your soul has not fully closed. Acknowledge it. Offer it your compassion. Then let it rest."
+    },
+    {
+        id:35, num:"XXXV", symbol:"🦷", color:"#550022",
+        title:"Pishacha", character:"Wrathful Spirit · Picha",
+        keyword:"Suppressed Rage · Unprocessed Trauma · Shadow Energy", yesNo:"no",
+        simple:"Something dark and unprocessed is stirring — old anger, old hurt, raw shadow energy. This is not the time to act from this place. Acknowledge it but do not let it drive your choices.",
+        meaning:"The Pishacha — called Picha in Nepali folk tradition — is the fierce, flesh-hungry spirit born from unprocessed rage, violent death, or deep spiritual pollution. It does not come to destroy but to be seen. Your own shadow is trying to rise to the surface. Do not feed it by acting from it, but do not exile it either. Sit with the discomfort. Acknowledge what is there. A shaman can help what a soldier cannot."
+    },
+    {
+        id:36, num:"XXXVI", symbol:"🏠", color:"#885500",
+        title:"Kuldevta", character:"Ancestral Clan Deity",
+        keyword:"Roots · Lineage · Belonging · Ancestral Blessing", yesNo:"yes",
+        simple:"Your ancestors stand behind you. You are not alone — you carry the strength of your entire lineage. Return to your roots. The power you need has been passed down to you.",
+        meaning:"Every Nepali family has their Kuldevta — the ancestral deity who has watched over the bloodline for generations, who holds the accumulated prayers, practices, and merit of all who came before. When this card appears, your ancestors are active in your life right now. Their blessing flows to you through your blood and your spiritual inheritance. Honor where you come from. The roots you were born into are deeper and stronger than you know."
+    },
+    {
+        id:37, num:"XXXVII", symbol:"🦅", color:"#334455",
+        title:"Bare Masto", character:"Great Masto · Supreme Spirit of Karnali",
+        keyword:"Cosmic Justice · Chief Power · Divine Authority", yesNo:"yes",
+        simple:"The highest authority is on your side. What is true and just will prevail. The Great Masto settles all accounts — trust that justice will be done.",
+        meaning:"Bare Masto — the Great Masto — is the supreme chief among the Masto spirit deities of Nepal's Karnali region, revered for generations as the enforcer of cosmic order and divine justice. He is called upon when human courts fail, when injustice has gone unanswered, when the cosmic ledger must be corrected. He does not hurry, but he never fails. What you have suffered unjustly is known to him. His justice is coming."
+    },
+    {
+        id:38, num:"XXXVIII", symbol:"⛰️", color:"#445566",
+        title:"Maikot Masto", character:"Masto of the High Fort",
+        keyword:"Boundaries · Highland Protection · Holding Ground", yesNo:"yes",
+        simple:"Hold your ground. Protect your boundaries. The Masto of the high fort stands at the edge of your territory and lets nothing harmful pass. You are safe inside your walls.",
+        meaning:"Maikot Masto guards the high places — the forts, the ridge-lines, the boundaries where the known meets the unknown. In Karnali tradition he is called upon to set firm spiritual boundaries, to protect the household from intrusion, and to guard those who travel through dangerous mountain passes. Your borders need to be clear and firm right now. State what is yours. Protect your inner territory."
+    },
+    {
+        id:39, num:"XXXIX", symbol:"🤍", color:"#ddeeff",
+        title:"Sethi Masto", character:"White Masto · Pure Spirit",
+        keyword:"Purification · Clean Slate · Fresh Beginning", yesNo:"yes",
+        simple:"A purification is happening. Old dirt, old karma, old heaviness is being washed away. You are moving into a clean, fresh phase. Let go of what was.",
+        meaning:"Sethi Masto — the white, pure Masto — is the cleanser among the Masto spirits, the force that washes away spiritual pollution, lifts curses, and restores the natural luminosity that is always underneath accumulated heaviness. When Sethi Masto appears, you are in a period of spiritual cleansing. Something that has been weighing on your energy and your fate is being removed. Breathe. The freshness coming is real."
+    },
+    {
+        id:40, num:"XL", symbol:"🌾", color:"#667700",
+        title:"Phalti Masto", character:"Masto of the Fields · Fertility Spirit",
+        keyword:"Harvest · Earth Abundance · Patient Growth", yesNo:"yes",
+        simple:"What you have planted is growing. The harvest is coming. Patient, steady work in the physical world is being rewarded. Trust the cycle — earth always returns what is sown with care.",
+        meaning:"Phalti Masto is the Masto of the fields, the spirit who ensures the rains come, the seeds germinate, and the harvest is full. He is worshipped at planting and at harvest in the high villages of Karnali, a reminder that the divine is not separate from the agricultural rhythms that sustain all life. Your efforts in the material world — slow, patient, rooted — are on the verge of producing a real and tangible result. The earth keeps her promises."
+    },
+    {
+        id:41, num:"XLI", symbol:"⚔️", color:"#cc4400",
+        title:"Bhawani", character:"Sword-Bearer · Fierce Shakti",
+        keyword:"Warrior Power · Righteous Anger · Victory in Battle", yesNo:"yes",
+        simple:"Take up your sword. You have been too gentle with what opposes you. Bhawani gives her blessing to the warrior who fights for what is right. Victory is yours — if you fight.",
+        meaning:"Bhawani — the fierce, sword-wielding aspect of the divine mother worshipped across Nepal — places her sword in the hands of those who face injustice with clarity and courage. She is not for timid prayers. She is for those who are willing to stand up and fight for truth, for protection, for the sacred. The cause you are facing is worth fighting for. Bhawani is behind you. Raise your sword."
+    },
+    {
+        id:42, num:"XLII", symbol:"🌙", color:"#4466aa",
+        title:"Chandeshwari", character:"Moon Goddess of Banepa",
+        keyword:"Cycles · Emotional Wisdom · Lunar Power", yesNo:"yes",
+        simple:"Honor your emotional cycles. What you feel is wisdom, not weakness. The moon goddess reminds you that everything has its cycle — the full and the empty, the bright and the dark.",
+        meaning:"Chandeshwari — the radiant goddess of Banepa and Panauti — presides over the moon's rhythms, the tidal pull of emotions, and the sacred feminine cycle of waxing and waning. She is worshipped at lunar festivals, and her temple sits at the confluence of sacred rivers. You are in a particular phase of your own inner cycle. Do not fight it — read it. What your emotions are telling you is more accurate than your analysis."
+    },
+    {
+        id:43, num:"XLIII", symbol:"🔱", color:"#cc0044",
+        title:"Nava Durga", character:"Nine Durgas of Bhaktapur",
+        keyword:"Collective Power · Nine Forms · Total Shakti", yesNo:"yes",
+        simple:"Nine forms of divine feminine power are active at once. Every strength is available to you — fierce, gentle, creative, destructive, nurturing. You have the full range. Use it.",
+        meaning:"In Bhaktapur, the Nava Durga — the nine Durgas — are worshipped as a complete, unified divine feminine force that encompasses all aspects of the goddess simultaneously. Each of the nine carries a different energy: warrior, mother, wisdom, death, creation, and more. When they appear together, they are saying that you do not need to choose one approach — you have access to all nine. The full spectrum of sacred feminine power is available to you right now."
+    },
+    {
+        id:44, num:"XLIV", symbol:"👵", color:"#aa6600",
+        title:"Ajima (Hariti)", character:"Grandmother Goddess · Protector of Children",
+        keyword:"Fierce Love · Redemption · Protective Grandmother", yesNo:"yes",
+        simple:"A fierce, loving grandmotherly protection surrounds you. Even the demon can be redeemed by love. What you fear in yourself can be transformed into your greatest protective power.",
+        meaning:"Ajima — the grandmother goddess, identified with Hariti the demoness who was converted from devourer of children to their greatest protector — is worshipped at every neighborhood shrine in Kathmandu's old towns. She is the terrifying made tender, the destructive force made into the most fierce love. She shows us that nothing is beyond redemption, and that the most powerful protectors were sometimes the most dangerous beings, transformed by encountering genuine compassion."
+    },
+    {
+        id:45, num:"XLV", symbol:"🦁", color:"#ff6600",
+        title:"Narasingha", character:"Lion Avatar · Sudden Protector",
+        keyword:"Sudden Protection · Divine Rage · Devotion Rewarded", yesNo:"yes",
+        simple:"Divine protection arrives suddenly and ferociously when you most need it. Your devotion has been seen. What threatens you will be torn apart. You are defended.",
+        meaning:"Narasingha — the half-man, half-lion avatar of Vishnu — erupted from a pillar at the precise moment of a devotee's greatest danger, tearing apart the oppressor who had declared himself beyond divine reach. He comes not with warning but in an instant, when the situation is most critical and the heart is most sincere. Your sincere need has been seen. Protection is coming — not gently, not gradually, but suddenly and completely. Trust it."
+    },
+    {
+        id:46, num:"XLVI", symbol:"😤", color:"#ffffff",
+        title:"Swet Bhairava", character:"Great White Bhairava · Durbar Square",
+        keyword:"Divine Grace · Festival Abundance · Blessing Received", yesNo:"yes",
+        simple:"Great blessings are being poured out to all who come. Open your mouth and receive. During Indra Jatra, rice beer flows from Swet Bhairava's mouth — abundance and divine grace are yours right now.",
+        meaning:"The great Swet Bhairava — the massive white Bhairava face set in the wall at Kathmandu Durbar Square — opens his mouth during Indra Jatra to pour out rice beer (aila) that the faithful receive directly from his divine lips. He is fierce but abundantly giving — the terrifying face that pours out blessing. You have come through your fear and stood before the great face. Now it is the time to receive, not to ask. Open yourself. Grace is flowing."
+    },
+    {
+        id:47, num:"XLVII", symbol:"💙", color:"#0022aa",
+        title:"Ugra Tara", character:"Fierce Blue Tara · Wrathful Liberator",
+        keyword:"Breaking Through · Fierce Compassion · No More Waiting", yesNo:"yes",
+        simple:"Gentle approaches have run their course. Ugra Tara's fierce energy breaks through every remaining barrier right now. This is the moment to push — hard, direct, and fearlessly.",
+        meaning:"Ugra Tara — the fierce, blue-black form of Tara — does not wait, does not soothe, does not negotiate. She is compassion that has run out of patience with what keeps you small. She erupts through obstacles that softer methods could not move. This card says: the time for patience has ended; the time for fierce, direct, unstoppable movement has arrived. Move without apology. Break through."
+    },
+    {
+        id:48, num:"XLVIII", symbol:"🤍", color:"#aaccff",
+        title:"Seto Machhendranath", character:"White Machhendranath · Inner Grace",
+        keyword:"Inner Transformation · White Compassion · Quiet Grace", yesNo:"yes",
+        simple:"Quiet, inner grace is transforming you from the inside. You don't need to announce it. Something sacred is happening within — let it unfold in stillness.",
+        meaning:"Seto Machhendranath — the White Machhendranath of Kathmandu's Kel Tol — is the inward face of the great compassionate one, the grace that works in silence and in the depths of the heart rather than in the streets. Where his red counterpart brings rain to the fields, Seto Machhendranath brings inner nourishment — the quiet transformation that happens when the divine quietly moves into the spaces you have made available. Be still. Something sacred is becoming."
+    },
+    // ── Banjhakri · Banjhakrini · Jyotish ─────────────────────────────────
+    {
+        id:49, num:"XLIX", symbol:"🥁", color:"#1a4400",
+        title:"Banjhakri", character:"Forest Shaman · Initiator of Healers",
+        keyword:"Shamanic Initiation · Wild Knowledge · Chosen by the Forest", yesNo:"yes",
+        simple:"You are being chosen and initiated by something larger than yourself. The forest is calling you into a deeper kind of knowing. This is not comfortable — but you will emerge as a healer, a seer, a guide. Say yes.",
+        meaning:"Banjhakri — the golden-skinned, drum-beating spirit of Nepal's deep forests — appears to those who are destined to become shamans (dhami-jhankri), seizing them from ordinary life and carrying them into the wilderness for an initiatory ordeal they did not choose. He teaches the sacred healing songs, the language of plants, the communication with spirits. You have not stumbled into your current situation by accident. You are being initiated. The wildness calling you is not chaos — it is the beginning of your true vocation. Trust the drum."
+    },
+    {
+        id:50, num:"L", symbol:"🌑", color:"#220011",
+        title:"Banjhakrini", character:"Wild Witch of the Forest · Supreme Gatekeeper",
+        keyword:"The Hardest Test · Surviving the Dark · Only the Worthy Pass", yesNo:"maybe",
+        simple:"The real test is here — and it is harder than anything Banjhakri gave you. Banjhakrini does not pass everyone. But if you survive her trial with honesty and courage, nothing can stop you.",
+        meaning:"Banjhakrini — the terrifying, disheveled forest witch and wife of Banjhakri — is far more feared than her husband. Where Banjhakri initiates, she tests. She is the threshold between the apprentice and the true healer, and she shows no mercy to those who approach with impure motive, pride, or pretense. Many who enter her forest never return. But those who come with complete honesty, with genuine humility, with real courage — she passes, and they emerge as the most powerful healers of all. Face what is in front of you completely. Do not flinch. Do not pretend. Only truth gets through."
+    },
+    {
+        id:51, num:"LI", symbol:"🔯", color:"#cc9900",
+        title:"Jyotish", character:"Vedic Astrology · Cosmic Map of Fate",
+        keyword:"Cosmic Timing · Planetary Karma · Read Your Stars", yesNo:"maybe",
+        simple:"The stars are speaking. Your current situation is not random — it is written in your planetary positions. Consult the cosmic map. Timing is everything. The right action at the wrong moment still fails.",
+        meaning:"Jyotish — the eye of the Vedas — is the ancient Nepali and Indian science of reading the light of stars as a map of karma, timing, and divine intention. It does not fatalize; it illuminates. The planets do not imprison you — they describe the weather of your soul. Understanding your chart is understanding the currents in which you are swimming, so that you can navigate rather than merely drift. This card says: before you act, read the timing. Consult someone who understands the map. The right moment is not yet — or it is exactly now. Only Jyotish can tell you which."
+    }
+];
+
+// ── Deck Registry ──────────────────────────────────────────────────────────────
+const DECK_CONFIG = {
+    mystic: {
+        data: MYSTIC_DECK,
+        eye: '🔮', rune: '✦',
+        title: 'Mystic Arts Tarot',
+        subtitle: 'By the Vishanti &nbsp;·&nbsp; A Dr. Strange Oracle',
+        modalSubFn: card => `${card.character} · Mystic Arcana ${card.num}`
+    },
+    avengers: {
+        data: GENERAL_MARVEL_DECK,
+        eye: '🦸', rune: '★',
+        title: "Marvel Avengers Oracle",
+        subtitle: "Earth's Mightiest Heroes &nbsp;·&nbsp; 12 Cards",
+        modalSubFn: card => `${card.character} · Avenger ${card.num.slice(2)}`
+    },
+    gods: {
+        data: MARVEL_GODS_DECK,
+        eye: '⚡', rune: '⚡',
+        title: 'Marvel Gods Oracle',
+        subtitle: 'Asgardians &nbsp;·&nbsp; Olympians &nbsp;·&nbsp; Cosmic Beings',
+        modalSubFn: card => `${card.character} · Marvel God ${card.num.slice(2)}`
+    },
+    vedic: {
+        data: VEDIC_DECK,
+        eye: '🕉️', rune: 'ॐ',
+        title: 'Vedic Gods Oracle',
+        subtitle: '33 Koti Devta — Vasus · Rudras · Adityas · Ashvins',
+        modalSubFn: card => `${card.character} · ${card.num}`
+    },
+    tantrik: {
+        data: TANTRIK_DECK,
+        eye: '🔺', rune: '▽',
+        title: 'Nepali Tantrik Oracle',
+        subtitle: 'Mahavidyas · Bhairava · Masto · Banjhakri · Jyotish · Vajrayana',
+        modalSubFn: card => `${card.character} · ${card.num}`
+    }
+};
+
+// ── State ────────────────────────────────────────────────────────────────────
+let activeDeckName = 'mystic';
+let DECK = MYSTIC_DECK;
+let flipped  = [];
+let selected = [];
+const lastTap  = {};
+const TAP_MS   = 320;
+
+function initState() {
+    flipped  = new Array(DECK.length).fill(false);
+    selected = new Array(DECK.length).fill(false);
+}
+initState();
+
+// ── Deck Switching ────────────────────────────────────────────────────────────
+const MARVEL_DECKS = new Set(['mystic','avengers','gods']);
+
+function toggleMarvelMenu() {
+    document.getElementById('btn-marvel-group').classList.toggle('open');
+    document.getElementById('marvel-submenu').classList.toggle('open');
+}
+
+function switchDeck(name) {
+    if (name === activeDeckName) return;
+    activeDeckName = name;
+    const cfg = DECK_CONFIG[name];
+    DECK = cfg.data;
+    initState();
+    closeModal();
+
+    // Apply deck theme to body (mystic/avengers/gods share Marvel theme)
+    if (MARVEL_DECKS.has(name)) document.body.removeAttribute('data-deck');
+    else document.body.setAttribute('data-deck', name);
+
+    // Update header
+    document.getElementById('headerEye').textContent   = cfg.eye;
+    document.getElementById('headerTitle').textContent  = cfg.title;
+    document.getElementById('headerSubtitle').innerHTML = cfg.subtitle;
+
+    // Update sub-button active state
+    document.querySelectorAll('.deck-btn.sub').forEach(b => b.classList.remove('active'));
+    const subBtn = document.getElementById('btn-' + name);
+    if (subBtn) subBtn.classList.add('active');
+
+    // Marvel parent button: highlight when any Marvel sub-deck active, open submenu
+    const parentBtn = document.getElementById('btn-marvel-group');
+    const submenu   = document.getElementById('marvel-submenu');
+    if (MARVEL_DECKS.has(name)) {
+        parentBtn.classList.add('marvel-on');
+        parentBtn.classList.add('open');
+        submenu.classList.add('open');
+    } else {
+        parentBtn.classList.remove('marvel-on');
+        parentBtn.classList.remove('open');
+        submenu.classList.remove('open');
+    }
+
+    // Update grid columns CSS variable based on deck size
+    updateLayout();
+    updateStats();
+    renderGrid();
+}
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+function updateLayout() {
+    const vw   = window.innerWidth;
+    const n    = DECK.length;
+    let cols;
+    if      (vw >= 1400) cols = Math.min(n, 11);
+    else if (vw >= 1100) cols = Math.min(n, 8);
+    else if (vw >= 800)  cols = Math.min(n, 6);
+    else if (vw >= 560)  cols = Math.min(n, 5);
+    else                  cols = Math.min(n, 4);
+
+    document.documentElement.style.setProperty('--grid-cols', cols);
+    document.documentElement.style.setProperty('--card-w', '150px');
+    document.documentElement.style.setProperty('--card-h', '255px');
+}
+
+// ── Interaction ──────────────────────────────────────────────────────────────
+function handleCardClick(i) {
+    if (flipped[i]) { showCardModal(i); return; }
+
+    const now = Date.now();
+    if (lastTap[i] && (now - lastTap[i]) < TAP_MS) {
+        lastTap[i] = 0;
+        revealCard(i);
+    } else {
+        lastTap[i] = now;
+        toggleSelect(i);
+    }
 }
 
 function toggleSelect(i) {
-    if (flipped[i]) return; // Cannot select already revealed cards
-
+    if (flipped[i]) return;
     selected[i] = !selected[i];
-    const wrapEl = document.getElementById('wrap-' + i);
-
-    if (selected[i]) {
-        wrapEl.classList.add('selected');
-    } else {
-        wrapEl.classList.remove('selected');
-    }
+    document.getElementById('wrap-' + i).classList.toggle('selected', selected[i]);
     updateStats();
 }
 
+function revealCard(i) {
+    if (flipped[i]) return;
+    flipped[i] = true; selected[i] = false;
+    const cardEl = document.getElementById('card-' + i);
+    const wrapEl = document.getElementById('wrap-' + i);
+    cardEl.classList.add('flipped');
+    wrapEl.classList.add('revealed');
+    wrapEl.classList.remove('selected');
+    updateStats();
+    // Card is now flipped — user taps the revealed card to read meaning
+}
+
 function revealSelected() {
-    const revealedIndices = [];
+    let firstIdx = -1;
     selected.forEach((s, i) => {
         if (s && !flipped[i]) {
-            flipped[i] = true;
-            revealedIndices.push(i);
+            if (firstIdx === -1) firstIdx = i;
+            flipped[i] = true; selected[i] = false;
             const cardEl = document.getElementById('card-' + i);
             const wrapEl = document.getElementById('wrap-' + i);
             cardEl.classList.add('flipped');
             wrapEl.classList.add('revealed');
             wrapEl.classList.remove('selected');
-            selected[i] = false; // Reset selection once revealed
         }
     });
-
-    if (revealedIndices.length > 0) {
-        showMeanings();
-    }
     updateStats();
+    // Cards are now flipped — user taps any revealed card to read meaning
 }
 
-function showMeanings() {
-    const panel = document.getElementById('meaningPanel');
-    const content = document.getElementById('meaningContent');
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function showCardModal(i) {
+    const card    = DECK[i];
+    const cfg     = DECK_CONFIG[activeDeckName];
+    const yn      = card.yesNo;
+    const ynLabel = yn === 'yes' ? '✦ YES ✦' : yn === 'no' ? '✦ NO ✦' : '✦ MAYBE ✦';
+    const subLine = cfg.modalSubFn(card);
 
-    // Get all cards that are currently flipped
-    const revealedCards = DECK.filter((_, i) => flipped[i]);
-
-    if (revealedCards.length === 0) {
-        panel.classList.remove('show');
-        return;
-    }
-
-    content.innerHTML = revealedCards.map(card => `
-        <div class="card-entry">
-            <div class="panel-header" style="color:${card.color}">${card.symbol} ${card.marvel} — ${card.title}</div>
-            <p class="panel-body">${card.meaning}</p>
-            <div class="panel-keyword" style="color:${card.color}">✦ ${card.keyword} ✦</div>
+    document.getElementById('modalContent').innerHTML = `
+        <span class="modal-symbol" style="color:${card.color}">${card.symbol}</span>
+        <div class="modal-title" style="color:${card.color}">${card.title}</div>
+        <div class="modal-sub">${subLine}</div>
+        <div class="modal-yesno">
+            <span class="yesno-badge ${yn}">${ynLabel}</span>
         </div>
-    `).join('');
-
-    panel.classList.add('show');
-    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+        <div class="modal-divider"></div>
+        <div class="modal-section-label">What this card is telling you</div>
+        <p class="modal-simple">${card.simple}</p>
+        <button class="modal-deep-toggle" onclick="toggleDeep(this)">▸ See the deeper meaning</button>
+        <p class="modal-deep">${card.meaning}</p>
+        <div class="modal-keyword" style="color:${card.color}">✦ ${card.keyword} ✦</div>
+    `;
+    document.getElementById('cardModal').classList.add('open');
 }
 
-function hideMeaning() {
-    document.getElementById('meaningPanel').classList.remove('show');
+function toggleDeep(btn) {
+    const deep = btn.nextElementSibling;
+    deep.classList.toggle('open');
+    btn.textContent = deep.classList.contains('open') ? '▾ Hide deeper meaning' : '▸ See the deeper meaning';
 }
 
-function resetAll() {
-    flipped.fill(false);
-    selected.fill(false);
-    hideMeaning();
-    updateStats();
-    renderGrid();
+function closeModal() {
+    document.getElementById('cardModal').classList.remove('open');
 }
 
-function shuffleDeck() {
-    // Standard practice: reset cards before shuffling
-    flipped.fill(false);
-    selected.fill(false);
-    hideMeaning();
-    updateStats();
-
-    // Fisher-Yates Shuffle
-    for (let i = DECK.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [DECK[i], DECK[j]] = [DECK[j], DECK[i]];
-    }
-
-    // Visual feedback: brief grid animation
-    const grid = document.getElementById('grid');
-    grid.style.opacity = '0';
-    grid.style.transform = 'scale(0.95)';
-    grid.style.transition = 'all 0.4s ease';
-
-    setTimeout(() => {
-        renderGrid();
-        grid.style.opacity = '1';
-        grid.style.transform = 'scale(1)';
-    }, 400);
+// ── View All Cards (flip in grid) ─────────────────────────────────────────────
+function viewAllCards() {
+    const indices = DECK.map((_, i) => i).filter(i => !flipped[i]);
+    if (indices.length === 0) return;
+    indices.forEach((i, idx) => {
+        setTimeout(() => {
+            flipped[i] = true; selected[i] = false;
+            const cardEl = document.getElementById('card-' + i);
+            const wrapEl = document.getElementById('wrap-' + i);
+            if (cardEl) cardEl.classList.add('flipped');
+            if (wrapEl) { wrapEl.classList.add('revealed'); wrapEl.classList.remove('selected'); }
+        }, idx * 55);
+    });
+    setTimeout(() => updateStats(), indices.length * 55 + 100);
 }
 
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+    const rev      = flipped.filter(Boolean).length;
+    const selCount = selected.filter((s, i) => s && !flipped[i]).length;
+    document.getElementById('revealed-count').textContent = rev;
+    document.getElementById('hidden-count').textContent   = DECK.length - rev;
+    document.getElementById('revealBtn').style.display    = selCount > 0 ? 'inline-block' : 'none';
+    document.getElementById('mainHint').textContent       = selCount > 0
+        ? `${selCount} card${selCount > 1 ? 's' : ''} selected — double-tap to reveal`
+        : 'Tap a card to select it · Double-tap to reveal its secret';
+}
+
+// ── Grid Render ───────────────────────────────────────────────────────────────
 function renderGrid() {
     const grid = document.getElementById('grid');
-    grid.innerHTML = DECK.map((card, i) => `
-        <div class="card-wrap ${flipped[i] ? 'revealed' : ''} ${selected[i] ? 'selected' : ''}"
-             id="wrap-${i}" onclick="toggleSelect(${i})">
-            <div class="card ${flipped[i] ? 'flipped' : ''}" id="card-${i}">
+    grid.innerHTML = DECK.map((card, i) => {
+        const yn      = card.yesNo;
+        const ynLabel = yn === 'yes' ? 'YES' : yn === 'no' ? 'NO' : 'MAYBE';
+        return `
+        <div class="card-wrap ${flipped[i]?'revealed':''} ${selected[i]?'selected':''}"
+             id="wrap-${i}" onclick="handleCardClick(${i})">
+            <div class="card ${flipped[i]?'flipped':''}" id="card-${i}">
                 <div class="face face-back">
-                    <div class="back-art">
-                        <span class="back-rune">✦</span>
-                    </div>
+                    <div class="back-art"><span class="back-rune">${DECK_CONFIG[activeDeckName].rune}</span></div>
                 </div>
                 <div class="face face-front"
                      style="border-color:${card.color}55;
-                            box-shadow:0 0 26px ${card.color}25, inset 0 0 28px rgba(100,0,200,.32);">
-                    <div class="f-arcana">Major Arcana ${card.num}</div>
+                            box-shadow:0 0 20px ${card.color}22,inset 0 0 24px rgba(100,0,200,.32);">
+                    <div class="f-arcana">Card ${card.num}</div>
                     <div class="f-symbol" style="color:${card.color}">${card.symbol}</div>
                     <div class="f-tarot-name">${card.title}</div>
-                    <div class="f-marvel-name">${card.marvel}</div>
+                    <div class="f-marvel-name">${card.character}</div>
                     <div class="f-line" style="background:linear-gradient(to right,transparent,${card.color}70,transparent)"></div>
+                    <span class="f-yesno ${yn}">${ynLabel}</span>
                     <div class="f-keyword">${card.keyword}</div>
-                    <div class="f-preview">${card.meaning.substring(0, 100)}…</div>
-                    <div class="f-tap">revealed</div>
+                    <div class="f-tap">tap to read</div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
-// Particles
+// ── Deck Actions ──────────────────────────────────────────────────────────────
+function resetAll() {
+    initState();
+    closeModal(); updateStats(); renderGrid();
+}
+
+function shuffleDeck() {
+    initState();
+    closeModal(); updateStats();
+
+    const grid       = document.getElementById('grid');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    if (shuffleBtn) shuffleBtn.disabled = true;
+
+    const gridRect = grid.getBoundingClientRect();
+    const cx = gridRect.left + gridRect.width  / 2;
+    const cy = gridRect.top  + gridRect.height / 2 + window.scrollY;
+
+    // Phase 1 — cards fly into a centre pile
+    const wraps = Array.from(grid.querySelectorAll('.card-wrap'));
+    wraps.forEach((wrap, idx) => {
+        const r   = wrap.getBoundingClientRect();
+        const dx  = cx - (r.left + r.width  / 2);
+        const dy  = (cy - window.scrollY) - (r.top  + r.height / 2);
+        const rot = (Math.random() - 0.5) * 45;
+        setTimeout(() => {
+            wrap.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.32s ease';
+            wrap.style.transform  = `translate(${dx}px,${dy}px) scale(0.48) rotate(${rot}deg)`;
+            wrap.style.opacity    = '0.55';
+            wrap.style.zIndex     = '50';
+        }, idx * 22);
+    });
+
+    const gatherMs = wraps.length * 22 + 380;
+
+    // Phase 2 — shuffle data, re-render, deal cards out
+    setTimeout(() => {
+        for (let i = DECK.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [DECK[i], DECK[j]] = [DECK[j], DECK[i]];
+        }
+        renderGrid();
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            const newWraps = Array.from(grid.querySelectorAll('.card-wrap'));
+
+            // Set all cards to pile position instantly
+            newWraps.forEach(wrap => {
+                const r   = wrap.getBoundingClientRect();
+                const dx  = cx - (r.left + r.width  / 2);
+                const dy  = (cy - window.scrollY) - (r.top  + r.height / 2);
+                const rot = (Math.random() - 0.5) * 55;
+                wrap.style.transition = 'none';
+                wrap.style.transform  = `translate(${dx}px,${dy}px) scale(0.35) rotate(${rot}deg)`;
+                wrap.style.opacity    = '0';
+            });
+
+            // Deal each card out with stagger
+            requestAnimationFrame(() => {
+                newWraps.forEach((wrap, idx) => {
+                    setTimeout(() => {
+                        wrap.style.transition = `transform 0.52s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.38s ease`;
+                        wrap.style.transform  = '';
+                        wrap.style.opacity    = '';
+                    }, idx * 38);
+                });
+
+                const cleanupMs = newWraps.length * 38 + 620;
+                setTimeout(() => {
+                    newWraps.forEach(w => { w.style.cssText = ''; });
+                    if (shuffleBtn) shuffleBtn.disabled = false;
+                }, cleanupMs);
+            });
+        }));
+    }, gatherMs);
+}
+
+// ── Particles ─────────────────────────────────────────────────────────────────
 (function(){
     const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
+    const ctx    = canvas.getContext('2d');
     const colors = ['#ff8c00','#ffd700','#c084fc','#ff6b00','#00aaff','#ff44ff'];
     let W, H, pts;
 
-    function init(){
+    function init() {
         W = canvas.width  = window.innerWidth;
         H = canvas.height = window.innerHeight;
-        pts = Array.from({length:70}, ()=>({
-            x: Math.random()*W,
-            y: Math.random()*H + H,
-            r: Math.random()*1.8+0.4,
-            speed: Math.random()*.5+.18,
+        pts = Array.from({length:70}, () => ({
+            x: Math.random()*W, y: Math.random()*H + H,
+            r: Math.random()*1.8+0.4, speed: Math.random()*.5+.18,
             drift: (Math.random()-.5)*.4,
             color: colors[Math.floor(Math.random()*colors.length)],
             alpha: Math.random()*.5+.15
         }));
     }
-
-    function loop(){
+    function loop() {
         ctx.clearRect(0,0,W,H);
-        for(const p of pts){
+        for (const p of pts) {
             p.y -= p.speed; p.x += p.drift;
-            if(p.y < -10){ p.y = H+10; p.x = Math.random()*W; }
+            if (p.y < -10) { p.y = H+10; p.x = Math.random()*W; }
             ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle   = p.color;
+            ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
         }
         ctx.globalAlpha = 1;
         requestAnimationFrame(loop);
     }
-
     window.addEventListener('resize', init);
     init(); loop();
 })();
 
-// Boot
+// ── Boot ──────────────────────────────────────────────────────────────────────
 renderGrid();
 updateStats();
+updateLayout();
+window.addEventListener('resize', updateLayout);
 </script>
 </body>
 </html>
