@@ -2,691 +2,466 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mystic Tarot Oracle</title>
-    <style>
-        :root { --card-w: 150px; --card-h: 255px; --grid-cols: 7; }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: #07001a;
-            color: #e0c4ff;
-            font-family: 'Georgia', serif;
-            min-height: 100vh;
-            overflow-x: hidden; /* Prevent horizontal scroll globally */
-        }
-
-        .bg-glow {
-            position: fixed;
-            top: 50%; left: 50%;
-            width: 1000px; height: 1000px;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(ellipse, rgba(255,100,0,0.06) 0%, rgba(120,0,220,0.08) 40%, transparent 70%);
-            animation: bg-rotate 30s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        @keyframes bg-rotate {
-            from { transform: translate(-50%,-50%) rotate(0deg); }
-            to   { transform: translate(-50%,-50%) rotate(360deg); }
-        }
-        .portal-rings {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%,-50%);
-            pointer-events: none; z-index: 0;
-        }
-        .ring {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%,-50%);
-            border-radius: 50%;
-            border: 1.5px solid rgba(255,120,0,0.1);
-            animation: ring-breathe 5s ease-in-out infinite;
-        }
-        .ring:nth-child(1){width:160px;height:160px;animation-delay:0s}
-        .ring:nth-child(2){width:340px;height:340px;animation-delay:.6s}
-        .ring:nth-child(3){width:540px;height:540px;animation-delay:1.2s}
-        .ring:nth-child(4){width:760px;height:760px;animation-delay:1.8s}
-        .ring:nth-child(5){width:1000px;height:1000px;animation-delay:2.4s}
-        @keyframes ring-breathe { 0%,100%{opacity:.1} 50%{opacity:.32} }
-        #particles { position:fixed; inset:0; pointer-events:none; z-index:0; }
-
-        /* ── Layout ── */
-        .container {
-            position: relative; z-index: 1;
-            padding: 1.2rem 0.6rem 2rem;
-            text-align: center;
-            max-width: 100vw;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        header { margin-bottom: 0.5rem; }
-        .eye {
-            font-size: 1.8rem; display: block;
-            filter: drop-shadow(0 0 14px rgba(255,130,0,0.9));
-            animation: eye-glow 3s ease-in-out infinite;
-        }
-        @keyframes eye-glow {
-            0%,100%{filter:drop-shadow(0 0 14px rgba(255,130,0,.9))}
-            50%{filter:drop-shadow(0 0 28px rgba(255,200,0,1))}
-        }
-        h1 {
-            font-size: clamp(1.1rem, 3vw, 1.9rem);
-            background: linear-gradient(135deg,#ff8c00 0%,#ffd700 50%,#ff6b00 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 4px; text-transform: uppercase;
-            margin: 0.2rem 0 0.1rem;
-        }
-        .subtitle {
-            font-size: 0.62rem; color: rgba(200,150,255,.5);
-            letter-spacing: 4px; text-transform: uppercase;
-        }
-        .divider {
-            width: 160px; height: 1px;
-            background: linear-gradient(to right,transparent,#ff8c00,transparent);
-            margin: 0.5rem auto 0;
-        }
-
-        /* Deck Selector */
-        .deck-selector {
-            display: flex; justify-content: center; align-items: center;
-            gap: 0.7rem; flex-wrap: wrap;
-            margin: 0.9rem 0 0.6rem;
-        }
-        .deck-btn {
-            padding: .48rem 1.1rem;
-            border: 2px solid rgba(200,150,255,.3);
-            background: transparent; color: rgba(200,150,255,.6);
-            font-family: 'Georgia',serif; font-size: .72rem;
-            letter-spacing: 1.5px; text-transform: uppercase;
-            cursor: pointer; border-radius: 4px;
-            transition: all .3s ease;
-        }
-        .deck-btn:hover {
-            border-color: rgba(255,215,0,.6);
-            color: #ffd700;
-            box-shadow: 0 0 14px rgba(255,215,0,.3);
-        }
-        .deck-btn.active {
-            border-color: #ffd700;
-            color: #ffd700;
-            background: rgba(255,215,0,.08);
-            box-shadow: 0 0 20px rgba(255,215,0,.5), inset 0 0 12px rgba(255,215,0,.06);
-        }
-        /* Collapsible Marvel group */
-        .deck-group { position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: .5rem; }
-        .deck-parent { position: relative; }
-        .deck-parent .arrow { display: inline-block; margin-left: .3rem; transition: transform .3s ease; font-style: normal; font-size: .6rem; }
-        .deck-parent.open .arrow { transform: rotate(180deg); }
-        .deck-parent.marvel-on {
-            border-color: rgba(255,215,0,.7);
-            color: #ffd700;
-            box-shadow: 0 0 14px rgba(255,215,0,.25);
-        }
-        .deck-parent.omkar-on {
-            border-color: rgba(255,145,20,.75);
-            color: #ff9914;
-            box-shadow: 0 0 14px rgba(255,145,20,.28);
-        }
-        .deck-submenu {
-            display: flex; flex-direction: row; gap: .45rem; flex-wrap: wrap; justify-content: center;
-            overflow: hidden; max-height: 0; opacity: 0;
-            transition: max-height .35s ease, opacity .28s ease;
-        }
-        .deck-submenu.open { max-height: 80px; opacity: 1; }
-        .deck-btn.sub {
-            font-size: .65rem; padding: .35rem .85rem;
-            border-color: rgba(180,130,255,.25);
-        }
-
-        /* Stats */
-        .deck-stats {
-            display: flex; justify-content: center;
-            gap: 2rem; margin: 0.5rem 0 0.4rem;
-        }
-        @media (max-width: 600px) {
-            .deck-stats { gap: 1.2rem; }
-        }
-        .stat { text-align: center; }
-        .stat-num { font-size: 1.35rem; font-weight: bold; color: #ff8c00; line-height: 1; }
-        .stat-label { font-size: 0.5rem; color: rgba(200,150,255,.45); letter-spacing: 2px; text-transform: uppercase; margin-top:.15rem; }
-
-        /* Controls */
-        .controls { display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:.4rem; }
-        .btn {
-            padding: .42rem 1.1rem;
-            border: 2px solid #ff8c00;
-            background: transparent; color: #ff8c00;
-            font-family: 'Georgia',serif; font-size: .72rem;
-            letter-spacing: 1.5px; text-transform: uppercase;
-            cursor: pointer; position: relative; overflow: hidden;
-            transition: all .3s ease; border-radius: 2px;
-        }
-        .btn::after {
-            content:''; position:absolute; inset:0;
-            background:linear-gradient(90deg,transparent,rgba(255,140,0,.15),transparent);
-            transform:translateX(-100%); transition:transform .5s ease;
-        }
-        .btn:hover::after{transform:translateX(100%)}
-        .btn:hover{background:rgba(255,140,0,.08);box-shadow:0 0 18px rgba(255,140,0,.5);color:#ffd700}
-        .btn:active{transform:scale(.97)}
-        .btn:disabled{opacity:.45;cursor:default;}
-        .btn-reset { border-color:rgba(200,150,255,.4); color:rgba(200,150,255,.6); }
-        .btn-reset:hover{background:rgba(200,150,255,.08);box-shadow:0 0 18px rgba(200,150,255,.3);color:#e0c4ff}
-        .btn-view { border-color:rgba(0,220,180,.5); color:rgba(0,220,180,.7); }
-        .btn-view:hover{background:rgba(0,220,180,.08);box-shadow:0 0 18px rgba(0,220,180,.3);color:#00ffcc}
-
-
-        .hint {
-            font-size:.55rem; color:rgba(200,150,255,.3);
-            letter-spacing:3px; text-transform:uppercase;
-            margin-bottom:.6rem;
-        }
-
-        /* ── Card Grid ── */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(var(--grid-cols), 1fr);
-            width: fit-content;
-            max-width: calc(100% - 10px);
-            gap: 8px;
-            justify-content: center;
-            margin: 0 auto;
-        }
-
-        .card-wrap {
-            perspective: 1100px;
-            width: var(--card-w);
-            height: var(--card-h);
-            cursor: pointer;
-        }
-        .card {
-            width: 100%; height: 100%;
-            position: relative; transform-style: preserve-3d;
-            transition: transform .85s cubic-bezier(0.175,0.885,0.32,1.275);
-        }
-        .card:hover:not(.flipped) {
-            transform: translateY(-6px) scale(1.05);
-            filter: drop-shadow(0 10px 20px rgba(255,120,0,0.5));
-        }
-        .card.flipped { transform: rotateY(180deg); }
-        .face {
-            position: absolute; inset: 0;
-            backface-visibility: hidden;
-            border-radius: 8px; overflow: hidden;
-        }
-
-        /* ── Deck Stack (pre-selection) ── */
-        .deck-stack {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            min-height: 340px; margin: 1.5rem 0 2rem;
-        }
-        .stack-pile {
-            position: relative;
-            width: 150px; height: 255px;
-            cursor: default;
-        }
-        .stack-card {
-            position: absolute; inset: 0;
-            border-radius: 10px;
-            background: linear-gradient(145deg,#0a0028 0%,#180045 55%,#0a0020 100%);
-            border: 2px solid rgba(255,120,0,.4);
-            box-shadow: 0 0 18px rgba(255,100,0,.18), inset 0 0 28px rgba(100,0,200,.22);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .stack-card:nth-child(1){ transform: rotate(-5deg) translate(-10px, 8px); }
-        .stack-card:nth-child(2){ transform: rotate(-2.5deg) translate(-5px, 4px); }
-        .stack-card:nth-child(3){ transform: rotate(0deg); }
-        .stack-card:nth-child(4){ transform: rotate(2.5deg) translate(5px,-4px); }
-        .stack-card:nth-child(5){ transform: rotate(5deg) translate(10px,-8px); }
-        .stack-rune {
-            font-size: 1.8rem;
-            filter: drop-shadow(0 0 10px rgba(255,130,0,.9));
-            animation: slow-spin 14s linear infinite;
-        }
-        .stack-label {
-            margin-top: 1.4rem;
-            font-size: .72rem; letter-spacing: 4px;
-            text-transform: uppercase;
-            color: rgba(200,150,255,.55);
-            text-align: center;
-        }
-        .deck-stack.hidden { display: none; }
-        .pre-deck-hidden { display: none !important; }
-        #revealBtn { background:rgba(255,215,0,0.15); border-color:#ffd700; color:#ffd700; display:none; }
-
-        /* Card back */
-        .face-back {
-            background: linear-gradient(145deg,#0a0028 0%,#180045 55%,#0a0020 100%);
-            border: 2px solid rgba(255,120,0,.4);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(255,100,0,.15), inset 0 0 30px rgba(100,0,200,.22);
-        }
-        .back-art {
-            width: 80%; height: 84%;
-            border: 1px solid rgba(255,120,0,.22);
-            border-radius: 5px;
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
-        }
-        .back-art::before {
-            content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-            width:55px; height:55px; border-radius:50%;
-            border:2px solid rgba(255,120,0,.3);
-            box-shadow:0 0 12px rgba(255,100,0,.28);
-        }
-        .back-art::after {
-            content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-            width:34px; height:34px; border-radius:50%;
-            border:1px solid rgba(255,190,0,.4);
-        }
-        .back-rune {
-            font-size:1.6rem; z-index:1;
-            filter:drop-shadow(0 0 8px rgba(255,130,0,.9));
-            animation:slow-spin 12s linear infinite;
-        }
+        <style>
+        :root{--card-w:150px;--card-h:255px;--grid-cols:7;--sb-w:240px;--topbar-h:56px;--ph-bar-h:44px;--bnav-h:64px}
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{height:100%;overflow:hidden}
+        body{background:#0e0120;color:#f0e8ff;font-family:'Georgia',serif;-webkit-font-smoothing:antialiased}
+        .bg-glow{position:fixed;top:50%;left:50%;width:1400px;height:1400px;transform:translate(-50%,-50%);background:radial-gradient(ellipse at 30% 40%,rgba(255,80,220,.22) 0%,rgba(160,60,255,.18) 35%,rgba(60,180,255,.1) 65%,transparent 80%);animation:bg-rotate 25s linear infinite;pointer-events:none;z-index:0}
+        @keyframes bg-rotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+        .portal-rings{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
+        .ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;animation:ring-breathe 5s ease-in-out infinite}
+        .ring:nth-child(1){width:160px;height:160px;animation-delay:0s;border:1.5px solid rgba(232,72,196,.18)}
+        .ring:nth-child(2){width:340px;height:340px;animation-delay:.6s;border:1.5px solid rgba(168,85,247,.14)}
+        .ring:nth-child(3){width:540px;height:540px;animation-delay:1.2s;border:1.5px solid rgba(99,102,241,.1)}
+        .ring:nth-child(4){width:760px;height:760px;animation-delay:1.8s;border:1.5px solid rgba(6,182,212,.08)}
+        .ring:nth-child(5){width:1000px;height:1000px;animation-delay:2.4s;border:1.5px solid rgba(232,72,196,.06)}
+        @keyframes ring-breathe{0%,100%{opacity:.2}50%{opacity:.65}}
+        #particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+        #app{position:relative;z-index:1;display:grid;height:100dvh;overflow:hidden;grid-template-columns:var(--sb-w) 1fr;grid-template-areas:"sidebar main"}
+        #sidebar{grid-area:sidebar;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(22,4,52,.98) 0%,rgba(12,2,38,.99) 100%);border-right:1px solid rgba(255,80,220,.3);height:100dvh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(255,80,220,.3) transparent}
+        #sidebar::-webkit-scrollbar{width:3px}
+        #sidebar::-webkit-scrollbar-thumb{background:rgba(232,72,196,.32);border-radius:4px}
+        .sb-brand{display:flex;align-items:center;gap:.75rem;padding:1.3rem 1rem 1.1rem;border-bottom:1px solid rgba(255,80,220,.22);flex-shrink:0;background:linear-gradient(180deg,rgba(255,80,220,.12) 0%,rgba(140,60,255,.06) 60%,transparent 100%)}
+        .sb-eye{font-size:1.65rem;flex-shrink:0;filter:drop-shadow(0 0 12px rgba(232,72,196,.9));animation:eye-glow 3s ease-in-out infinite}
+        @keyframes eye-glow{0%,100%{filter:drop-shadow(0 0 12px rgba(232,72,196,.9))}50%{filter:drop-shadow(0 0 26px rgba(251,191,36,1))}}
+        .sb-brand-title{font-size:.8rem;letter-spacing:2.5px;text-transform:uppercase;font-weight:bold;background:linear-gradient(135deg,#e879f9,#fbbf24,#34d399,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .sb-brand-sub{font-size:.43rem;color:rgba(232,180,255,.4);letter-spacing:1.8px;text-transform:uppercase;margin-top:.2rem;line-height:1.55}
+        .sb-section{font-size:.44rem;letter-spacing:3px;text-transform:uppercase;color:rgba(232,180,255,.3);padding:.8rem 1rem .3rem}
+        .sb-section-flush{padding-top:.1rem}
+        .sb-nav{display:flex;flex-direction:column;padding:0 .6rem .5rem}
+        .sb-group{margin-bottom:.15rem}
+        .sb-group-btn{width:100%;display:flex;align-items:center;gap:.55rem;padding:.52rem .75rem;border:1px solid transparent;border-radius:8px;background:transparent;color:rgba(220,180,255,.52);font-family:'Georgia',serif;font-size:.7rem;text-align:left;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .sb-group-btn .sb-icon{font-size:.95rem;flex-shrink:0}
+        .sb-group-btn .sb-btn-text{flex:1}
+        .sb-group-btn .arrow{font-style:normal;font-size:.52rem;transition:transform .25s;color:rgba(220,180,255,.32)}
+        .sb-group-btn.open .arrow{transform:rotate(180deg)}
+        .sb-group-btn:hover{background:rgba(255,80,220,.12);border-color:rgba(255,80,220,.45);color:#ff9ef7}
+        .sb-group-btn.marvel-on,.sb-group-btn.omkar-on,.sb-group-btn.classic-on,.sb-group-btn.nordic-on{background:rgba(255,80,220,.15);border-color:rgba(255,80,220,.55);color:#ff9ef7}
+        .sb-submenu{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s,opacity .25s;padding-left:.55rem}
+        .sb-submenu.open{max-height:280px;opacity:1}
+        .sb-deck-btn{width:100%;display:flex;align-items:center;gap:.5rem;padding:.42rem .7rem;border:1px solid transparent;border-radius:6px;background:transparent;color:rgba(220,180,255,.44);font-family:'Georgia',serif;font-size:.65rem;text-align:left;cursor:pointer;transition:all .2s;margin-bottom:.12rem;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .sb-deck-btn .sb-icon{font-size:.88rem;flex-shrink:0}
+        .sb-deck-btn:hover{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.5);color:#fde68a}
+        .sb-deck-btn.active{background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(255,130,50,.12));border-color:#fbbf24;color:#fbbf24;font-weight:bold}
+        .sb-divider{height:1px;background:rgba(232,72,196,.11);margin:.35rem .75rem;flex-shrink:0}
+        .sb-stats-wrap{padding:0 .9rem .5rem}
+        .sb-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.15rem}
+        .sb-stat{text-align:center;padding:.6rem .3rem;background:rgba(232,72,196,.06);border:1px solid rgba(232,72,196,.15);border-radius:10px}
+        .sb-stat-num{font-size:1.4rem;font-weight:bold;color:#e879f9;line-height:1}
+        .sb-stat-label{font-size:.42rem;color:rgba(220,180,255,.4);letter-spacing:2px;text-transform:uppercase;margin-top:.18rem}
+        .sb-actions-wrap{padding:0 .6rem}
+        .sb-actions{display:flex;flex-direction:column;gap:.32rem;margin-top:.15rem}
+        .sb-btn{width:100%;padding:.52rem .75rem;text-align:left;border:1px solid rgba(255,80,220,.4);background:linear-gradient(135deg,rgba(255,80,220,.12),rgba(160,60,255,.08));color:#ff9ef7;font-family:'Georgia',serif;font-size:.64rem;letter-spacing:1.2px;text-transform:uppercase;border-radius:8px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .sb-btn:hover{background:linear-gradient(135deg,rgba(255,80,220,.28),rgba(160,60,255,.18));border-color:#ff50dc;color:#ffe0ff;box-shadow:0 0 14px rgba(255,80,220,.3)}
+        .sb-btn:disabled{opacity:.3;cursor:default}
+        .sb-btn-reset{border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.06);color:rgba(165,180,252,.82)}
+        .sb-btn-reset:hover{background:rgba(99,102,241,.16);border-color:#818cf8;color:#c7d2fe}
+        .sb-btn-view{border-color:rgba(52,211,153,.26);background:rgba(52,211,153,.05);color:rgba(52,211,153,.82)}
+        .sb-btn-view:hover{background:rgba(52,211,153,.15);border-color:#34d399;color:#6ee7b7}
+        .sb-hint{font-size:.44rem;color:rgba(220,180,255,.28);letter-spacing:2px;text-transform:uppercase;text-align:center;padding:.7rem .9rem;margin-top:auto;line-height:1.9}
+        .js-reveal-btn{display:none}
+        #app-main{grid-area:main;display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+        #app-topbar{display:none}
+        #app-tabbar{display:none}
+        #ph-bar{display:none}
+        #app-bottomnav{display:none}
+        #app-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:1.5rem 1rem 2rem;scroll-behavior:smooth}
+        #app-content::-webkit-scrollbar{width:5px}
+        #app-content::-webkit-scrollbar-thumb{background:rgba(232,72,196,.22);border-radius:5px}
+        #app-topbar{height:var(--topbar-h);flex-shrink:0;align-items:center;padding:0 1rem;gap:.75rem;background:linear-gradient(90deg,rgba(22,4,52,.98) 0%,rgba(14,2,38,.99) 100%);border-bottom:1px solid rgba(255,80,220,.28);position:relative;z-index:50}
+        .tb-eye{font-size:1.35rem;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(232,72,196,.85));animation:eye-glow 3s ease-in-out infinite}
+        .tb-title{flex:1;font-size:.78rem;letter-spacing:2px;text-transform:uppercase;font-weight:bold;background:linear-gradient(135deg,#e879f9,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .tb-stats{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+        .tb-chip{background:rgba(232,72,196,.12);border:1px solid rgba(232,72,196,.24);border-radius:20px;padding:.18rem .55rem;font-size:.56rem;color:rgba(232,72,196,.95);white-space:nowrap;font-family:'Georgia',serif}
+        .tb-chip .js-revealed,.tb-chip .js-hidden{font-weight:bold;font-size:.66rem}
+        .tb-chip-label{color:rgba(220,180,255,.45);font-size:.48rem;margin-left:.15rem}
+        .tb-btns{display:flex;gap:.32rem;flex-shrink:0}
+        .tb-icon-btn{width:2.1rem;height:2.1rem;border-radius:8px;border:1px solid rgba(232,72,196,.24);background:rgba(232,72,196,.08);color:rgba(232,72,196,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .tb-icon-btn:hover,.tb-icon-btn:active{background:rgba(232,72,196,.24);border-color:#e879f9;color:#f0abfc}
+        #app-tabbar{flex-shrink:0;flex-direction:column;background:linear-gradient(90deg,rgba(18,3,45,.98),rgba(12,2,35,.99));border-bottom:1px solid rgba(255,80,220,.22);padding:.5rem .7rem .4rem;gap:.32rem;position:relative;z-index:40}
+        .tab-nav-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.32rem}
+        .tab-group{display:inline-flex;flex-direction:column}
+        .tab-group-btn{display:inline-flex;align-items:center;gap:.32rem;padding:.4rem .82rem;border:1px solid rgba(220,180,255,.22);background:transparent;color:rgba(220,180,255,.55);font-family:'Georgia',serif;font-size:.65rem;letter-spacing:1px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .tab-group-btn .arrow{font-style:normal;font-size:.5rem;transition:transform .25s}
+        .tab-group-btn.open .arrow{transform:rotate(180deg)}
+        .tab-group-btn.marvel-on,.tab-group-btn.omkar-on,.tab-group-btn.classic-on,.tab-group-btn.nordic-on{border-color:rgba(251,191,36,.4);color:rgba(251,191,36,.88)}
+        .tab-submenu{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s,opacity .25s;display:flex;flex-wrap:wrap;gap:.26rem;padding-top:0}
+        .tab-submenu.open{max-height:80px;opacity:1;padding-top:.28rem}
+        .tab-deck-btn{padding:.34rem .68rem;border:1px solid rgba(220,180,255,.18);background:transparent;color:rgba(220,180,255,.5);font-family:'Georgia',serif;font-size:.6rem;border-radius:4px;cursor:pointer;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .tab-deck-btn:hover{border-color:rgba(251,191,36,.4);color:rgba(251,191,36,.88)}
+        .tab-deck-btn.active{border-color:rgba(251,191,36,.52);color:#fbbf24;background:rgba(251,191,36,.1)}
+        .tab-actions{display:flex;flex-wrap:wrap;gap:.28rem;border-top:1px solid rgba(232,72,196,.1);padding-top:.38rem}
+        .tab-ctrl-btn{padding:.34rem .72rem;border:1px solid rgba(232,72,196,.28);background:rgba(232,72,196,.06);color:rgba(232,72,196,.88);font-family:'Georgia',serif;font-size:.58rem;letter-spacing:1px;border-radius:4px;cursor:pointer;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .tab-ctrl-btn:hover,.tab-ctrl-btn:active{background:rgba(232,72,196,.2);border-color:#e879f9;color:#f0abfc}
+        #ph-bar{flex-shrink:0;height:var(--ph-bar-h);align-items:center;gap:.32rem;padding:0 .7rem;background:linear-gradient(90deg,rgba(18,3,45,.98),rgba(12,2,35,.99));border-top:1px solid rgba(255,80,220,.22);overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+        #ph-bar::-webkit-scrollbar{display:none}
+        .ph-btn{flex-shrink:0;padding:.3rem .7rem;border:1px solid rgba(232,72,196,.28);background:rgba(232,72,196,.07);color:rgba(232,72,196,.88);font-family:'Georgia',serif;font-size:.58rem;letter-spacing:1px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .ph-btn:hover,.ph-btn:active{background:rgba(232,72,196,.22);border-color:#e879f9}
+        #app-bottomnav{flex-shrink:0;height:var(--bnav-h);align-items:stretch;justify-content:space-around;background:linear-gradient(90deg,rgba(20,3,48,.99),rgba(10,2,32,.99));border-top:1px solid rgba(255,80,220,.28);padding:0 .4rem;padding-bottom:env(safe-area-inset-bottom,0px)}
+        .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;padding:.38rem .08rem;background:transparent;border:none;border-radius:8px;color:rgba(220,180,255,.32);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;position:relative}
+        .bnav-btn:active,.bnav-btn:hover{color:#ff9ef7}
+        .bnav-btn.active{color:#fbbf24}
+        .bnav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,#ff50dc,#fbbf24);box-shadow:0 0 12px rgba(255,80,220,.8)}
+        .bnav-icon{font-size:1.1rem;line-height:1}
+        .bnav-label{font-size:.36rem;letter-spacing:1px;text-transform:uppercase}
+        @media(max-width:1023px){#app{grid-template-columns:1fr;grid-template-areas:"main"}#sidebar{display:none}#app-topbar{display:flex}#app-tabbar{display:flex}#app-content{padding:1rem .7rem 1.5rem}}
+        @media(max-width:599px){#app-tabbar{display:none}#ph-bar{display:flex}#app-bottomnav{display:flex}#app-content{padding:.75rem .45rem .9rem}}
+        .pre-deck-hidden{display:none !important}
+        .hint{font-size:.5rem;color:rgba(220,180,255,.3);letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:.65rem}
+        .grid{display:grid;grid-template-columns:repeat(var(--grid-cols),var(--card-w));gap:8px;justify-content:center;margin:0 auto}
+        .card-wrap{perspective:1100px;width:var(--card-w);height:var(--card-h);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .85s cubic-bezier(0.175,0.885,0.32,1.275)}
+        .card:hover:not(.flipped){transform:translateY(-10px) scale(1.07);filter:drop-shadow(0 14px 32px rgba(255,80,220,.75))}
+        @media(hover:none){.card:hover:not(.flipped){transform:none;filter:none}}
+        .card.flipped{transform:rotateY(180deg)}
+        .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;overflow:hidden}
+        .deck-stack{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;padding:2rem 0}
+        .stack-pile{position:relative;width:150px;height:255px;cursor:default}
+        .stack-card{position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,#6d28d9,#a855f7,#ec4899);border:2.5px solid rgba(251,191,36,.75);box-shadow:0 6px 28px rgba(168,85,247,.55),inset 0 0 30px rgba(232,72,196,.3);display:flex;align-items:center;justify-content:center}
+        .stack-card:nth-child(1){transform:rotate(-5deg) translate(-10px,8px)}
+        .stack-card:nth-child(2){transform:rotate(-2.5deg) translate(-5px,4px)}
+        .stack-card:nth-child(3){transform:rotate(0deg)}
+        .stack-card:nth-child(4){transform:rotate(2.5deg) translate(5px,-4px)}
+        .stack-card:nth-child(5){transform:rotate(5deg) translate(10px,-8px)}
+        .stack-rune{font-size:1.8rem;filter:drop-shadow(0 0 12px rgba(251,191,36,1));animation:slow-spin 14s linear infinite}
+        .stack-label{margin-top:1.4rem;font-size:.7rem;letter-spacing:4px;text-transform:uppercase;color:rgba(220,180,255,.6);text-align:center}
+        .deck-stack.hidden{display:none}
+        .face-back{background:linear-gradient(135deg,#6d28d9 0%,#a855f7 40%,#ec4899 80%,#f59e0b 100%);border:2.5px solid rgba(251,191,36,.78);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 22px rgba(168,85,247,.45),inset 0 0 30px rgba(232,72,196,.28)}
+        .back-art{width:80%;height:84%;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;background:rgba(255,255,255,.05)}
+        .back-art::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:2px solid rgba(255,255,255,.4);box-shadow:0 0 18px rgba(251,191,36,.55)}
+        .back-art::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5)}
+        .back-rune{font-size:1.7rem;z-index:1;filter:drop-shadow(0 0 10px rgba(255,255,255,.9));animation:slow-spin 12s linear infinite}
         @keyframes slow-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-
-        /* Card front */
-        .face-front {
-            transform: rotateY(180deg);
-            background: linear-gradient(155deg,#0c0028 0%,#1a0055 45%,#0c0030 100%);
-            border: 2px solid rgba(255,120,0,.35);
-            display: flex; flex-direction: column; align-items: center;
-            padding: .6rem .5rem;
-            box-shadow: inset 0 0 24px rgba(100,0,200,.32);
-        }
-        .f-arcana { font-size:.42rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,120,0,.45); }
-        /* Serial number — card back corner badge */
-        .back-serial {
-            position:absolute; top:.45rem; left:.5rem; z-index:3;
-            font-size:1.05rem; font-weight:bold; letter-spacing:.5px;
-            color:rgba(255,210,120,.95); font-family:'Georgia',serif;
-            background:rgba(0,0,0,.5); border-radius:5px; padding:.04rem .38rem;
-            text-shadow:0 0 10px rgba(255,130,0,.9);
-            line-height:1.3;
-        }
-        /* Serial number — card front top badge */
-        .f-serial {
-            align-self:flex-start;
-            font-size:1.05rem; font-weight:bold; letter-spacing:.5px;
-            color:rgba(255,255,255,.92); font-family:'Georgia',serif;
-            background:rgba(255,120,0,.22); border:1.5px solid rgba(255,120,0,.5);
-            border-radius:5px; padding:.04rem .4rem;
-            text-shadow:0 0 8px rgba(255,120,0,.85);
-            margin-bottom:.06rem; line-height:1.3;
-        }
-        .f-symbol {
-            font-size:2.1rem; margin:.2rem 0;
-            animation:sym-breathe 2.5s ease-in-out infinite;
-        }
-        @keyframes sym-breathe{
-            0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px currentColor)}
-            50%{transform:scale(1.1);filter:drop-shadow(0 0 16px currentColor)}
-        }
-        .f-tarot-name { font-size:.46rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,120,0,.72); text-align:center; }
-        .f-marvel-name { font-size:.6rem; font-weight:bold; color:#e0c4ff; text-align:center; line-height:1.2; margin:.18rem 0; }
-        .f-line { width:78%; height:1px; margin:.22rem 0; background:linear-gradient(to right,transparent,rgba(255,120,0,.45),transparent); }
-        .f-keyword { font-size:.42rem; letter-spacing:1.5px; text-transform:uppercase; color:#ffd700; text-align:center; margin-bottom:.18rem; }
-        .f-yesno {
-            font-size:.62rem; font-weight:bold; letter-spacing:2.5px;
-            padding:.2rem .6rem; border-radius:50px;
-            margin:.14rem 0 .18rem;
-        }
-        .f-yesno.yes  { background:rgba(0,255,100,.12); border:1.5px solid #00e664; color:#00e664; }
-        .f-yesno.no   { background:rgba(255,60,60,.12);  border:1.5px solid #ff4444; color:#ff4444; }
-        .f-yesno.maybe{ background:rgba(255,200,0,.12);  border:1.5px solid #ffd700; color:#ffd700; }
-        .f-tap { font-size:.4rem; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,120,0,.35); margin-top:auto; }
-
-        /* ── Card Modal (full-screen overlay) ── */
-        .card-modal {
-            position: fixed; inset: 0;
-            background: rgba(0,0,14,0.85);
-            z-index: 2000;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none;
-            visibility: hidden;
-            transition: opacity .3s ease, visibility 0s .3s;
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
-            padding: 0.8rem;
-        }
-        .card-modal.open {
-            opacity: 1; pointer-events: all; visibility: visible;
-            transition: opacity .3s ease, visibility 0s 0s;
-        }
-        .modal-box {
-            background: rgba(8,0,25,0.98);
-            border: 1px solid rgba(255,120,0,.5);
-            border-radius: 14px;
-            padding: 1.6rem 1.4rem 1.4rem;
-            max-width: 460px; width: 100%;
-            max-height: 92vh; overflow-y: auto;
-            position: relative;
-            box-shadow: 0 0 60px rgba(255,100,0,.22), inset 0 0 40px rgba(80,0,180,.22);
-            animation: modal-in .3s cubic-bezier(0.175,0.885,0.32,1.275);
-        }
-        @media (max-width: 480px) {
-            .modal-box { padding: 1.4rem 1.1rem 1.2rem; }
-        }
-        @keyframes modal-in {
-            from { transform: scale(0.82) translateY(30px); opacity: 0; }
-            to   { transform: scale(1)    translateY(0);    opacity: 1; }
-        }
-        .modal-close {
-            position: absolute; top: .9rem; right: 1rem;
-            background: none; border: none;
-            color: rgba(200,150,255,.55); font-size: 1.3rem;
-            cursor: pointer; line-height: 1; transition: color .2s;
-        }
-        .modal-close:hover { color: #ff8c00; }
-        .modal-symbol {
-            font-size: 3rem; display: block; text-align: center; margin-bottom: .5rem;
-            animation: sym-breathe 2.5s ease-in-out infinite;
-        }
-        .modal-title { text-align:center; font-size:1.1rem; font-weight:bold; letter-spacing:2px; margin-bottom:.15rem; }
-        .modal-sub { text-align:center; font-size:.65rem; letter-spacing:3px; text-transform:uppercase; color:rgba(255,120,0,.6); margin-bottom:.9rem; }
-        .modal-yesno { display:flex; justify-content:center; margin-bottom:1.1rem; }
-        .yesno-badge {
-            font-size: 1.35rem; font-weight: bold; letter-spacing: 5px;
-            padding: .45rem 2rem; border-radius: 50px;
-        }
-        .yesno-badge.yes   { background:rgba(0,255,100,.14); border:2px solid #00e664; color:#00e664; text-shadow:0 0 14px #00e664; }
-        .yesno-badge.no    { background:rgba(255,60,60,.14);  border:2px solid #ff4444; color:#ff4444; text-shadow:0 0 14px #ff4444; }
-        .yesno-badge.maybe { background:rgba(255,200,0,.14);  border:2px solid #ffd700; color:#ffd700; text-shadow:0 0 14px #ffd700; }
-        .modal-divider { height:1px; background:linear-gradient(to right,transparent,rgba(255,120,0,.35),transparent); margin:.85rem 0; }
-        .modal-section-label { font-size:.55rem; letter-spacing:3.5px; text-transform:uppercase; color:rgba(200,150,255,.4); margin-bottom:.4rem; }
-        .modal-simple { font-size:1rem; color:#e8d8ff; line-height:1.65; margin-bottom:.5rem; }
-        .modal-deep-toggle {
-            background:none; border:none; color:rgba(255,120,0,.5);
-            font-size:.6rem; letter-spacing:2.5px; text-transform:uppercase;
-            cursor:pointer; padding:0; margin-bottom:.5rem; transition:color .2s;
-        }
-        .modal-deep-toggle:hover { color:#ff8c00; }
-        .modal-deep { font-size:.85rem; color:rgba(200,175,255,.7); line-height:1.75; display:none; padding-top:.4rem; }
-        .modal-deep.open { display:block; }
-        .modal-keyword { text-align:center; font-size:.58rem; letter-spacing:3px; text-transform:uppercase; margin-top:.8rem; }
-
-        /* Card states */
-        .card-wrap.selected .face-back {
-            border-color: #ffd700;
-            box-shadow: 0 0 30px rgba(255,215,0,0.6), inset 0 0 30px rgba(100,0,200,.4);
-            filter: brightness(1.2);
-        }
-        .card-wrap.selected { transform: translateY(-6px) scale(1.03); }
-        .card-wrap.selected .back-rune {
-            animation: slow-spin 12s linear infinite, hint-pulse 1s ease-in-out infinite;
-        }
-        @keyframes hint-pulse {
-            0%,100%{filter:drop-shadow(0 0 8px rgba(255,215,0,.7))}
-            50%{filter:drop-shadow(0 0 18px rgba(255,215,0,1))}
-        }
-        .card-wrap.revealed .face-back { opacity:.45; }
-        .card-wrap.revealed .face-front { cursor:pointer; }
-
-        /* ══════════════════════════════════════════════════
-           VEDIC DECK — Saffron temple / mandala aesthetic
-           ══════════════════════════════════════════════════ */
-        body[data-deck="vedic"] {
-            background: #0e0600;
-            color: #ffe8c0;
-        }
-        body[data-deck="vedic"] .bg-glow {
-            background: radial-gradient(ellipse, rgba(255,140,0,.09) 0%, rgba(180,70,0,.1) 40%, transparent 70%);
-        }
-        body[data-deck="vedic"] .ring { border-color: rgba(255,145,20,.14); }
-        /* Card back */
-        body[data-deck="vedic"] .face-back {
-            background: linear-gradient(145deg,#1e0900 0%,#40180a 55%,#140600 100%);
-            border: 2px solid rgba(255,160,30,.52);
-            box-shadow: 0 0 22px rgba(255,140,0,.2), inset 0 0 32px rgba(160,60,0,.3);
-        }
-        body[data-deck="vedic"] .back-art { border-color: rgba(255,160,30,.3); }
-        body[data-deck="vedic"] .back-art::before {
-            width:58px; height:58px;
-            border:2px solid rgba(255,160,30,.45);
-            box-shadow:0 0 14px rgba(255,140,0,.4);
-        }
-        body[data-deck="vedic"] .back-art::after {
-            width:36px; height:36px;
-            border:1.5px solid rgba(255,215,80,.55);
-            border-radius:0;          /* square — mandala inner frame */
-            transform:translate(-50%,-50%) rotate(45deg);
-        }
-        body[data-deck="vedic"] .back-rune {
-            font-size:1.5rem;
-            filter:drop-shadow(0 0 10px rgba(255,170,30,1));
-            animation:slow-spin 22s linear infinite;
-        }
-        /* Card front */
-        body[data-deck="vedic"] .face-front {
-            background: linear-gradient(155deg,#1e0900 0%,#3f1800 45%,#160700 100%);
-        }
-        body[data-deck="vedic"] .f-arcana    { color:rgba(255,160,30,.6); }
-        body[data-deck="vedic"] .back-serial { color:rgba(255,210,80,.95); text-shadow:0 0 10px rgba(255,150,0,.9); background:rgba(0,0,0,.5); }
-        body[data-deck="vedic"] .f-serial    { background:rgba(220,110,0,.22); border-color:rgba(220,110,0,.55); color:rgba(255,230,140,.95); text-shadow:0 0 8px rgba(220,130,0,.85); }
-        body[data-deck="vedic"] .f-tarot-name { color:rgba(255,160,30,.8); }
-        body[data-deck="vedic"] .f-tap        { color:rgba(255,160,30,.35); }
-        body[data-deck="vedic"] .card-wrap.selected .face-back {
-            border-color:#ffd700;
-            box-shadow:0 0 32px rgba(255,210,0,.62), inset 0 0 32px rgba(160,60,0,.4);
-        }
-
-        /* ══════════════════════════════════════════════════
-           TANTRIK DECK — Crimson yantra / fierce energy
-           ══════════════════════════════════════════════════ */
-        body[data-deck="tantrik"] {
-            background: #0a0005;
-            color: #ffc8de;
-        }
-        body[data-deck="tantrik"] .bg-glow {
-            background: radial-gradient(ellipse, rgba(210,0,60,.08) 0%, rgba(120,0,70,.1) 40%, transparent 70%);
-        }
-        body[data-deck="tantrik"] .ring { border-color: rgba(210,0,60,.13); }
-        /* Card back */
-        body[data-deck="tantrik"] .face-back {
-            background: linear-gradient(145deg,#1c0009 0%,#3e001a 55%,#110006 100%);
-            border: 2px solid rgba(210,0,60,.55);
-            box-shadow: 0 0 22px rgba(200,0,50,.2), inset 0 0 32px rgba(100,0,40,.34);
-        }
-        body[data-deck="tantrik"] .back-art {
-            border-color: rgba(210,0,60,.3);
-            border-radius: 0;              /* square yantra frame */
-            transform: rotate(45deg);      /* diamond orientation */
-        }
-        body[data-deck="tantrik"] .back-rune {
-            font-size:1.4rem;
-            transform: rotate(-45deg);     /* keep rune upright */
-            animation: tantrik-spin 9s linear infinite;
-            filter:drop-shadow(0 0 10px rgba(220,0,70,1));
-        }
-        @keyframes tantrik-spin {
-            from { transform: rotate(-45deg); }
-            to   { transform: rotate(-45deg) rotate(360deg); }
-        }
-        body[data-deck="tantrik"] .back-art::before {
-            width:52px; height:52px;
-            border-radius:0;
-            border:2px solid rgba(210,0,60,.48);
-            box-shadow:0 0 14px rgba(200,0,55,.42);
-            transform:translate(-50%,-50%) rotate(0deg);
-        }
-        body[data-deck="tantrik"] .back-art::after {
-            width:32px; height:32px;
-            border-radius:0;
-            border:1.5px solid rgba(255,80,130,.55);
-            transform:translate(-50%,-50%) rotate(45deg);
-        }
-        /* Card front */
-        body[data-deck="tantrik"] .face-front {
-            background: linear-gradient(155deg,#1c0009 0%,#3e001a 45%,#130006 100%);
-        }
-        body[data-deck="tantrik"] .f-arcana    { color:rgba(220,0,70,.6); }
-        body[data-deck="tantrik"] .back-serial  { color:rgba(255,140,170,.95); text-shadow:0 0 10px rgba(220,0,60,.9); background:rgba(0,0,0,.5); }
-        body[data-deck="tantrik"] .f-serial     { background:rgba(200,0,55,.22); border-color:rgba(200,0,55,.55); color:rgba(255,170,200,.95); text-shadow:0 0 8px rgba(220,0,65,.85); }
-        body[data-deck="tantrik"] .f-tarot-name { color:rgba(220,0,70,.82); }
-        body[data-deck="tantrik"] .f-tap        { color:rgba(220,0,70,.35); }
-        body[data-deck="tantrik"] .card-wrap.selected .face-back {
-            border-color:#ff4499;
-            box-shadow:0 0 32px rgba(255,50,150,.58), inset 0 0 32px rgba(100,0,40,.4);
-        }
-        /* ══════════════════════════════════════════════════
-           MYSTIC DECK — Deep cosmic violet / portal rings
-           ══════════════════════════════════════════════════ */
-        body[data-deck="mystic"] { background:#07001a; color:#e0c4ff; }
-        body[data-deck="mystic"] .bg-glow { background:radial-gradient(ellipse,rgba(120,60,255,.09) 0%,rgba(80,0,200,.1) 40%,transparent 70%); }
-        body[data-deck="mystic"] .ring { border-color:rgba(130,70,255,.13); }
-        body[data-deck="mystic"] .face-back {
-            background:linear-gradient(145deg,#08001e 0%,#1a0055 55%,#080018 100%);
-            border:2px solid rgba(140,70,255,.55);
-            box-shadow:0 0 22px rgba(120,60,255,.22),inset 0 0 32px rgba(80,0,200,.3);
-        }
-        body[data-deck="mystic"] .back-art { border-color:rgba(140,80,255,.3); }
-        body[data-deck="mystic"] .back-art::before { border:2px solid rgba(140,80,255,.45); box-shadow:0 0 14px rgba(120,60,255,.48); }
-        body[data-deck="mystic"] .back-art::after  { border:1.5px solid rgba(190,130,255,.55); }
-        body[data-deck="mystic"] .back-rune { filter:drop-shadow(0 0 10px rgba(170,90,255,1)); }
-        body[data-deck="mystic"] .back-serial { color:rgba(200,160,255,.95); text-shadow:0 0 10px rgba(140,80,255,.9); }
-        body[data-deck="mystic"] .face-front { background:linear-gradient(155deg,#0c0028 0%,#1e0070 45%,#0c0030 100%); border-color:rgba(140,70,255,.4); }
-        body[data-deck="mystic"] .f-serial   { background:rgba(130,60,255,.22); border-color:rgba(130,60,255,.55); color:rgba(210,170,255,.95); text-shadow:0 0 8px rgba(140,80,255,.85); }
-        body[data-deck="mystic"] .f-arcana   { color:rgba(160,100,255,.6); }
-        body[data-deck="mystic"] .f-tarot-name { color:rgba(180,120,255,.82); }
-        body[data-deck="mystic"] .f-marvel-name { color:#d8bcff; }
-        body[data-deck="mystic"] .f-line { background:linear-gradient(to right,transparent,rgba(140,80,255,.55),transparent) !important; }
-        body[data-deck="mystic"] .f-tap  { color:rgba(160,100,255,.38); }
-        body[data-deck="mystic"] .card-wrap.selected .face-back { border-color:#aa66ff; box-shadow:0 0 30px rgba(160,100,255,.65),inset 0 0 30px rgba(80,0,200,.4); }
-
-        /* ══════════════════════════════════════════════════
-           AVENGERS DECK — Dark navy · steel · crimson
-           ══════════════════════════════════════════════════ */
-        body[data-deck="avengers"] { background:#00050e; color:#dceeff; }
-        body[data-deck="avengers"] .bg-glow { background:radial-gradient(ellipse,rgba(40,80,200,.08) 0%,rgba(200,30,30,.08) 40%,transparent 70%); }
-        body[data-deck="avengers"] .ring { border-color:rgba(180,50,50,.12); }
-        body[data-deck="avengers"] .face-back {
-            background:linear-gradient(145deg,#000818 0%,#001040 55%,#000614 100%);
-            border:2px solid rgba(200,50,50,.55);
-            box-shadow:0 0 22px rgba(180,40,40,.2),inset 0 0 32px rgba(20,30,80,.35);
-        }
-        body[data-deck="avengers"] .back-art { border-color:rgba(200,50,50,.3); }
-        body[data-deck="avengers"] .back-art::before { width:54px;height:54px; border:2px solid rgba(200,50,50,.5); box-shadow:0 0 14px rgba(200,40,40,.42); border-radius:0; transform:translate(-50%,-50%) rotate(45deg); }
-        body[data-deck="avengers"] .back-art::after  { width:34px;height:34px; border:1.5px solid rgba(255,200,200,.48); border-radius:50%; }
-        body[data-deck="avengers"] .back-rune { filter:drop-shadow(0 0 10px rgba(230,60,60,1)); }
-        body[data-deck="avengers"] .back-serial { color:rgba(255,180,180,.95); text-shadow:0 0 10px rgba(220,50,50,.9); }
-        body[data-deck="avengers"] .face-front { background:linear-gradient(155deg,#000a20 0%,#001650 45%,#000c28 100%); border-color:rgba(200,50,50,.4); }
-        body[data-deck="avengers"] .f-serial   { background:rgba(200,40,40,.22); border-color:rgba(200,40,40,.55); color:rgba(255,200,200,.95); text-shadow:0 0 8px rgba(220,50,50,.85); }
-        body[data-deck="avengers"] .f-arcana   { color:rgba(200,100,100,.6); }
-        body[data-deck="avengers"] .f-tarot-name { color:rgba(220,120,120,.82); }
-        body[data-deck="avengers"] .f-marvel-name { color:#d0e8ff; }
-        body[data-deck="avengers"] .f-line { background:linear-gradient(to right,transparent,rgba(200,50,50,.55),transparent) !important; }
-        body[data-deck="avengers"] .f-tap  { color:rgba(200,100,100,.38); }
-        body[data-deck="avengers"] .card-wrap.selected .face-back { border-color:#ff4444; box-shadow:0 0 30px rgba(255,60,60,.65),inset 0 0 30px rgba(100,0,20,.4); }
-
-        /* ══════════════════════════════════════════════════
-           GODS DECK — Dark bronze · ancient gold · thunder
-           ══════════════════════════════════════════════════ */
-        body[data-deck="gods"] { background:#080600; color:#fff8e0; }
-        body[data-deck="gods"] .bg-glow { background:radial-gradient(ellipse,rgba(220,160,20,.08) 0%,rgba(150,80,0,.09) 40%,transparent 70%); }
-        body[data-deck="gods"] .ring { border-color:rgba(220,170,20,.12); }
-        body[data-deck="gods"] .face-back {
-            background:linear-gradient(145deg,#0e0800 0%,#2a1800 55%,#0a0600 100%);
-            border:2px solid rgba(220,170,20,.55);
-            box-shadow:0 0 22px rgba(200,150,0,.2),inset 0 0 32px rgba(80,40,0,.35);
-        }
-        body[data-deck="gods"] .back-art { border-color:rgba(220,170,20,.3); }
-        body[data-deck="gods"] .back-art::before { width:58px;height:58px; border:2px solid rgba(220,170,20,.5); box-shadow:0 0 16px rgba(220,180,0,.5); border-radius:50%; }
-        body[data-deck="gods"] .back-art::after  { width:36px;height:36px; border:1.5px solid rgba(255,220,80,.55); border-radius:0; transform:translate(-50%,-50%) rotate(45deg); }
-        body[data-deck="gods"] .back-rune { filter:drop-shadow(0 0 10px rgba(255,210,0,1)); animation:slow-spin 20s linear infinite; }
-        body[data-deck="gods"] .back-serial { color:rgba(255,228,100,.95); text-shadow:0 0 10px rgba(220,180,0,.9); }
-        body[data-deck="gods"] .face-front { background:linear-gradient(155deg,#100900 0%,#2e1800 45%,#0e0700 100%); border-color:rgba(210,160,20,.4); }
-        body[data-deck="gods"] .f-serial   { background:rgba(200,150,0,.22); border-color:rgba(200,150,0,.55); color:rgba(255,232,130,.95); text-shadow:0 0 8px rgba(220,170,0,.85); }
-        body[data-deck="gods"] .f-arcana   { color:rgba(200,155,50,.6); }
-        body[data-deck="gods"] .f-tarot-name { color:rgba(220,170,60,.82); }
-        body[data-deck="gods"] .f-marvel-name { color:#fff0c8; }
-        body[data-deck="gods"] .f-line { background:linear-gradient(to right,transparent,rgba(210,160,20,.55),transparent) !important; }
-        body[data-deck="gods"] .f-tap  { color:rgba(200,155,50,.38); }
-        body[data-deck="gods"] .card-wrap.selected .face-back { border-color:#ffd700; box-shadow:0 0 30px rgba(255,210,0,.65),inset 0 0 30px rgba(100,60,0,.4); }
+        .face-front{transform:rotateY(180deg);background:linear-gradient(160deg,#ffffff 0%,#f7f0ff 55%,#fff4fb 100%);border:2.5px solid rgba(168,85,247,.55);display:flex;flex-direction:column;align-items:center;padding:.5rem .42rem .38rem;box-shadow:inset 0 0 24px rgba(200,80,255,.1)}
+        .f-arcana{font-size:.52rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(109,40,217,.7);font-weight:600;margin-bottom:.04rem}
+        .back-serial{position:absolute;top:.45rem;left:.5rem;z-index:3;font-size:1rem;font-weight:bold;letter-spacing:.5px;color:#fff;font-family:'Georgia',serif;background:rgba(109,40,217,.72);border-radius:5px;padding:.04rem .38rem;text-shadow:0 1px 4px rgba(0,0,0,.4);line-height:1.3}
+        .f-serial{align-self:flex-start;font-size:.88rem;font-weight:bold;letter-spacing:.5px;color:#fff;font-family:'Georgia',serif;background:linear-gradient(135deg,#7c3aed,#a855f7);border:1.5px solid rgba(168,85,247,.6);border-radius:6px;padding:.03rem .38rem;text-shadow:0 1px 3px rgba(0,0,0,.3);margin-bottom:.05rem;line-height:1.25}
+        .f-symbol{font-size:2.4rem;margin:.12rem 0;animation:sym-breathe 2.5s ease-in-out infinite}
+        @keyframes sym-breathe{0%,100%{transform:scale(1);filter:drop-shadow(0 0 8px currentColor)}50%{transform:scale(1.12);filter:drop-shadow(0 0 22px currentColor)}}
+        .f-tarot-name{font-size:.5rem;letter-spacing:1px;text-transform:uppercase;color:rgba(109,40,217,.65);text-align:center;margin-bottom:.08rem}
+        .f-marvel-name{font-size:.72rem;font-weight:900;color:#1a0040;text-align:center;line-height:1.2;margin:.1rem 0 .14rem;text-shadow:0 1px 0 rgba(255,255,255,.8)}
+        .f-line{width:82%;height:1.5px;margin:.14rem 0;background:linear-gradient(to right,transparent,rgba(168,85,247,.6),transparent)}
+        .f-keyword{font-size:.48rem;letter-spacing:1px;text-transform:uppercase;font-weight:700;color:#6d28d9;text-align:center;margin-bottom:.1rem;opacity:.85}
+        .f-yesno{font-size:.66rem;font-weight:bold;letter-spacing:2px;padding:.2rem .55rem;border-radius:50px;margin:.1rem 0 .12rem}
+        .f-yesno.yes{background:rgba(16,185,129,.18);border:2px solid #10b981;color:#047857}
+        .f-yesno.no{background:rgba(239,68,68,.15);border:2px solid #ef4444;color:#dc2626}
+        .f-yesno.maybe{background:rgba(245,158,11,.15);border:2px solid #f59e0b;color:#92400e}
+        .f-tap{font-size:.42rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(109,40,217,.4);margin-top:auto;padding-top:.12rem}
+        .card-modal{position:fixed;inset:0;background:rgba(15,4,40,.87);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;visibility:hidden;transition:opacity .3s ease,visibility 0s .3s;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:.8rem}
+        .card-modal.open{opacity:1;pointer-events:all;visibility:visible;transition:opacity .3s ease,visibility 0s 0s}
+        .modal-box{background:linear-gradient(160deg,#12022e 0%,#1e0545 60%,#140830 100%);border:1.5px solid rgba(255,80,220,.55);border-radius:16px;padding:0;max-width:460px;width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 60px rgba(255,80,220,.32),0 0 0 1px rgba(255,80,220,.1),inset 0 0 40px rgba(200,60,255,.08);animation:modal-in .3s cubic-bezier(0.175,0.885,0.32,1.275)}
+        .modal-topbar{flex-shrink:0;display:flex;justify-content:flex-end;align-items:center;padding:.55rem .7rem .2rem;border-bottom:1px solid rgba(232,72,196,.15)}
+        .modal-body{overflow-y:auto;flex:1;padding:1rem 1.4rem 1.4rem;scroll-behavior:smooth}
+        @media(max-width:480px){.card-modal{padding:.4rem max(.4rem,env(safe-area-inset-right,0px)) max(.4rem,env(safe-area-inset-bottom,0px)) max(.4rem,env(safe-area-inset-left,0px));align-items:flex-end}.modal-box{border-radius:18px 18px 0 0;max-height:96vh;width:100%;max-width:100%}.modal-body{padding:.9rem 1.1rem max(1.2rem,env(safe-area-inset-bottom,0px))}}
+        @keyframes modal-in{from{transform:scale(.82) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+        .modal-close{background:rgba(232,72,196,.12);border:1px solid rgba(232,72,196,.3);border-radius:50%;color:rgba(232,180,255,.8);font-size:1.05rem;cursor:pointer;line-height:1;transition:all .2s;width:2.6rem;height:2.6rem;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+        .modal-close:hover,.modal-close:active{color:#f0abfc;background:rgba(232,72,196,.26);border-color:rgba(232,72,196,.62)}
+        .modal-symbol{font-size:3rem;display:block;text-align:center;margin-bottom:.5rem;animation:sym-breathe 2.5s ease-in-out infinite}
+        .modal-title{text-align:center;font-size:1.1rem;font-weight:bold;letter-spacing:2px;margin-bottom:.15rem;color:#f8f0ff}
+        .modal-sub{text-align:center;font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(232,72,196,.72);margin-bottom:.9rem}
+        .modal-yesno{display:flex;justify-content:center;margin-bottom:1.1rem}
+        .yesno-badge{font-size:1.35rem;font-weight:bold;letter-spacing:5px;padding:.45rem 2rem;border-radius:50px}
+        .yesno-badge.yes{background:rgba(16,185,129,.18);border:2px solid #10b981;color:#10b981;text-shadow:0 0 14px #10b981}
+        .yesno-badge.no{background:rgba(239,68,68,.16);border:2px solid #ef4444;color:#ef4444;text-shadow:0 0 14px #ef4444}
+        .yesno-badge.maybe{background:rgba(245,158,11,.16);border:2px solid #f59e0b;color:#f59e0b;text-shadow:0 0 14px #f59e0b}
+        .modal-divider{height:1px;background:linear-gradient(to right,transparent,rgba(232,72,196,.42),transparent);margin:.85rem 0}
+        .modal-section-label{font-size:.55rem;letter-spacing:3.5px;text-transform:uppercase;color:rgba(220,180,255,.45);margin-bottom:.4rem}
+        .modal-simple{font-size:1rem;color:#f0e8ff;line-height:1.65;margin-bottom:.5rem}
+        .modal-deep-toggle{background:none;border:none;color:rgba(232,72,196,.55);font-size:.6rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;padding:0;margin-bottom:.5rem;transition:color .2s}
+        .modal-deep-toggle:hover{color:#e879f9}
+        .modal-deep{font-size:.85rem;color:rgba(220,180,255,.75);line-height:1.75;display:none;padding-top:.4rem}
+        .modal-deep.open{display:block}
+        .modal-keyword{text-align:center;font-size:.58rem;letter-spacing:3px;text-transform:uppercase;margin-top:.8rem;color:#fbbf24}
+        .card-wrap.selected .face-back{border-color:#fbbf24;box-shadow:0 0 42px rgba(251,191,36,.9),0 0 80px rgba(255,80,220,.4),inset 0 0 24px rgba(168,85,247,.35);filter:brightness(1.18)}
+        .card-wrap.selected{transform:translateY(-10px) scale(1.05)}
+        .card-wrap.selected .back-rune{animation:slow-spin 10s linear infinite,hint-pulse 1s ease-in-out infinite}
+        @keyframes hint-pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(251,191,36,.82))}50%{filter:drop-shadow(0 0 24px rgba(251,191,36,1))}}
+        .card-wrap.revealed .face-back{opacity:.5}
+        .card-wrap.revealed .face-front{cursor:pointer}
+        body[data-deck="vedic"]{background:#0e0600;color:#ffe8c0}
+        body[data-deck="vedic"] .bg-glow{background:radial-gradient(ellipse,rgba(255,140,0,.14) 0%,rgba(180,70,0,.14) 40%,transparent 70%)}
+        body[data-deck="vedic"] .ring{border-color:rgba(255,145,20,.16)}
+        body[data-deck="vedic"] .face-back{background:linear-gradient(135deg,#ea580c 0%,#f97316 35%,#fbbf24 70%,#f59e0b 100%);border:2.5px solid rgba(255,255,255,.52);box-shadow:0 4px 22px rgba(234,88,12,.55),inset 0 0 28px rgba(251,191,36,.22)}
+        body[data-deck="vedic"] .back-art{border-color:rgba(255,255,255,.35)}
+        body[data-deck="vedic"] .back-art::before{border:2px solid rgba(255,255,255,.52);box-shadow:0 0 16px rgba(251,191,36,.62)}
+        body[data-deck="vedic"] .back-art::after{border:1.5px solid rgba(255,255,255,.62);border-radius:0;transform:translate(-50%,-50%) rotate(45deg)}
+        body[data-deck="vedic"] .back-rune{filter:drop-shadow(0 0 10px rgba(255,255,255,.92));animation:slow-spin 22s linear infinite}
+        body[data-deck="vedic"] .face-front{border-color:rgba(234,88,12,.75)}
+        body[data-deck="vedic"] .f-arcana{color:rgba(180,60,0,.7)}
+        body[data-deck="vedic"] .back-serial{background:rgba(180,50,0,.78);color:#fff}
+        body[data-deck="vedic"] .f-serial{background:linear-gradient(135deg,#ea580c,#f97316);border-color:rgba(234,88,12,.62);color:#fff}
+        body[data-deck="vedic"] .f-tarot-name{color:rgba(180,60,0,.82)}
+        body[data-deck="vedic"] .f-marvel-name{color:#431407}
+        body[data-deck="vedic"] .f-line{background:linear-gradient(to right,transparent,rgba(234,88,12,.52),transparent) !important}
+        body[data-deck="vedic"] .f-tap{color:rgba(234,88,12,.38)}
+        body[data-deck="vedic"] .card-wrap.selected .face-back{border-color:#fff;box-shadow:0 0 38px rgba(251,191,36,.82),inset 0 0 24px rgba(234,88,12,.3)}
+        body[data-deck="tantrik"]{background:#0a0005;color:#ffc8de}
+        body[data-deck="tantrik"] .bg-glow{background:radial-gradient(ellipse,rgba(236,72,153,.14) 0%,rgba(190,24,93,.14) 40%,transparent 70%)}
+        body[data-deck="tantrik"] .ring{border-color:rgba(236,72,153,.16)}
+        body[data-deck="tantrik"] .face-back{background:linear-gradient(135deg,#9d174d 0%,#db2777 40%,#f43f5e 75%,#e11d48 100%);border:2.5px solid rgba(255,255,255,.52);box-shadow:0 4px 22px rgba(219,39,119,.55),inset 0 0 28px rgba(244,63,94,.22)}
+        body[data-deck="tantrik"] .back-art{border-color:rgba(255,255,255,.35);border-radius:0;transform:rotate(45deg)}
+        body[data-deck="tantrik"] .back-rune{font-size:1.4rem;transform:rotate(-45deg);animation:tantrik-spin 9s linear infinite;filter:drop-shadow(0 0 10px rgba(255,255,255,.92))}
+        @keyframes tantrik-spin{from{transform:rotate(-45deg)}to{transform:rotate(-45deg) rotate(360deg)}}
+        body[data-deck="tantrik"] .back-art::before{width:52px;height:52px;border-radius:0;border:2px solid rgba(255,255,255,.52);box-shadow:0 0 14px rgba(255,100,150,.52);transform:translate(-50%,-50%) rotate(0deg)}
+        body[data-deck="tantrik"] .back-art::after{width:32px;height:32px;border-radius:0;border:1.5px solid rgba(255,255,255,.62);transform:translate(-50%,-50%) rotate(45deg)}
+        body[data-deck="tantrik"] .face-front{border-color:rgba(219,39,119,.75)}
+        body[data-deck="tantrik"] .f-arcana{color:rgba(157,23,77,.72)}
+        body[data-deck="tantrik"] .back-serial{background:rgba(157,23,77,.78);color:#fff}
+        body[data-deck="tantrik"] .f-serial{background:linear-gradient(135deg,#9d174d,#db2777);border-color:rgba(219,39,119,.62);color:#fff}
+        body[data-deck="tantrik"] .f-tarot-name{color:rgba(157,23,77,.82)}
+        body[data-deck="tantrik"] .f-marvel-name{color:#4a0010}
+        body[data-deck="tantrik"] .f-line{background:linear-gradient(to right,transparent,rgba(219,39,119,.52),transparent) !important}
+        body[data-deck="tantrik"] .f-tap{color:rgba(219,39,119,.38)}
+        body[data-deck="tantrik"] .card-wrap.selected .face-back{border-color:#fff;box-shadow:0 0 38px rgba(244,63,94,.82),inset 0 0 24px rgba(219,39,119,.3)}
+        body[data-deck="mystic"]{background:#1a0538;color:#f8f0ff}
+        body[data-deck="mystic"] .bg-glow{background:radial-gradient(ellipse,rgba(232,72,196,.14) 0%,rgba(124,58,237,.14) 40%,transparent 70%)}
+        body[data-deck="mystic"] .ring:nth-child(1){border-color:rgba(232,72,196,.2)}
+        body[data-deck="mystic"] .ring:nth-child(2){border-color:rgba(168,85,247,.16)}
+        body[data-deck="mystic"] .ring:nth-child(3){border-color:rgba(99,102,241,.12)}
+        body[data-deck="mystic"] .ring:nth-child(4){border-color:rgba(6,182,212,.08)}
+        body[data-deck="mystic"] .ring:nth-child(5){border-color:rgba(232,72,196,.06)}
+        body[data-deck="mystic"] .face-back{background:linear-gradient(135deg,#6d28d9 0%,#a855f7 40%,#ec4899 80%,#f59e0b 100%);border:2.5px solid rgba(251,191,36,.78);box-shadow:0 4px 22px rgba(168,85,247,.52),inset 0 0 28px rgba(232,72,196,.28)}
+        body[data-deck="mystic"] .back-art{border-color:rgba(255,255,255,.32)}
+        body[data-deck="mystic"] .back-art::before{border:2px solid rgba(255,255,255,.46);box-shadow:0 0 18px rgba(251,191,36,.52)}
+        body[data-deck="mystic"] .back-art::after{border:1.5px solid rgba(255,255,255,.56)}
+        body[data-deck="mystic"] .back-rune{filter:drop-shadow(0 0 10px rgba(255,255,255,.92))}
+        body[data-deck="mystic"] .back-serial{background:rgba(109,40,217,.72);color:#fff}
+        body[data-deck="mystic"] .face-front{border-color:rgba(168,85,247,.75)}
+        body[data-deck="mystic"] .f-serial{background:linear-gradient(135deg,#7c3aed,#a855f7);border-color:rgba(168,85,247,.62);color:#fff}
+        body[data-deck="mystic"] .f-arcana{color:rgba(124,58,237,.65)}
+        body[data-deck="mystic"] .f-tarot-name{color:rgba(109,40,217,.82)}
+        body[data-deck="mystic"] .f-marvel-name{color:#1e0b40}
+        body[data-deck="mystic"] .f-line{background:linear-gradient(to right,transparent,rgba(168,85,247,.56),transparent) !important}
+        body[data-deck="mystic"] .f-tap{color:rgba(168,85,247,.38)}
+        body[data-deck="mystic"] .card-wrap.selected .face-back{border-color:#fbbf24;box-shadow:0 0 38px rgba(251,191,36,.82),inset 0 0 24px rgba(168,85,247,.32)}
+        body[data-deck="avengers"]{background:#050010;color:#dceeff}
+        body[data-deck="avengers"] .bg-glow{background:radial-gradient(ellipse,rgba(37,99,235,.14) 0%,rgba(220,38,38,.12) 40%,transparent 70%)}
+        body[data-deck="avengers"] .ring{border-color:rgba(220,38,38,.14)}
+        body[data-deck="avengers"] .face-back{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 35%,#7c3aed 60%,#dc2626 90%,#991b1b 100%);border:2.5px solid rgba(255,200,50,.68);box-shadow:0 4px 22px rgba(37,99,235,.48),inset 0 0 28px rgba(220,38,38,.22)}
+        body[data-deck="avengers"] .back-art{border-color:rgba(255,200,50,.4);border-radius:8px;background:rgba(255,255,255,.05)}
+        body[data-deck="avengers"] .back-art::before{width:54px;height:54px;border:2px solid rgba(255,200,50,.56);box-shadow:0 0 14px rgba(255,200,50,.48);border-radius:0;transform:translate(-50%,-50%) rotate(45deg)}
+        body[data-deck="avengers"] .back-art::after{width:34px;height:34px;border:1.5px solid rgba(255,255,255,.56);border-radius:50%}
+        body[data-deck="avengers"] .back-rune{filter:drop-shadow(0 0 10px rgba(255,200,50,.92))}
+        body[data-deck="avengers"] .back-serial{background:rgba(30,58,138,.78);color:#fff}
+        body[data-deck="avengers"] .face-front{background:linear-gradient(170deg,#f0f4ff 0%,#e8f0ff 60%,#f0f4ff 100%);border-color:rgba(37,99,235,.62)}
+        body[data-deck="avengers"] .f-serial{background:linear-gradient(135deg,#1e3a8a,#2563eb);border-color:rgba(37,99,235,.62);color:#fff}
+        body[data-deck="avengers"] .f-arcana{color:rgba(30,58,138,.7)}
+        body[data-deck="avengers"] .f-tarot-name{color:rgba(30,58,138,.82)}
+        body[data-deck="avengers"] .f-marvel-name{color:#0c1445}
+        body[data-deck="avengers"] .f-line{background:linear-gradient(to right,transparent,rgba(37,99,235,.56),transparent) !important}
+        body[data-deck="avengers"] .f-tap{color:rgba(37,99,235,.38)}
+        body[data-deck="avengers"] .card-wrap.selected .face-back{border-color:#fbbf24;box-shadow:0 0 38px rgba(255,200,50,.78),inset 0 0 24px rgba(37,99,235,.32)}
+        body[data-deck="gods"]{background:#0c0800;color:#fff8e0}
+        body[data-deck="gods"] .bg-glow{background:radial-gradient(ellipse,rgba(234,179,8,.14) 0%,rgba(180,100,0,.14) 40%,transparent 70%)}
+        body[data-deck="gods"] .ring{border-color:rgba(234,179,8,.15)}
+        body[data-deck="gods"] .face-back{background:linear-gradient(135deg,#78350f 0%,#b45309 30%,#d97706 55%,#fbbf24 80%,#fef08a 100%);border:2.5px solid rgba(255,255,255,.58);box-shadow:0 4px 22px rgba(234,179,8,.52),inset 0 0 28px rgba(251,191,36,.22)}
+        body[data-deck="gods"] .back-art{border-color:rgba(255,255,255,.42)}
+        body[data-deck="gods"] .back-art::before{width:58px;height:58px;border:2px solid rgba(255,255,255,.58);box-shadow:0 0 16px rgba(251,191,36,.62);border-radius:50%}
+        body[data-deck="gods"] .back-art::after{width:36px;height:36px;border:1.5px solid rgba(255,255,255,.68);border-radius:0;transform:translate(-50%,-50%) rotate(45deg)}
+        body[data-deck="gods"] .back-rune{filter:drop-shadow(0 0 10px rgba(255,255,255,.92));animation:slow-spin 20s linear infinite}
+        body[data-deck="gods"] .back-serial{background:rgba(120,53,15,.78);color:#fff}
+        body[data-deck="gods"] .face-front{background:linear-gradient(170deg,#fffef5 0%,#fefce8 60%,#fffbf0 100%);border-color:rgba(217,119,6,.62)}
+        body[data-deck="gods"] .f-serial{background:linear-gradient(135deg,#78350f,#d97706);border-color:rgba(217,119,6,.62);color:#fff}
+        body[data-deck="gods"] .f-arcana{color:rgba(120,53,15,.7)}
+        body[data-deck="gods"] .f-tarot-name{color:rgba(120,53,15,.82)}
+        body[data-deck="gods"] .f-marvel-name{color:#2c1810}
+        body[data-deck="gods"] .f-line{background:linear-gradient(to right,transparent,rgba(217,119,6,.56),transparent) !important}
+        body[data-deck="gods"] .f-tap{color:rgba(217,119,6,.38)}
+        body[data-deck="gods"] .card-wrap.selected .face-back{border-color:#fff;box-shadow:0 0 38px rgba(251,191,36,.88),inset 0 0 24px rgba(217,119,6,.32)}
+        body[data-deck="classic"]{background:#0c1a0c;color:#f0f8e8}
+        body[data-deck="classic"] .bg-glow{background:radial-gradient(ellipse,rgba(22,163,74,.12) 0%,rgba(5,150,105,.12) 40%,transparent 70%)}
+        body[data-deck="classic"] .ring{border-color:rgba(22,163,74,.15)}
+        body[data-deck="classic"] .face-back{background:linear-gradient(135deg,#14532d 0%,#15803d 35%,#0d9488 65%,#0891b2 90%,#0e7490 100%);border:2.5px solid rgba(255,255,200,.62);box-shadow:0 4px 22px rgba(22,163,74,.48),inset 0 0 28px rgba(5,150,105,.22)}
+        body[data-deck="classic"] .back-art{border-color:rgba(255,255,200,.4)}
+        body[data-deck="classic"] .back-art::before{border:2px solid rgba(255,255,200,.52);box-shadow:0 0 14px rgba(255,255,200,.52);border-radius:50%}
+        body[data-deck="classic"] .back-art::after{border:1.5px solid rgba(255,255,255,.56)}
+        body[data-deck="classic"] .back-rune{filter:drop-shadow(0 0 10px rgba(255,255,200,.92))}
+        body[data-deck="classic"] .back-serial{background:rgba(20,83,45,.78);color:#fff}
+        body[data-deck="classic"] .face-front{background:linear-gradient(170deg,#f7fef7 0%,#ecfdf5 60%,#f0fdf4 100%);border-color:rgba(22,163,74,.62)}
+        body[data-deck="classic"] .f-serial{background:linear-gradient(135deg,#14532d,#15803d);border-color:rgba(22,163,74,.62);color:#fff}
+        body[data-deck="classic"] .f-arcana{color:rgba(20,83,45,.7)}
+        body[data-deck="classic"] .f-tarot-name{color:rgba(20,83,45,.84)}
+        body[data-deck="classic"] .f-marvel-name{color:#052e16}
+        body[data-deck="classic"] .f-line{background:linear-gradient(to right,transparent,rgba(22,163,74,.56),transparent) !important}
+        body[data-deck="classic"] .f-tap{color:rgba(22,163,74,.38)}
+        body[data-deck="classic"] .card-wrap.selected .face-back{border-color:#fff;box-shadow:0 0 38px rgba(255,255,200,.78),inset 0 0 24px rgba(22,163,74,.32)}
+        body[data-deck="nordic"]{background:#050c14;color:#e8f4f8}
+        body[data-deck="nordic"] .bg-glow{background:radial-gradient(ellipse,rgba(56,189,248,.12) 0%,rgba(6,182,212,.12) 35%,rgba(99,102,241,.08) 60%,transparent 80%)}
+        body[data-deck="nordic"] .ring{border-color:rgba(56,189,248,.15)}
+        body[data-deck="nordic"] .face-back{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 35%,#164e63 60%,#0c4a6e 80%,#075985 100%);border:2.5px solid rgba(147,197,253,.68);box-shadow:0 4px 22px rgba(56,189,248,.38),inset 0 0 28px rgba(99,102,241,.22)}
+        body[data-deck="nordic"] .back-art{border-color:rgba(147,197,253,.38)}
+        body[data-deck="nordic"] .back-art::before{border:2px solid rgba(147,197,253,.52);box-shadow:0 0 14px rgba(56,189,248,.42)}
+        body[data-deck="nordic"] .back-art::after{border:1.5px solid rgba(186,230,253,.58)}
+        body[data-deck="nordic"] .back-rune{font-size:1.9rem;filter:drop-shadow(0 0 10px rgba(147,197,253,.92));animation:slow-spin 18s linear infinite}
+        body[data-deck="nordic"] .back-serial{background:rgba(15,23,42,.82);color:#bae6fd}
+        body[data-deck="nordic"] .face-front{background:linear-gradient(170deg,#f0f8ff 0%,#e8f4f8 60%,#eff9ff 100%);border-color:rgba(56,189,248,.58)}
+        body[data-deck="nordic"] .f-serial{background:linear-gradient(135deg,#0f172a,#1e3a5f);border-color:rgba(56,189,248,.58);color:#bae6fd}
+        body[data-deck="nordic"] .f-arcana{color:rgba(14,116,144,.72)}
+        body[data-deck="nordic"] .f-tarot-name{color:rgba(14,116,144,.86)}
+        body[data-deck="nordic"] .f-marvel-name{color:#0c1829}
+        body[data-deck="nordic"] .f-line{background:linear-gradient(to right,transparent,rgba(56,189,248,.52),transparent) !important}
+        body[data-deck="nordic"] .f-tap{color:rgba(56,189,248,.38)}
+        body[data-deck="nordic"] .card-wrap.selected .face-back{border-color:#bae6fd;box-shadow:0 0 38px rgba(147,197,253,.72),inset 0 0 24px rgba(56,189,248,.28)}
     </style>
 </head>
 <body>
 
 <div class="bg-glow"></div>
-<div class="portal-rings">
-    <div class="ring"></div><div class="ring"></div>
-    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-</div>
+<div class="portal-rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
 <canvas id="particles"></canvas>
-
-<!-- Card Meaning Modal -->
 <div class="card-modal" id="cardModal" onclick="closeModal()">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeModal()">✕</button>
-        <div id="modalContent"></div>
-    </div>
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-topbar"><button type="button" class="modal-close" onclick="closeModal()" aria-label="Close">✕</button></div>
+    <div class="modal-body"><div id="modalContent"></div></div>
+  </div>
 </div>
-
-<div class="container">
-    <header>
-        <span class="eye" id="headerEye">✦</span>
-        <h1 id="headerTitle">Mystic Tarot Oracle</h1>
-        <p class="subtitle" id="headerSubtitle">Choose your deck to begin</p>
-        <div class="divider"></div>
+<div id="app">
+  <aside id="sidebar">
+    <div class="sb-brand">
+      <span class="sb-eye" id="headerEye">✦</span>
+      <div>
+        <div class="sb-brand-title" id="headerTitle">Mystic Tarot Oracle</div>
+        <div class="sb-brand-sub" id="headerSubtitle">Choose your deck to begin</div>
+      </div>
+    </div>
+    <p class="sb-section">Decks</p>
+    <nav class="sb-nav">
+      <div class="sb-group">
+        <button type="button" class="sb-group-btn" id="btn-marvel-group" onclick="toggleMarvelMenu()"><span class="sb-icon">🔮</span><span class="sb-btn-text">Marvel</span><i class="arrow">▼</i></button>
+        <div class="sb-submenu" id="marvel-submenu">
+          <button type="button" class="sb-deck-btn" id="btn-mystic" onclick="switchDeck('mystic')"><span class="sb-icon">✦</span>Mystic Arts</button>
+          <button type="button" class="sb-deck-btn" id="btn-avengers" onclick="switchDeck('avengers')"><span class="sb-icon">🦸</span>Avengers</button>
+          <button type="button" class="sb-deck-btn" id="btn-gods" onclick="switchDeck('gods')"><span class="sb-icon">⚡</span>Marvel Gods</button>
+        </div>
+      </div>
+      <div class="sb-group">
+        <button type="button" class="sb-group-btn" id="btn-omkar-group" onclick="toggleOmkarMenu()"><span class="sb-icon">🕉️</span><span class="sb-btn-text">Omkar</span><i class="arrow">▼</i></button>
+        <div class="sb-submenu" id="omkar-submenu">
+          <button type="button" class="sb-deck-btn" id="btn-vedic" onclick="switchDeck('vedic')"><span class="sb-icon">ॐ</span>Vedic Gods</button>
+          <button type="button" class="sb-deck-btn" id="btn-tantrik" onclick="switchDeck('tantrik')"><span class="sb-icon">🔺</span>Tantrik</button>
+        </div>
+      </div>
+      <div class="sb-group">
+        <button type="button" class="sb-group-btn" id="btn-classic-group" onclick="toggleClassicMenu()"><span class="sb-icon">🌿</span><span class="sb-btn-text">Classic</span><i class="arrow">▼</i></button>
+        <div class="sb-submenu" id="classic-submenu">
+          <button type="button" class="sb-deck-btn" id="btn-classic" onclick="switchDeck('classic')"><span class="sb-icon">☽</span>Rider-Waite</button>
+        </div>
+      </div>
+      <div class="sb-group">
+        <button type="button" class="sb-group-btn" id="btn-nordic-group" onclick="toggleNordicMenu()"><span class="sb-icon">🪬</span><span class="sb-btn-text">Nordic</span><i class="arrow">▼</i></button>
+        <div class="sb-submenu" id="nordic-submenu">
+          <button type="button" class="sb-deck-btn" id="btn-nordic" onclick="switchDeck('nordic')"><span class="sb-icon">ᚱ</span>Elder Futhark</button>
+        </div>
+      </div>
+    </nav>
+    <div class="sb-divider"></div>
+    <div class="sb-stats-wrap pre-deck-hidden" id="deckStats">
+      <p class="sb-section sb-section-flush">Stats</p>
+      <div class="sb-stats-grid">
+        <div class="sb-stat"><div class="sb-stat-num js-revealed">0</div><div class="sb-stat-label">Revealed</div></div>
+        <div class="sb-stat"><div class="sb-stat-num js-hidden">0</div><div class="sb-stat-label">Hidden</div></div>
+      </div>
+    </div>
+    <div class="sb-divider pre-deck-hidden"></div>
+    <div class="sb-actions-wrap pre-deck-hidden" id="deckControls">
+      <p class="sb-section sb-section-flush">Actions</p>
+      <div class="sb-actions">
+        <button type="button" class="sb-btn js-reveal-btn" id="revealBtn" onclick="revealSelected()">✦ Reveal Selected</button>
+        <button type="button" class="sb-btn" id="shuffleBtn" onclick="shuffleDeck()">⟳ Shuffle Deck</button>
+        <button type="button" class="sb-btn sb-btn-reset" onclick="resetAll()">↺ Reset All</button>
+        <button type="button" class="sb-btn sb-btn-view" id="viewBtn" onclick="viewAllCards()">⊞ View All Cards</button>
+      </div>
+    </div>
+    <div class="sb-hint pre-deck-hidden" id="mainHint">Tap · Select · Double-tap to Reveal</div>
+  </aside>
+  <div id="app-main">
+    <header id="app-topbar">
+      <span class="tb-eye" id="tb-eye">✦</span>
+      <span class="tb-title" id="tb-title">Oracle</span>
+      <div class="tb-stats pre-deck-hidden" id="tb-stats">
+        <div class="tb-chip"><span class="js-revealed">0</span><span class="tb-chip-label">Rev</span></div>
+        <div class="tb-chip"><span class="js-hidden">0</span><span class="tb-chip-label">Left</span></div>
+      </div>
+      <div class="tb-btns pre-deck-hidden" id="tb-btns">
+        <button type="button" class="tb-icon-btn js-reveal-btn" onclick="revealSelected()" title="Reveal Selected">✦</button>
+        <button type="button" class="tb-icon-btn" onclick="shuffleDeck()" title="Shuffle">⟳</button>
+        <button type="button" class="tb-icon-btn" onclick="resetAll()" title="Reset">↺</button>
+        <button type="button" class="tb-icon-btn" onclick="viewAllCards()" title="View All">⊞</button>
+      </div>
     </header>
-
-    <!-- Deck Selector -->
-    <div class="deck-selector">
-        <div class="deck-group">
-            <button type="button" class="deck-btn deck-parent" id="btn-marvel-group" onclick="toggleMarvelMenu()">🔮 Marvel <i class="arrow">▼</i></button>
-            <div class="deck-submenu" id="marvel-submenu">
-                <button type="button" class="deck-btn sub" id="btn-mystic"    onclick="switchDeck('mystic')">✦ Mystic</button>
-                <button type="button" class="deck-btn sub" id="btn-avengers"  onclick="switchDeck('avengers')">🦸 Avengers</button>
-                <button type="button" class="deck-btn sub" id="btn-gods"      onclick="switchDeck('gods')">⚡ Gods</button>
-            </div>
+    <div id="app-tabbar">
+      <div class="tab-nav-row">
+        <div class="tab-group">
+          <button type="button" class="tab-group-btn" id="tab-marvel-group" onclick="toggleTabMarvelMenu()">🔮 Marvel <i class="arrow">▼</i></button>
+          <div class="tab-submenu" id="tab-marvel-submenu">
+            <button type="button" class="tab-deck-btn" id="tab-btn-mystic" onclick="switchDeck('mystic')">✦ Mystic</button>
+            <button type="button" class="tab-deck-btn" id="tab-btn-avengers" onclick="switchDeck('avengers')">🦸 Avengers</button>
+            <button type="button" class="tab-deck-btn" id="tab-btn-gods" onclick="switchDeck('gods')">⚡ Gods</button>
+          </div>
         </div>
-        <div class="deck-group">
-            <button type="button" class="deck-btn deck-parent" id="btn-omkar-group" onclick="toggleOmkarMenu()">🕉️ Omkar <i class="arrow">▼</i></button>
-            <div class="deck-submenu" id="omkar-submenu">
-                <button type="button" class="deck-btn sub" id="btn-vedic"   onclick="switchDeck('vedic')">ॐ Vedic Gods</button>
-                <button type="button" class="deck-btn sub" id="btn-tantrik" onclick="switchDeck('tantrik')">🔺 Tantrik</button>
-            </div>
+        <div class="tab-group">
+          <button type="button" class="tab-group-btn" id="tab-omkar-group" onclick="toggleTabOmkarMenu()">🕉️ Omkar <i class="arrow">▼</i></button>
+          <div class="tab-submenu" id="tab-omkar-submenu">
+            <button type="button" class="tab-deck-btn" id="tab-btn-vedic" onclick="switchDeck('vedic')">ॐ Vedic</button>
+            <button type="button" class="tab-deck-btn" id="tab-btn-tantrik" onclick="switchDeck('tantrik')">🔺 Tantrik</button>
+          </div>
         </div>
+        <div class="tab-group">
+          <button type="button" class="tab-group-btn" id="tab-classic-group" onclick="toggleTabClassicMenu()">🌿 Classic <i class="arrow">▼</i></button>
+          <div class="tab-submenu" id="tab-classic-submenu">
+            <button type="button" class="tab-deck-btn" id="tab-btn-classic" onclick="switchDeck('classic')">☽ Rider-Waite</button>
+          </div>
+        </div>
+        <div class="tab-group">
+          <button type="button" class="tab-group-btn" id="tab-nordic-group" onclick="toggleTabNordicMenu()">🪬 Nordic <i class="arrow">▼</i></button>
+          <div class="tab-submenu" id="tab-nordic-submenu">
+            <button type="button" class="tab-deck-btn" id="tab-btn-nordic" onclick="switchDeck('nordic')">ᚱ Futhark</button>
+          </div>
+        </div>
+      </div>
+      <div class="tab-actions pre-deck-hidden" id="tab-actions">
+        <button type="button" class="tab-ctrl-btn js-reveal-btn" onclick="revealSelected()">✦ Reveal</button>
+        <button type="button" class="tab-ctrl-btn" onclick="shuffleDeck()">⟳ Shuffle</button>
+        <button type="button" class="tab-ctrl-btn" onclick="resetAll()">↺ Reset</button>
+        <button type="button" class="tab-ctrl-btn" onclick="viewAllCards()">⊞ View All</button>
+      </div>
     </div>
-
-    <!-- Stacked deck shown before any deck is chosen -->
-    <div class="deck-stack" id="stackView">
+    <div id="app-content">
+      <div class="deck-stack" id="stackView">
         <div class="stack-pile">
-            <div class="stack-card"><span class="stack-rune">✦</span></div>
-            <div class="stack-card"><span class="stack-rune">✦</span></div>
-            <div class="stack-card"><span class="stack-rune">✦</span></div>
-            <div class="stack-card"><span class="stack-rune">✦</span></div>
-            <div class="stack-card"><span class="stack-rune">✦</span></div>
+          <div class="stack-card"><span class="stack-rune">✦</span></div>
+          <div class="stack-card"><span class="stack-rune">✦</span></div>
+          <div class="stack-card"><span class="stack-rune">✦</span></div>
+          <div class="stack-card"><span class="stack-rune">✦</span></div>
+          <div class="stack-card"><span class="stack-rune">✦</span></div>
         </div>
-        <div class="stack-label">Select a deck above to begin</div>
+        <div class="stack-label">Select a deck to begin</div>
+      </div>
+      <p class="hint pre-deck-hidden" id="sb-hint-mobile">Tap · Select · Double-tap to Reveal</p>
+      <div class="grid" id="grid"></div>
     </div>
-
-    <div class="deck-stats pre-deck-hidden" id="deckStats">
-        <div class="stat">
-            <div class="stat-num" id="revealed-count">0</div>
-            <div class="stat-label">Revealed</div>
-        </div>
-        <div class="stat">
-            <div class="stat-num" id="hidden-count">0</div>
-            <div class="stat-label">Hidden</div>
-        </div>
+    <div id="ph-bar" class="pre-deck-hidden">
+      <button type="button" class="ph-btn js-reveal-btn" onclick="revealSelected()">✦ Reveal</button>
+      <button type="button" class="ph-btn" onclick="shuffleDeck()">⟳ Shuffle</button>
+      <button type="button" class="ph-btn" onclick="resetAll()">↺ Reset</button>
+      <button type="button" class="ph-btn" onclick="viewAllCards()">⊞ All Cards</button>
     </div>
-
-    <div class="controls pre-deck-hidden" id="deckControls">
-        <button class="btn" id="revealBtn" onclick="revealSelected()">✦ Reveal Selected ✦</button>
-        <button class="btn" id="shuffleBtn" onclick="shuffleDeck()">✦ Shuffle Deck ✦</button>
-        <button class="btn btn-reset" onclick="resetAll()">✦ Reset All ✦</button>
-        <button class="btn btn-view" id="viewBtn" onclick="viewAllCards()">✦ View All Cards ✦</button>
-    </div>
-    <p class="hint pre-deck-hidden" id="mainHint">Tap a card to select it · Double-tap to reveal its secret</p>
-
-    <div class="grid" id="grid"></div>
+    <nav id="app-bottomnav">
+      <button type="button" class="bnav-btn" id="bnav-mystic" onclick="switchDeck('mystic')"><span class="bnav-icon">✦</span><span class="bnav-label">Mystic</span></button>
+      <button type="button" class="bnav-btn" id="bnav-avengers" onclick="switchDeck('avengers')"><span class="bnav-icon">🦸</span><span class="bnav-label">Avengers</span></button>
+      <button type="button" class="bnav-btn" id="bnav-gods" onclick="switchDeck('gods')"><span class="bnav-icon">⚡</span><span class="bnav-label">Gods</span></button>
+      <button type="button" class="bnav-btn" id="bnav-vedic" onclick="switchDeck('vedic')"><span class="bnav-icon">ॐ</span><span class="bnav-label">Vedic</span></button>
+      <button type="button" class="bnav-btn" id="bnav-tantrik" onclick="switchDeck('tantrik')"><span class="bnav-icon">🔺</span><span class="bnav-label">Tantrik</span></button>
+      <button type="button" class="bnav-btn" id="bnav-classic" onclick="switchDeck('classic')"><span class="bnav-icon">☽</span><span class="bnav-label">Tarot</span></button>
+      <button type="button" class="bnav-btn" id="bnav-nordic" onclick="switchDeck('nordic')"><span class="bnav-icon">ᚱ</span><span class="bnav-label">Runes</span></button>
+    </nav>
+  </div>
 </div>
 
+<script src="tarot-deck.js"></script>
 <script>
 // ── Deck Data ─────────────────────────────────────────────────────────────────
 
@@ -2742,6 +2517,81 @@ const TANTRIK_DECK = [
 ];
 
 // ── Deck Registry ──────────────────────────────────────────────────────────────
+const NORDIC_DECK = [
+    {id:0,num:"ᚠ",symbol:"ᚠ",color:"#d4a843",title:"Fehu",character:"Elder Futhark · Rune of Wealth & Cattle",keyword:"Abundance · Flow · Earned Fortune",yesNo:"yes",
+    simple:"Something of value is flowing toward you. Wealth, opportunity, or recognition you have genuinely worked for is arriving. Receive it — and let it circulate, not stagnate.",
+    meaning:"Fehu — the first rune, the rune of cattle and moveable wealth — is the force of abundance in active flow. In the Norse world, cattle was not just food; it was currency, status, and life itself. Fehu does not represent hoarded treasure but wealth that moves, that feeds, that builds relationship. When Fehu falls, resources are arriving or accumulating. The warning built into this rune is against greed — held too tight, Fehu curdles into obsession. Received openly and shared wisely, it multiplies. Something you have invested — effort, time, skill, care — is now returning dividends. Accept the flow and keep it moving."},
+    {id:1,num:"ᚢ",symbol:"ᚢ",color:"#8b4513",title:"Uruz",character:"Elder Futhark · Rune of Primal Strength",keyword:"Raw Power · Health · Untamed Force",yesNo:"yes",
+    simple:"You are stronger than you know. A surge of primal vitality is available to you now. Don't hold back — push through what seemed immovable.",
+    meaning:"Uruz is the aurochs — the enormous wild ox that once roamed ancient Europe, now extinct, but preserved in rune as an emblem of untamed, magnificent, unstoppable physical and vital force. This is not the polished strength of the trained warrior; it is the raw power of the wild thing that has never been broken. When Uruz appears, there is raw energy available — health returning, drive surging, obstacles crumbling before force of will. It also speaks to tests: the aurochs was hunted as a rite of passage precisely because it was dangerous. This challenge is also a proving ground. You have the strength to pass it."},
+    {id:2,num:"ᚦ",symbol:"ᚦ",color:"#4a4a8a",title:"Thurisaz",character:"Elder Futhark · Rune of the Giant",keyword:"Defense · Disruption · Necessary Force",yesNo:"maybe",
+    simple:"Something needs to be confronted directly. This is not a gentle rune — it points at what must be broken through. Use force with awareness; the hammer can defend or destroy.",
+    meaning:"Thurisaz is the rune of the giant — Thurs, the destructive forces of chaos — but also, through its association with Thor, of the divine hammer that defeats them. It is the principle of force applied to resistance: the thorn that guards the rose, the hammer that breaks the mountain, the storm that clears the stale air. Thurisaz does not encourage aggression but it does counsel direct confrontation with what has been avoided. Something in your path cannot be reasoned around; it must be addressed with force or decisiveness. The discomfort ahead is productive. Move through it, not around it."},
+    {id:3,num:"ᚨ",symbol:"ᚨ",color:"#2d5a8e",title:"Ansuz",character:"Elder Futhark · Odin's Rune of Communication",keyword:"Wisdom · Messages · Divine Inspiration",yesNo:"yes",
+    simple:"Listen carefully. Something important is being communicated — in words, in signs, in a feeling you cannot quite name. Odin speaks through the gaps between things.",
+    meaning:"Ansuz is Odin's rune — the rune of the divine breath, of speech, of the inspired word that creates worlds. In Norse cosmology, it was Odin who sacrificed himself on Yggdrasil to receive the runes, and Ansuz is the direct channel of that transmission: wisdom from above, translated into language for below. When Ansuz appears, something important is trying to reach you. Pay attention to dreams, to sudden flashes of understanding, to the words of someone older or wiser, to the message you keep encountering in different forms. The communication will come through whatever channel you are willing to receive. Be still enough to hear it."},
+    {id:4,num:"ᚱ",symbol:"ᚱ",color:"#6b3fa0",title:"Raidho",character:"Elder Futhark · Rune of the Journey",keyword:"Travel · Rhythm · Right Action",yesNo:"yes",
+    simple:"You are on the right road. Keep moving. The journey itself is the lesson — not the destination. Maintain your rhythm and trust the path.",
+    meaning:"Raidho is the rune of the wheel, the wagon, the sacred journey. It encompasses not merely physical travel but the right ordering of movement — the rhythm of action taken in proper time and alignment with cosmic law. In Norse culture, the road was never neutral; travel was undertaken with intention and accompanied by ritual. When Raidho appears, you are in motion, or you need to be. The situation calls for movement, progression, the willingness to leave a stationary point and engage with the road. It also speaks of right timing — not just any action, but the correctly timed, correctly directed action. You know the right move. Make it."},
+    {id:5,num:"ᚲ",symbol:"ᚲ",color:"#e84416",title:"Kenaz",character:"Elder Futhark · Rune of the Torch",keyword:"Illumination · Craft · Creative Fire",yesNo:"yes",
+    simple:"The light is on. Something that was hidden is now visible; something that was impossible is now within reach. Use this illumination to create.",
+    meaning:"Kenaz is the torch held in darkness — the fire that was mastered, domesticated, brought into human hands as tool rather than destroyer. It is the fire of the forge, the fire of the hearthside where stories are told, the fire of the artist who shapes raw material into meaning. When Kenaz falls, clarity is arriving. Something you could not see is now illuminated. A problem that seemed intractable has a visible solution. A creative project has ignited. This is the rune of the craftsperson, the artist, the inventor — the person who takes the raw material of existence and through the application of skill and inspired fire creates something new. Your creative fire is lit. Use it."},
+    {id:6,num:"ᚷ",symbol:"ᚷ",color:"#2e8b57",title:"Gebo",character:"Elder Futhark · Rune of the Gift",keyword:"Exchange · Partnership · Sacred Reciprocity",yesNo:"yes",
+    simple:"A genuine exchange is at the heart of this situation — give freely and receive graciously. The gift creates the bond. Real partnership is sacred.",
+    meaning:"Gebo is the rune of the gift — but in the Norse world, gift-giving was never merely generous: it was the engine of relationship, obligation, and social fabric. The gift demanded the gift in return; the exchange created the bond. Gebo represents the sacred reciprocity at the heart of all genuine partnership: love, friendship, marriage, alliance, creative collaboration. It is drawn as an X — two paths crossing, each giving to the other at the intersection point. When Gebo appears, an exchange is at the center of the matter — a relationship founded on genuine mutual giving and receiving. Receive graciously; give freely. The bond created by true exchange is among the most powerful forces in human life."},
+    {id:7,num:"ᚹ",symbol:"ᚹ",color:"#f0c040",title:"Wunjo",character:"Elder Futhark · Rune of Joy",keyword:"Joy · Harmony · Wish Fulfilled",yesNo:"yes",
+    simple:"Joy is real and available. Something you have worked toward is aligning. Allow yourself to feel it — genuine happiness is not naive, it is earned.",
+    meaning:"Wunjo is the rune of joy — genuine, earned, communal joy, the joy of the clan gathered in warmth with enough, the joy of things working as they should. It is not the shallow happiness of distraction but the deep satisfaction of alignment: when the self, the community, and the cosmos are momentarily in harmony and the soul recognizes it. When Wunjo falls, something wished for is manifesting or is close. The period of striving is giving way to the reward. Allow the joy. There is a tendency, particularly after difficulty, to distrust good outcomes — to wait for the other shoe. This rune says: receive the joy. You earned it, and the cosmos is offering it genuinely."},
+    {id:8,num:"ᚺ",symbol:"ᚺ",color:"#708090",title:"Hagalaz",character:"Elder Futhark · Rune of Hail",keyword:"Disruption · Crisis · The Necessary Storm",yesNo:"no",
+    simple:"A disruption is coming or is already here. You cannot avoid it — it is the hailstorm. Take shelter, protect what matters most, and wait for it to pass. It will pass.",
+    meaning:"Hagalaz is hail — frozen water falling from the sky, destroying crops, battering everything exposed, unstoppable. In the Norse rune poems, it is the coldest grain, the destroyer of the fields, the force that arrives without warning and cannot be reasoned with. When Hagalaz falls, disruption is either already present or approaching. Something in the carefully constructed order of your life is about to be broken open by an outside force. The important thing to understand about Hagalaz is that hail melts. The destruction is real, but it is also temporary, and what survives the storm is genuinely strong. Protect what you can. Let what must break, break."},
+    {id:9,num:"ᚾ",symbol:"ᚾ",color:"#2c2c4e",title:"Nauthiz",character:"Elder Futhark · Rune of Need",keyword:"Constraint · Endurance · Necessity",yesNo:"no",
+    simple:"You are in a place of real constraint. This is the rune of necessity — things are tight and you must endure. But the fire that this friction creates is yours to use.",
+    meaning:"Nauthiz is need-fire — the fire made by the desperate friction of two sticks when all other fire has gone out. It is the rune of genuine scarcity, constraint, and survival necessity. The need-fire was a sacred ritual in Norse culture: lit in times of dire collective crisis, it cleared disease, called protection, and proved that even in the most severe conditions, human ingenuity and will could generate warmth from nothing. When Nauthiz appears, you are in genuine need — resources are scarce, constraints are real, the situation is difficult. But there is fire available to you here: the fire of resilience under pressure, the insight that comes only from extremity. Endure. Generate your own warmth. This is survivable."},
+    {id:10,num:"ᛁ",symbol:"ᛁ",color:"#c8e8f0",title:"Isa",character:"Elder Futhark · Rune of Ice",keyword:"Stillness · Pause · Frozen Progress",yesNo:"no",
+    simple:"Everything is frozen right now. Do not force movement — the ice is strong and will crack whatever pushes against it. This is a time for stillness, for clarity, for waiting.",
+    meaning:"Isa is pure ice — the primordial ice of Niflheim that, combined with fire, was the first thing in Norse creation. It is the hardest stillness: not the peace of completion but the absolute arrest of motion. When things freeze, everything stops. Forward motion is impossible. Isa appears when the situation is locked — when relationships have gone cold, when projects will not move, when clarity has crystallized into an unmoveable block. The lesson of Isa is not to push: ice cracks under pressure in ways that destroy the very path you needed. Instead, this is a time of inner work, of becoming as clear and still as the ice itself, of waiting for the warmth that will eventually arrive and release what is frozen. Be still. The thaw comes."},
+    {id:11,num:"ᛃ",symbol:"ᛃ",color:"#4caf50",title:"Jera",character:"Elder Futhark · Rune of the Harvest",keyword:"Cycles · Patience · Right Timing",yesNo:"yes",
+    simple:"The harvest arrives in its own time. You have planted well — trust the cycle. What you have worked for is coming to fruition, but it cannot be rushed.",
+    meaning:"Jera is the year itself — the full cycle of the agricultural year, from sowing through growing through harvest through the fallow period that precedes the next sowing. It is the rune of right timing, of patience, of the understanding that good things grow in their own season and cannot be forced without catastrophe. You cannot hurry the wheat. When Jera appears, the cycle is in motion and the harvest is coming. The emphasis is on patience: the work has been done, the conditions are right, the outcome is inevitable — but it arrives in its own time. Stop trying to accelerate the natural rhythm. What you have worked for is approaching. It cannot be rushed and does not need to be. Trust the season."},
+    {id:12,num:"ᛇ",symbol:"ᛇ",color:"#1a4a1a",title:"Eihwaz",character:"Elder Futhark · Rune of the Yew",keyword:"Resilience · Death & Renewal · Endurance",yesNo:"yes",
+    simple:"What looks like an ending contains its own renewal. The yew tree is the tree of death and eternal life. You are passing through, not ending. Endure.",
+    meaning:"Eihwaz is the yew tree — the tree that stands in graveyards, the tree whose wood makes the warrior's bow, the tree that is both deeply poisonous and magnificently long-lived, the tree whose roots reach into the earth of the dead and whose branches touch the sky of the living. It is the axis of the world, the tree that connects realms. Eihwaz speaks of endurance through darkness, of the passage through death-like experience into renewed life. When Eihwaz appears, you are in a threshold moment — something is dying, some version of yourself or some chapter of your life is genuinely ending. But the yew does not die. The ending is also a beginning. Pass through the darkness with your spine straight. You will emerge."},
+    {id:13,num:"ᛈ",symbol:"ᛈ",color:"#8b3a3a",title:"Perthro",character:"Elder Futhark · Rune of Mystery",keyword:"Fate · Hidden Knowledge · The Unseeable",yesNo:"maybe",
+    simple:"The outcome is genuinely unknown — not because you have failed to prepare, but because fate itself is not yet decided. Sit with the mystery. What will be revealed cannot be forced.",
+    meaning:"Perthro is one of the most debated and mysterious runes — often interpreted as a dice cup or a gaming piece container, the instrument of fate. The lots are cast; the result is hidden until the cup is overturned. This is the rune of what cannot be known in advance: of wyrd, the deep web of fate that the Norns weave. When Perthro falls, you are dealing with something genuinely uncertain — the outcome is in the hands of forces larger than your will alone. This is not a counsel to passivity; you still act, still play the game. But the result is not entirely yours to determine. Receive the mystery with equanimity. What is hidden will be revealed at the right time, and not before."},
+    {id:14,num:"ᛉ",symbol:"ᛉ",color:"#3a7a3a",title:"Algiz",character:"Elder Futhark · Rune of Protection",keyword:"Shield · Sanctuary · Divine Guard",yesNo:"yes",
+    simple:"You are protected. The shield is up. Remain within its boundaries and you are safe — do not step outside what you know to be sacred ground right now.",
+    meaning:"Algiz is the elk, the sedge grass with its razor-sharp edges, and the outstretched human figure with hands raised in the universal gesture of halt and ward-off. It is the rune of protection — sacred protection, the kind that comes from alignment with the divine and from awareness of one's own sacred boundaries. The elk defends itself with its full enormous body; the sedge grass cuts anything careless enough to grab it. When Algiz appears, protection is either actively present or actively needed. The shield is available — but you must stay within the protected zone. This is not a time to wander onto uncertain ground. Hold your sacred space, maintain your integrity, and the protection is real."},
+    {id:15,num:"ᛊ",symbol:"ᛊ",color:"#ffd700",title:"Sowilo",character:"Elder Futhark · Rune of the Sun",keyword:"Victory · Clarity · Solar Power",yesNo:"yes",
+    simple:"The sun is fully out. Victory, clarity, and radiant energy are yours. Move decisively. This is the moment to act with full force and full confidence.",
+    meaning:"Sowilo is the sun rune — the lightning bolt of solar power, the rune of the victory that the Norse sun goddess Sol rides across the sky. It is pure solar energy: clarity, strength, health, the illumination that burns away shadow, the power that enables growth and victory. There is no ambivalence in Sowilo; it is the rune of full, shining, winning force. When Sowilo appears, the time for hesitation is past. The situation is fully lit; you can see clearly, act decisively, and the force of the sun is behind you. Victory is not just possible — it is the natural outcome of aligned action taken in this moment. Bring your full self. The light is with you."},
+    {id:16,num:"ᛏ",symbol:"ᛏ",color:"#3d5a8e",title:"Tiwaz",character:"Elder Futhark · Tyr's Rune of Justice",keyword:"Justice · Sacrifice · Honor",yesNo:"yes",
+    simple:"Do the right thing even at personal cost. Honor demands it. The just outcome is possible — but it requires someone willing to pay the price for it.",
+    meaning:"Tiwaz is the rune of Tyr — the one-handed god of justice who sacrificed his right hand to bind the wolf Fenrir for the good of all worlds. Tyr knew the wolf would bite; he placed his hand in Fenrir's jaws anyway, because the oath and the safety of the cosmos required it. This is the supreme rune of justice enacted through personal sacrifice — not justice as comfortable rule-following but justice as costly, deliberate, honorable action that benefits the whole even when it diminishes the self. When Tiwaz appears, the situation calls for the Tyr-move: the action that is clearly right, that you know is right, that costs something real to take. Take it. This is the highest form of integrity."},
+    {id:17,num:"ᛒ",symbol:"ᛒ",color:"#7ec850",title:"Berkano",character:"Elder Futhark · Rune of the Birch",keyword:"Growth · Nurture · New Beginnings",yesNo:"yes",
+    simple:"Something new is growing — tender and needing care. Nurture it. This is the rune of the mother, the midwife, the gardener. Give the new thing the protection it needs.",
+    meaning:"Berkano is the birch tree — one of the first trees to colonize bare earth after devastation, the tree of spring's first green, the tree associated with the mother goddess and with new life. The birch is the tree of gentle, persistent, unstoppable growth: it cracks rock, it returns to cleared land, it is always among the first. Berkano speaks of new beginnings that need careful tending: a new project, a new relationship, a new phase of life, perhaps literally new life. When Berkano falls, something genuinely new is emerging. It is still fragile, still close to the root. It needs nurturing, shelter from harsh weather, the patient gardener's attention. What is emerging in your life right now deserves your most protective care."},
+    {id:18,num:"ᛖ",symbol:"ᛖ",color:"#8b6914",title:"Ehwaz",character:"Elder Futhark · Rune of the Horse",keyword:"Partnership · Trust · Movement Together",yesNo:"yes",
+    simple:"True partnership — the kind where horse and rider move as one — is either present or being called for. Trust the relationship completely. Move together.",
+    meaning:"Ehwaz is the horse — not the wild horse of Uruz but the horse in relationship with the rider: two different beings, completely aligned in direction and trust, moving together as a single magnificent force. The horse was sacred in Norse culture as the vehicle of gods and heroes, the bond between human and animal that made travel, war, and the divine journey possible. When Ehwaz appears, the quality of your relationships and partnerships is central. Is there genuine trust between you and those you are working with? Are you moving in the same direction? The power available in real partnership — the kind where both parties are fully committed and completely trusting — is immense. Cultivate that alignment."},
+    {id:19,num:"ᛗ",symbol:"ᛗ",color:"#5a5a8e",title:"Mannaz",character:"Elder Futhark · Rune of the Human",keyword:"Self · Community · The Examined Life",yesNo:"yes",
+    simple:"The answer is in the self — but the self exists in relationship. Know yourself fully. Act from genuine self-knowledge, not ego. The examined life is the only basis for meaningful action.",
+    meaning:"Mannaz is the rune of the human being — of self, of humanity, of the individual in community. It is simultaneously the most intimate and the most universal rune, because to truly know the self is to find the universal human. In Norse philosophy, the self was not an isolated individual; it was a node in a web of relationships — family, clan, land, gods, ancestors, fate. Mannaz calls for genuine self-knowledge: not the flattering story the ego tells, but the clear-eyed honest assessment of who one actually is, with all gifts and all limitations. When Mannaz appears, the most important question is: who am I, really, in this situation? Act from that honest center, not from performance."},
+    {id:20,num:"ᛚ",symbol:"ᛚ",color:"#1a5f7a",title:"Laguz",character:"Elder Futhark · Rune of Water",keyword:"Intuition · Flow · The Unconscious",yesNo:"yes",
+    simple:"Go with the flow. Your intuition is your most reliable guide right now. Stop fighting the current — read it, honor it, let it carry you toward what needs to happen.",
+    meaning:"Laguz is water — not the placid lake but the powerful current, the deep sea, the mystery of what moves beneath the surface. It is the rune of intuition, of the unconscious, of the vast knowledge that does not come through the rational mind but through feeling, dreaming, sensing. The Norse had profound respect for water: it was the substance of life, the realm of the dead (the sunken ship), the mirror of divination. When Laguz falls, rational analysis is reaching its limit. What you need to know is available to you — but only if you access it through feeling rather than thinking. Trust the body's knowing. Trust the dream. Trust the irrational pull toward or away from something. Your intuition is correct. Follow it."},
+    {id:21,num:"ᛜ",symbol:"ᛜ",color:"#6b8e23",title:"Ingwaz",character:"Elder Futhark · Rune of Ing / Fertility",keyword:"Potential · Gestation · Inner Fire",yesNo:"yes",
+    simple:"Something powerful is gestating inside you. The seed is planted; the energy is building. This is not yet the moment of release — hold the potential until it is ready.",
+    meaning:"Ingwaz is the rune of Ing — the fertility god, the deity of the hearth-fire and the seeded field, the power of contained potential about to bloom. It is the rune of gestation: the fire banked but enormous, the seed swollen with everything it will become, the pregnant pause before the new thing announces itself to the world. Ingwaz does not counsel action; it counsels the wisdom to hold what is building until the right moment, to trust that what is growing inside will emerge in its own time with full force. What are you carrying right now that is not yet ready to be born? Give it the time and the interior warmth it needs. The release, when it comes, will be complete."},
+    {id:22,num:"ᛞ",symbol:"ᛞ",color:"#ff8c00",title:"Dagaz",character:"Elder Futhark · Rune of Dawn",keyword:"Breakthrough · Transformation · Threshold",yesNo:"yes",
+    simple:"The breakthrough has happened or is imminent. Dawn is breaking. What was dark is now light. Step through the threshold — you are in the middle of a genuine transformation.",
+    meaning:"Dagaz is the rune of dawn — the precise moment when night becomes day, the liminal threshold of transformation where everything changes in an instant. It is drawn as two triangles joined at their points, forming an hourglass: the moment of crossing, of reversal, of the old becoming the new. Dagaz is one of the most powerfully positive runes in the Elder Futhark: it is the breakthrough that comes after long darkness, the 'aha' that dissolves a problem that seemed intractable, the moment when what was impossible suddenly becomes inevitable. When Dagaz appears, you are at or very near the threshold. The long night is ending. Step into the dawn. The transformation is real and it is now."},
+    {id:23,num:"ᛟ",symbol:"ᛟ",color:"#8b4513",title:"Othala",character:"Elder Futhark · Rune of the Homeland",keyword:"Heritage · Roots · Sacred Inheritance",yesNo:"yes",
+    simple:"Your roots, your lineage, your inheritance — physical, spiritual, ancestral — are the foundation you are being called to stand on. Return to what is genuinely yours.",
+    meaning:"Othala is the rune of the homeland — the inherited estate, the ancestral land, the sacred enclosure that belongs to the clan across generations. In Norse culture, the odal-land was inalienable: it could not be bought or sold because it was not merely property but the living expression of the family's relationship with a particular piece of earth across time. When Othala falls, the question is one of inheritance and rootedness: what has been passed to you — in genetics, in culture, in spiritual tradition, in family pattern, in the specific gifts of your lineage — that is yours to claim, to honor, and to build from? True security comes not from accumulation but from standing firmly on the ground that is genuinely, ancestrally yours. Know your roots."}
+];
+
 const DECK_CONFIG = {
     mystic: {
         data: MYSTIC_DECK,
@@ -2777,6 +2627,20 @@ const DECK_CONFIG = {
         title: 'Nepali Tantrik Oracle',
         subtitle: 'Mahavidyas · Nepali Gods · Devis · Bhairava · Masto · Banjhakri · Vajrayana · Bhoot · Pret · Taleju · Manakamana · Swayambhu',
         modalSubFn: card => `${card.character} · ${card.num}`
+    },
+    classic: {
+        data: CLASSIC_TAROT_DECK,
+        eye: '🌿', rune: '☽',
+        title: 'Classic Rider-Waite Tarot',
+        subtitle: 'Major Arcana · Minor Arcana · Wands · Cups · Swords · Pentacles',
+        modalSubFn: card => `${card.character} · ${card.num}`
+    },
+    nordic: {
+        data: NORDIC_DECK,
+        eye: '🪬', rune: 'ᚱ',
+        title: 'Elder Futhark Norse Runes',
+        subtitle: 'Freyr · Odin · Tyr · Thor · The 24 Runes of the Elder Futhark',
+        modalSubFn: card => `${card.character} · ${card.num}`
     }
 };
 
@@ -2795,8 +2659,10 @@ function initState() {
 initState();
 
 // ── Deck Switching ────────────────────────────────────────────────────────────
-const MARVEL_DECKS = new Set(['mystic','avengers','gods']);
-const OMKAR_DECKS  = new Set(['vedic','tantrik']);
+const MARVEL_DECKS  = new Set(['mystic','avengers','gods']);
+const OMKAR_DECKS   = new Set(['vedic','tantrik']);
+const CLASSIC_DECKS = new Set(['classic']);
+const NORDIC_DECKS  = new Set(['nordic']);
 
 function toggleMarvelMenu() {
     document.getElementById('btn-marvel-group').classList.toggle('open');
@@ -2805,6 +2671,30 @@ function toggleMarvelMenu() {
 function toggleOmkarMenu() {
     document.getElementById('btn-omkar-group').classList.toggle('open');
     document.getElementById('omkar-submenu').classList.toggle('open');
+}
+function toggleClassicMenu() {
+    document.getElementById('btn-classic-group').classList.toggle('open');
+    document.getElementById('classic-submenu').classList.toggle('open');
+}
+function toggleNordicMenu() {
+    document.getElementById('btn-nordic-group').classList.toggle('open');
+    document.getElementById('nordic-submenu').classList.toggle('open');
+}
+function toggleTabMarvelMenu() {
+    document.getElementById('tab-marvel-group').classList.toggle('open');
+    document.getElementById('tab-marvel-submenu').classList.toggle('open');
+}
+function toggleTabOmkarMenu() {
+    document.getElementById('tab-omkar-group').classList.toggle('open');
+    document.getElementById('tab-omkar-submenu').classList.toggle('open');
+}
+function toggleTabClassicMenu() {
+    document.getElementById('tab-classic-group').classList.toggle('open');
+    document.getElementById('tab-classic-submenu').classList.toggle('open');
+}
+function toggleTabNordicMenu() {
+    document.getElementById('tab-nordic-group').classList.toggle('open');
+    document.getElementById('tab-nordic-submenu').classList.toggle('open');
 }
 
 function switchDeck(name) {
@@ -2815,52 +2705,56 @@ function switchDeck(name) {
     initState();
     closeModal();
 
-    // Apply deck-specific theme
     document.body.setAttribute('data-deck', name);
 
-    // Update header
-    document.getElementById('headerEye').textContent   = cfg.eye;
-    document.getElementById('headerTitle').textContent  = cfg.title;
-    document.getElementById('headerSubtitle').innerHTML = cfg.subtitle;
+    // Update sidebar brand
+    document.getElementById('headerEye').textContent      = cfg.eye;
+    document.getElementById('headerTitle').textContent    = cfg.title;
+    document.getElementById('headerSubtitle').textContent = cfg.subtitle;
+    // Update topbar
+    document.getElementById('tb-eye').textContent   = cfg.eye;
+    document.getElementById('tb-title').textContent = cfg.title;
 
-    // Update sub-button active state
-    document.querySelectorAll('.deck-btn.sub').forEach(b => b.classList.remove('active'));
-    const subBtn = document.getElementById('btn-' + name);
-    if (subBtn) subBtn.classList.add('active');
+    // Sidebar deck button active states
+    document.querySelectorAll('.sb-deck-btn').forEach(b => b.classList.remove('active'));
+    const sbBtn = document.getElementById('btn-' + name);
+    if (sbBtn) sbBtn.classList.add('active');
 
-    // Marvel parent button: highlight when any Marvel sub-deck active, open submenu
-    const parentBtn = document.getElementById('btn-marvel-group');
-    const submenu   = document.getElementById('marvel-submenu');
-    if (MARVEL_DECKS.has(name)) {
-        parentBtn.classList.add('marvel-on');
-        parentBtn.classList.add('open');
-        submenu.classList.add('open');
-    } else {
-        parentBtn.classList.remove('marvel-on');
-        parentBtn.classList.remove('open');
-        submenu.classList.remove('open');
-    }
+    // Tabbar deck button active states
+    document.querySelectorAll('.tab-deck-btn').forEach(b => b.classList.remove('active'));
+    const tabBtn = document.getElementById('tab-btn-' + name);
+    if (tabBtn) tabBtn.classList.add('active');
 
-    // Omkar parent button: highlight when Vedic or Tantrik active
-    const omkarBtn     = document.getElementById('btn-omkar-group');
-    const omkarSubmenu = document.getElementById('omkar-submenu');
-    if (OMKAR_DECKS.has(name)) {
-        omkarBtn.classList.add('omkar-on');
-        omkarBtn.classList.add('open');
-        omkarSubmenu.classList.add('open');
-    } else {
-        omkarBtn.classList.remove('omkar-on');
-        omkarBtn.classList.remove('open');
-        omkarSubmenu.classList.remove('open');
-    }
+    // Bottom nav active state
+    document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+    const bnavBtn = document.getElementById('bnav-' + name);
+    if (bnavBtn) bnavBtn.classList.add('active');
 
-    // Reveal the deck UI on first selection
+    // Group open/active states — sidebar + tabbar
+    const isMarvel  = MARVEL_DECKS.has(name);
+    const isOmkar   = OMKAR_DECKS.has(name);
+    const isClassic = CLASSIC_DECKS.has(name);
+    const isNordic  = NORDIC_DECKS.has(name);
+    [
+        { btn:'btn-marvel-group',   sub:'marvel-submenu',      cls:'marvel-on',  active:isMarvel  },
+        { btn:'btn-omkar-group',    sub:'omkar-submenu',       cls:'omkar-on',   active:isOmkar   },
+        { btn:'btn-classic-group',  sub:'classic-submenu',     cls:'classic-on', active:isClassic },
+        { btn:'btn-nordic-group',   sub:'nordic-submenu',      cls:'nordic-on',  active:isNordic  },
+        { btn:'tab-marvel-group',   sub:'tab-marvel-submenu',  cls:'marvel-on',  active:isMarvel  },
+        { btn:'tab-omkar-group',    sub:'tab-omkar-submenu',   cls:'omkar-on',   active:isOmkar   },
+        { btn:'tab-classic-group',  sub:'tab-classic-submenu', cls:'classic-on', active:isClassic },
+        { btn:'tab-nordic-group',   sub:'tab-nordic-submenu',  cls:'nordic-on',  active:isNordic  },
+    ].forEach(({ btn, sub, cls, active }) => {
+        const b = document.getElementById(btn);
+        const s = document.getElementById(sub);
+        if (b) { b.classList.toggle(cls, active); b.classList.toggle('open', active); }
+        if (s) s.classList.toggle('open', active);
+    });
+
+    // Reveal UI on first deck selection
     document.getElementById('stackView').classList.add('hidden');
-    document.getElementById('deckStats').classList.remove('pre-deck-hidden');
-    document.getElementById('deckControls').classList.remove('pre-deck-hidden');
-    document.getElementById('mainHint').classList.remove('pre-deck-hidden');
+    document.querySelectorAll('.pre-deck-hidden').forEach(el => el.classList.remove('pre-deck-hidden'));
 
-    // Update grid columns CSS variable based on deck size
     updateLayout();
     updateStats();
     renderGrid();
@@ -2868,25 +2762,23 @@ function switchDeck(name) {
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 function updateLayout() {
-    const vw    = window.innerWidth;
-    const n     = DECK.length;
-    let cols, cw, ch;
+    const vw       = window.innerWidth;
+    const sbW      = vw >= 1024 ? 240 : 0; // sidebar only on desktop
+    const availW   = vw - sbW;
+    const n        = DECK.length;
+    let cols;
 
-    if (vw >= 1200) {
-        cols = Math.min(n, 7); cw = 150;
-    } else if (vw >= 900) {
-        cols = Math.min(n, 5); cw = 140;
-    } else if (vw >= 700) {
-        cols = Math.min(n, 4); cw = 135;
-    } else if (vw >= 480) {
-        cols = Math.min(n, 3); cw = 125;
-    } else if (vw >= 370) {
-        cols = Math.min(n, 2); cw = 145; // 2 cols fits nicely on mobile if they are wider
-    } else {
-        cols = 1; cw = 200; // Single column for very small screens
-    }
+    if      (vw >= 1024) cols = Math.min(n, 7);
+    else if (vw >= 900)  cols = Math.min(n, 5);
+    else if (vw >= 700)  cols = Math.min(n, 4);
+    else if (vw >= 480)  cols = Math.min(n, 3);
+    else if (vw >= 370)  cols = Math.min(n, 2);
+    else                 cols = 1;
 
-    ch = cw * 1.7; // Golden ratio approx for tarot
+    const hPad = vw >= 1024 ? 16 : vw >= 480 ? 11 : 7;
+    const gap  = 8;
+    const cw   = Math.floor((availW - hPad * 2 - (cols - 1) * gap) / cols);
+    const ch   = Math.round(cw * 1.7);
 
     document.documentElement.style.setProperty('--grid-cols', cols);
     document.documentElement.style.setProperty('--card-w', cw + 'px');
@@ -2999,13 +2891,24 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function updateStats() {
     const rev      = flipped.filter(Boolean).length;
+    const hidden   = DECK.length - rev;
     const selCount = selected.filter((s, i) => s && !flipped[i]).length;
-    document.getElementById('revealed-count').textContent = rev;
-    document.getElementById('hidden-count').textContent   = DECK.length - rev;
-    document.getElementById('revealBtn').style.display    = selCount > 0 ? 'inline-block' : 'none';
-    document.getElementById('mainHint').textContent       = selCount > 0
+
+    document.querySelectorAll('.js-revealed').forEach(el => el.textContent = rev);
+    document.querySelectorAll('.js-hidden').forEach(el => el.textContent = hidden);
+
+    const showReveal = selCount > 0;
+    document.querySelectorAll('.js-reveal-btn').forEach(el => {
+        el.style.display = showReveal ? '' : 'none';
+    });
+
+    const hintText = selCount > 0
         ? `${selCount} card${selCount > 1 ? 's' : ''} selected — double-tap to reveal`
-        : 'Tap a card to select it · Double-tap to reveal its secret';
+        : 'Tap · Select · Double-tap to Reveal';
+    ['mainHint','sb-hint-mobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = hintText;
+    });
 }
 
 // ── Grid Render ───────────────────────────────────────────────────────────────
@@ -3023,16 +2926,15 @@ function renderGrid() {
                     <div class="back-serial">#${i+1}</div>
                 </div>
                 <div class="face face-front"
-                     style="border-color:${card.color}55;
-                            box-shadow:0 0 20px ${card.color}22,inset 0 0 24px rgba(100,0,200,.32);">
-                    <div class="f-serial">#${i+1}</div>
+                     style="border-color:${card.color}88;background:linear-gradient(160deg,#fff 0%,${card.color}12 55%,${card.color}08 100%);box-shadow:0 0 18px ${card.color}28,inset 0 0 20px ${card.color}10;">
+                    <div class="f-serial" style="background:linear-gradient(135deg,${card.color},${card.color}cc);border-color:${card.color}88">#${i+1}</div>
                     <div class="f-arcana">${card.num}</div>
                     <div class="f-symbol" style="color:${card.color}">${card.symbol}</div>
-                    <div class="f-tarot-name">${card.title}</div>
-                    <div class="f-marvel-name">${card.character}</div>
-                    <div class="f-line" style="background:linear-gradient(to right,transparent,${card.color}70,transparent)"></div>
+                    <div class="f-tarot-name" style="color:${card.color}cc">${card.title}</div>
+                    <div class="f-marvel-name" style="color:${card.color}">${card.character}</div>
+                    <div class="f-line" style="background:linear-gradient(to right,transparent,${card.color},transparent)"></div>
                     <span class="f-yesno ${yn}">${ynLabel}</span>
-                    <div class="f-keyword">${card.keyword}</div>
+                    <div class="f-keyword" style="color:${card.color}dd">${card.keyword}</div>
                     <div class="f-tap">tap to read</div>
                 </div>
             </div>
@@ -3121,7 +3023,7 @@ function shuffleDeck() {
 (function(){
     const canvas = document.getElementById('particles');
     const ctx    = canvas.getContext('2d');
-    const colors = ['#ff8c00','#ffd700','#c084fc','#ff6b00','#00aaff','#ff44ff'];
+    const colors = ['#ff50dc','#c84fff','#fbbf24','#34d399','#60a5fa','#ff6b8a','#a78bfa','#fb923c'];
     let W, H, pts;
 
     function init() {
@@ -3159,4 +3061,3 @@ window.addEventListener('resize', updateLayout);
 </script>
 </body>
 </html>
- 
